@@ -89,7 +89,7 @@
     @apply bg-brand-brown/40;
   }
   .animate-marquee-slower {
-    animation: marquee-slow 70s linear infinite;
+    animation: marquee-slow 25s linear infinite;
   }
 
   @keyframes marquee-slow {

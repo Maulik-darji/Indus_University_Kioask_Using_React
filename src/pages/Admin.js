@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminCategories from './AdminCategories';
+import { db } from '../firebase';
+import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
 
 // Custom Modal Component for "Center of the Screen" Popups
 const CenterModal = ({ isOpen, onClose, title, children }) => {
@@ -36,58 +38,136 @@ export default function Admin() {
   const [instituteForm, setInstituteForm] = useState({ id: null, name: '', desc: '' });
   const [newAdminForm, setNewAdminForm] = useState({ username: '', pass: '' });
   const [tickerForm, setTickerForm] = useState('');
+  const [tickerFormIdx, setTickerFormIdx] = useState(null);
 
   // Initial Load
   useEffect(() => {
-    // Events
-    const storedEvents = localStorage.getItem('indus_events');
-    if (storedEvents) {
-      setEvents(JSON.parse(storedEvents));
-    } else {
-      const defEvents = [
-        { id: 1, month: 'JAN', day: '05', title: 'INDUS CUP 2K26', desc: 'Stand a Chance to Win Cash Prizes up to ₹10,00,000', type: 'Sports Fest', isFeatured: true },
-        { id: 2, month: 'FEB', day: '15', title: 'Indus Hackathon 2025', desc: 'Join the ultimate 48-hour coding challenge at CSE Department.', type: 'Academic', isFeatured: false }
-      ];
-      setEvents(defEvents);
-      localStorage.setItem('indus_events', JSON.stringify(defEvents));
-    }
+    // Events - Realtime Cloud Sync
+    const qEvents = query(collection(db, "events_v3"), orderBy("timestamp", "desc"));
+    const unsubscribeEvents = onSnapshot(qEvents, (snapshot) => {
+      const items = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      setEvents(items);
+    });
 
-    // Institutes
-    const storedInst = localStorage.getItem('indus_institutes');
-    if (storedInst) {
-      setInstitutes(JSON.parse(storedInst));
-    } else {
-      const defInst = [
-        { id: 1, name: 'IITE – Indus Institute of Technology & Engineering', desc: 'Upgrading technical skills as per industry requirements.' },
-        { id: 2, name: 'IAS – Indus Architecture School', desc: 'Shaping the built environment through excellence.' },
-        { id: 3, name: 'IDS – Indus Design School', desc: 'Fostering creativity and innovation in specialized design.' },
-        { id: 4, name: 'IIICT – Indus Institute of Info. & Comm. Technology', desc: 'Leading the way in computing and IT research.' },
-        { id: 5, name: 'IIMS – Indus Institute of Management Studies', desc: 'Where Practice Meets Theory in business management.' },
-        { id: 6, name: 'IISHLS – Indus Institute of Sci. Humanities & Lib. Studies', desc: 'Interdisciplinary pursuit of sciences and humanities.' },
-        { id: 7, name: 'IISS – Indus Institute of Special Studies', desc: 'Integrating traditional values and ethos.' },
-        { id: 8, name: 'IIPR – Indus Institute of Pharmacy and Research', desc: 'High-quality education in pharmaceutical sciences.' },
-        { id: 9, name: 'IIATE – Indus Institute of Aviation Tech & Engineering', desc: 'Specialized training in aviation and aerospace.' },
-        { id: 10, name: 'IAGNI – Indus Advance Green Nanotechnology Institute', desc: 'Cutting-edge research in sustainable nanotechnology.' },
-      ];
-      setInstitutes(defInst);
-      localStorage.setItem('indus_institutes', JSON.stringify(defInst));
-    }
+    // Institutes - Realtime Cloud Sync
+    const qInst = query(collection(db, "institutes_v3"), orderBy("timestamp", "asc"));
+    const unsubscribeInst = onSnapshot(qInst, (snapshot) => {
+      const items = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      setInstitutes(items);
+    });
 
-    // General Settings (Ticker & Inquiry)
-    const storedTicker = localStorage.getItem('indus_ticker');
-    if (storedTicker) setTicker(JSON.parse(storedTicker));
-    else setTicker(["⭐ INDUS CUP 2K26! Win Cash Prizes up to ₹10,00,000! ⭐", "🚀 Hackathon 2025 by CSE Department - Register Now! 🚀"]);
+    // General Settings (Ticker & Inquiry) - Realtime Cloud Sync
+    const qTicker = query(collection(db, "ticker_v3"), orderBy("timestamp", "asc"));
+    const unsubscribeTicker = onSnapshot(qTicker, (snapshot) => {
+      const items = snapshot.docs.map(doc => ({ id: doc.id, text: doc.data().text }));
+      setTicker(items);
+    });
 
     setInquiryNumber(localStorage.getItem('indus_inquiry_number') || '+91 74054 13342');
+
+    return () => {
+      unsubscribeTicker();
+      unsubscribeEvents();
+      unsubscribeInst();
+    };
   }, []);
 
-  // Save Helpers
-  const saveEvents = (data) => { setEvents(data); localStorage.setItem('indus_events', JSON.stringify(data)); };
-  const saveInstitutes = (data) => { setInstitutes(data); localStorage.setItem('indus_institutes', JSON.stringify(data)); };
-  const saveTicker = (data) => {
-    setTicker(data);
-    localStorage.setItem('indus_ticker', JSON.stringify(data));
-    window.dispatchEvent(new Event('ticker-update'));
+  // --- EVENTS LOGIC ---
+  const saveEvent = async (e) => {
+    e.preventDefault();
+    const type = eventForm.type.toUpperCase();
+    const payload = { ...eventForm, type, timestamp: serverTimestamp() };
+    delete payload.id; // Hide ID from firestore doc data
+
+    try {
+      if (eventForm.id) {
+        await updateDoc(doc(db, "events_v3", eventForm.id), payload);
+      } else {
+        await addDoc(collection(db, "events_v3"), payload);
+      }
+      setEventForm({ id: null, month: '', day: '', title: '', desc: '', type: '', isFeatured: false, color: '#f97316', link: '' });
+    } catch (err) { console.error(err); }
+  };
+
+  // --- INSTITUTES LOGIC ---
+  const saveInstitute = async (e) => {
+    e.preventDefault();
+    const payload = { ...instituteForm, timestamp: serverTimestamp() };
+    delete payload.id;
+
+    try {
+      if (instituteForm.id) {
+        await updateDoc(doc(db, "institutes_v3", instituteForm.id), payload);
+      } else {
+        await addDoc(collection(db, "institutes_v3"), payload);
+      }
+      setInstituteForm({ id: null, name: '', desc: '' });
+    } catch (err) { console.error(err); }
+  };
+
+  const closeModal = () => setModalConfig({ ...modalConfig, isOpen: false });
+
+  const confirmDelete = (type, id, title) => {
+    setModalConfig({
+      isOpen: true,
+      title: 'Confirm Deletion',
+      content: (
+        <div>
+          <p className="text-slate-600 mb-8 text-lg font-medium">Are you sure you want to delete <strong>{title}</strong>? This action cannot be undone.</p>
+          <div className="flex gap-4">
+            <button onClick={closeModal} className="flex-1 py-4 bg-slate-100 rounded-xl font-bold text-slate-600 hover:bg-slate-200">Cancel</button>
+            <button
+              onClick={async () => {
+                try {
+                if (type === 'event') await deleteDoc(doc(db, "events_v3", id));
+                if (type === 'institute') await deleteDoc(doc(db, "institutes_v3", id));
+                if (type === 'ticker') await deleteTickerItem(id);
+                if (type === 'category') {
+                  const storedCats = localStorage.getItem('indus_categories');
+                  if (storedCats) {
+                    const cats = JSON.parse(storedCats);
+                    localStorage.setItem('indus_categories', JSON.stringify(cats.filter(c => c.id !== id)));
+                    window.dispatchEvent(new Event('storage')); // trigger update for AdminCategories
+                  }
+                }
+                closeModal();
+                } catch(err) { console.error(err); }
+              }}
+              className="flex-1 py-4 bg-red-500 rounded-xl font-black text-white hover:bg-red-600 shadow-[0_4px_15px_rgba(239,68,68,0.3)]"
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      )
+    });
+  };
+  const saveTickerItem = async (text) => {
+    try {
+      await addDoc(collection(db, "ticker_v3"), {
+        text,
+        timestamp: serverTimestamp()
+      });
+    } catch (e) {
+      console.error("Error adding ticker: ", e);
+    }
+  };
+
+  const updateTickerItem = async (id, text) => {
+    try {
+      const tickerRef = doc(db, "ticker_v3", id);
+      await updateDoc(tickerRef, { text });
+    } catch (e) {
+      console.error("Error updating ticker: ", e);
+    }
+  };
+
+  const deleteTickerItem = async (id) => {
+    try {
+      await deleteDoc(doc(db, "ticker_v3", id));
+    } catch (e) {
+      console.error("Error deleting ticker: ", e);
+    }
   };
 
   const handleSettingsSave = () => {
@@ -95,7 +175,7 @@ export default function Admin() {
     setModalConfig({
       isOpen: true,
       title: 'Settings Updated',
-      content: <p className="text-slate-600 mb-6 font-bold text-center">Your global settings have been saved to local storage.</p>
+      content: <p className="text-slate-600 mb-6 font-bold text-center">Your global settings have been saved locally.</p>
     });
   };
 
@@ -124,67 +204,6 @@ export default function Admin() {
     setNewAdminForm({ username: '', pass: '' });
   };
 
-  const closeModal = () => setModalConfig({ ...modalConfig, isOpen: false });
-
-  const confirmDelete = (type, id, title) => {
-    setModalConfig({
-      isOpen: true,
-      title: 'Confirm Deletion',
-      content: (
-        <div>
-          <p className="text-slate-600 mb-8 text-lg font-medium">Are you sure you want to delete <strong>{title}</strong>? This action cannot be undone.</p>
-          <div className="flex gap-4">
-            <button onClick={closeModal} className="flex-1 py-4 bg-slate-100 rounded-xl font-bold text-slate-600 hover:bg-slate-200">Cancel</button>
-            <button
-              onClick={() => {
-                if (type === 'event') saveEvents(events.filter(e => e.id !== id));
-                if (type === 'institute') saveInstitutes(institutes.filter(i => i.id !== id));
-                if (type === 'ticker') saveTicker(ticker.filter((_, idx) => idx !== id));
-                if (type === 'category') {
-                  const storedCats = localStorage.getItem('indus_categories');
-                  if (storedCats) {
-                    const cats = JSON.parse(storedCats);
-                    localStorage.setItem('indus_categories', JSON.stringify(cats.filter(c => c.id !== id)));
-                    window.dispatchEvent(new Event('storage')); // trigger update for AdminCategories
-                  }
-                }
-                closeModal();
-              }}
-              className="flex-1 py-4 bg-red-500 rounded-xl font-bold text-white hover:bg-red-600 shadow-[0_4px_15px_rgba(239,68,68,0.3)]"
-            >
-              Delete
-            </button>
-          </div>
-        </div>
-      )
-    });
-  };
-
-  // --- EVENTS LOGIC ---
-  const saveEvent = (e) => {
-    e.preventDefault();
-    const type = eventForm.type.toUpperCase();
-
-    const payload = { ...eventForm, type };
-
-    if (eventForm.id) {
-      saveEvents(events.map(ev => ev.id === eventForm.id ? payload : ev));
-    } else {
-      saveEvents([...events, { ...payload, id: Date.now() }]);
-    }
-    setEventForm({ id: null, month: '', day: '', title: '', desc: '', type: '', isFeatured: false, color: '#f97316', link: '' });
-  };
-
-  // --- INSTITUTES LOGIC ---
-  const saveInstitute = (e) => {
-    e.preventDefault();
-    if (instituteForm.id) {
-      saveInstitutes(institutes.map(inst => inst.id === instituteForm.id ? { ...instituteForm } : inst));
-    } else {
-      saveInstitutes([...institutes, { ...instituteForm, id: Date.now() }]);
-    }
-    setInstituteForm({ id: null, name: '', desc: '' });
-  };
 
 
   if (!isAuth) {
@@ -445,16 +464,65 @@ export default function Admin() {
               <div className="bg-white p-8 rounded-[1.25rem] shadow-sm border border-slate-100 h-full flex flex-col">
                 <h3 className="text-xl font-black mb-6 text-slate-800 uppercase tracking-widest">System News Ticker</h3>
 
-                <form onSubmit={(e) => { e.preventDefault(); if (tickerForm) { saveTicker([...ticker, tickerForm]); setTickerForm(''); } }} className="flex gap-4 mb-8">
-                  <input required type="text" placeholder="Type breaking news alert..." value={tickerForm} onChange={(e) => setTickerForm(e.target.value)} className="flex-1 bg-slate-50 px-5 py-4 rounded-xl outline-none font-black text-base focus:ring-2 focus:ring-slate-800/10 border border-transparent focus:bg-white transition-all" />
-                  <button type="submit" className="px-8 bg-slate-900 text-white rounded-xl font-black hover:bg-black transition-colors uppercase text-xs">Add</button>
+                {/* ADD FORM - Now purely for new items */}
+                <form onSubmit={(e) => { 
+                  e.preventDefault(); 
+                  if (tickerForm) { 
+                    saveTickerItem(tickerForm); 
+                    setTickerForm(''); 
+                  } 
+                }} className="flex gap-4 mb-8">
+                  <input required type="text" placeholder="Type breaking news alert..." value={tickerForm} onChange={(e) => setTickerForm(e.target.value)} className="flex-1 bg-slate-50 px-5 py-4 rounded-xl outline-none font-black text-base focus:ring-2 focus:ring-slate-800/10 border border-transparent focus:bg-white transition-all shadow-inner" />
+                  <button type="submit" className="px-10 bg-slate-900 text-white rounded-xl font-black hover:bg-black transition-all uppercase text-[10px] tracking-widest shadow-lg shadow-slate-900/10 active:scale-95">Add</button>
                 </form>
 
                 <div className="space-y-3 flex-1 overflow-y-auto max-h-[350px] custom-scrollbar pr-2">
-                  {ticker.map((item, idx) => (
-                    <div key={idx} className="flex items-center gap-4 bg-[#f8f9fa] p-5 rounded-xl group/t border border-slate-200 shadow-sm hover:shadow-md hover:bg-white transition-all transform hover:-translate-y-0.5">
-                      <p className="flex-1 text-base font-bold text-slate-700 truncate">{item}</p>
-                      <button onClick={() => confirmDelete('ticker', idx, 'this ticker text')} className="w-10 h-10 bg-red-100/50 text-red-600 rounded-lg flex items-center justify-center hover:text-white hover:bg-red-500 transition-all border border-red-200/50 shadow-sm"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg></button>
+                  {ticker.map((itemObj, idx) => (
+                    <div key={itemObj.id} className="flex items-center gap-4 bg-[#f8f9fa] p-5 rounded-[1.25rem] border border-slate-100 shadow-sm hover:shadow-md hover:bg-white transition-all group/t">
+                      <p className="flex-1 text-[15px] font-bold text-slate-700 leading-snug">{itemObj.text}</p>
+                      <div className="flex gap-2">
+                        <button 
+                          onClick={() => {
+                            setModalConfig({
+                              isOpen: true,
+                              title: 'Edit University Update',
+                              content: (
+                                <div className="space-y-6">
+                                  <div className="text-left">
+                                    <label className="block text-[9px] font-black tracking-widest text-slate-400 uppercase mb-3">Announcement Text</label>
+                                    <textarea 
+                                      id="ticker-edit-area"
+                                      defaultValue={itemObj.text}
+                                      className="w-full bg-slate-50 p-5 rounded-2xl outline-none font-bold text-slate-800 border-none focus:ring-2 focus:ring-slate-200 min-h-[150px] resize-none"
+                                    />
+                                  </div>
+                                  <div className="flex gap-4">
+                                    <button onClick={closeModal} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-slate-200">Discard</button>
+                                    <button 
+                                      onClick={() => {
+                                        const newText = document.getElementById('ticker-edit-area').value;
+                                        if (newText) {
+                                          updateTickerItem(itemObj.id, newText);
+                                          closeModal();
+                                        }
+                                      }}
+                                      className="flex-1 py-4 bg-slate-900 text-white rounded-xl font-black uppercase text-[10px] tracking-widest hover:bg-black shadow-xl shadow-slate-900/10"
+                                    >
+                                      Update News
+                                    </button>
+                                  </div>
+                                </div>
+                              )
+                            });
+                          }} 
+                          className="w-11 h-11 bg-slate-100 text-slate-400 rounded-xl flex items-center justify-center hover:text-slate-900 hover:bg-white hover:shadow-lg transition-all border border-transparent hover:border-slate-100"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                        </button>
+                        <button onClick={() => confirmDelete('ticker', itemObj.id, 'this ticker text')} className="w-11 h-11 bg-red-50 text-red-600 rounded-xl flex items-center justify-center hover:bg-red-500 hover:text-white transition-all border border-red-100/50 shadow-sm">
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" /></svg>
+                        </button>
+                      </div>
                     </div>
                   ))}
                   {ticker.length === 0 && <div className="text-center py-20 opacity-20 font-black text-[10px] uppercase tracking-[0.3em]">No Ticker Feed</div>}

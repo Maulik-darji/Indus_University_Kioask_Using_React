@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { db } from './firebase';
+import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
 import Sidebar from './components/Sidebar';
 import Home from './pages/Home';
 import About from './pages/About';
@@ -12,32 +14,31 @@ import Committees from './pages/Committees';
 import Admin from './pages/Admin';
 
 function ScrollingTicker() {
-  const [tickerItems, setTickerItems] = React.useState(() => {
-    const stored = localStorage.getItem('indus_ticker_v3');
-    return stored ? JSON.parse(stored) : [
-      "🎓 Admissions Open for 2026-27! Register today for B.Tech, M.Tech, and Designing courses.",
-      "🚀 INDUS CUP 2026: Regional sports meet registrations are now live! Participate & Win big prizes.",
-      "🏢 Placement Success: Direct on-campus hiring for Google, Meta, and Microsoft starts next week.",
-      "⭐ Research & Innovation: Congratulations to our PhD scholars for the recent Science Journal publication."
-    ];
-  });
+  const [tickerItems, setTickerItems] = React.useState([
+    "🎓 Admissions Open for 2026-27! Register today for B.Tech, M.Tech, and Designing courses.",
+    "🚀 INDUS CUP 2026: Regional sports meet registrations are now live! Participate & Win big prizes.",
+    "🏢 Placement Success: Direct on-campus hiring for Google, Meta, and Microsoft starts next week.",
+    "⭐ Research & Innovation: Congratulations to our PhD scholars for the recent Science Journal publication."
+  ]);
 
   React.useEffect(() => {
-    const handleStorage = () => {
-      const stored = localStorage.getItem('indus_ticker_v3');
-      if (stored) setTickerItems(JSON.parse(stored));
-    };
-    window.addEventListener('storage', handleStorage);
-    window.addEventListener('ticker-update', handleStorage);
-    return () => {
-      window.removeEventListener('storage', handleStorage);
-      window.removeEventListener('ticker-update', handleStorage);
-    };
+    // Real-time Cloud Synchronization
+    const q = query(collection(db, "ticker_v3"), orderBy("timestamp", "asc"));
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      const items = [];
+      snapshot.forEach((doc) => {
+        items.push(doc.data().text);
+      });
+      if (items.length > 0) {
+        setTickerItems(items);
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const content = tickerItems.map((item, idx) => (
     <div key={idx} className="flex items-center group">
-       <span className="h-2.5 w-2.5 rounded-full bg-blue-500 mr-8 flex-shrink-0 animate-pulse shadow-[0_0_10px_rgba(59,130,246,0.6)]"></span>
        <span className="text-slate-800 font-bold text-[13.5px] tracking-wide uppercase whitespace-nowrap hover:text-blue-700 transition-colors">
           {item}
        </span>
@@ -47,7 +48,7 @@ function ScrollingTicker() {
   
   return (
     <div className="flex animate-marquee-slower whitespace-nowrap items-center py-2 h-full">
-      {content}{content}{content}{content}
+      {content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}
     </div>
   );
 }
@@ -181,14 +182,8 @@ function App() {
         </main>
 
         {/* Ticker Section - Dedicated Footer Space */}
-        <div className="h-16 md:h-18 bg-white border-t border-gray-100 flex items-center z-50 flex-shrink-0">
-          <div className="bg-slate-900 h-full px-8 flex items-center z-20 shadow-[10px_0_30px_rgba(0,0,0,0.1)]">
-            <span className="text-white font-black text-[10px] tracking-[0.2em] uppercase whitespace-nowrap flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
-              Updates
-            </span>
-          </div>
-          <div className="flex-1 overflow-hidden h-full flex items-center bg-[#fcfbf9]/50">
+        <div className="h-16 md:h-18 bg-[#fcfbf9] border-t border-gray-100 flex items-center z-50 flex-shrink-0 relative overflow-hidden">
+          <div className="flex-1 overflow-hidden h-full flex items-center">
             <ScrollingTicker />
           </div>
         </div>

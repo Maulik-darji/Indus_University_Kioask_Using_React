@@ -157,17 +157,17 @@ const defaultProgramData = {
 };
 
 const defaultCategories = [
-  { id: 'btech', label: 'B.Tech', badge: 'DEGREE', color: 'border-blue-500', bgColor: 'bg-blue-500', lightBg: 'bg-blue-50', programs: ['Information and Communication Technology', 'Civil Engineering', 'Automobile Engineering', 'Mechanical Engineering', 'Metallurgical Engineering', 'Electrical Engineering', 'Electronics and Communication Engineering', 'Computer Engineering', 'Cyber Security', 'Information Technology', 'Computer Science Engineering', 'Aircraft Maintenance Engineering', 'Aeronautical Engineering', 'Aerospace Engineering', 'Defence Aerospace Engineering'] },
-  { id: 'btech-dtd', label: 'B.Tech (D to D)', badge: 'LATERAL', color: 'border-amber-700', bgColor: 'bg-amber-700', lightBg: 'bg-amber-50', programs: ['Information and Communication Technology', 'Civil Engineering', 'Automobile Engineering', 'Mechanical Engineering', 'Metallurgical Engineering', 'Electrical Engineering', 'Electronics and Communication Engineering', 'Computer Engineering', 'Cyber Security', 'Information Technology', 'Computer Science Engineering'] },
-  { id: 'diploma', label: 'Diploma', badge: 'TECHNICAL', color: 'border-orange-500', bgColor: 'bg-orange-500', lightBg: 'bg-orange-50', programs: ['Information and Communication Technology', 'Civil Engineering', 'Automobile Engineering', 'Mechanical Engineering', 'Computer Engineering', 'Electrical Engineering', 'Electronics and Communication Engineering'] },
-  { id: 'mtech', label: 'M.Tech', badge: 'MASTERS', color: 'border-red-600', bgColor: 'bg-red-600', lightBg: 'bg-red-50', programs: ['CAD/CAM (Mechanical Engineering)', 'Construction Project Management (Civil Engineering)', 'Digital Communication (EC Engineering)', 'Electrical Power System', 'Industrial Metallury', 'Structural Engineering (Civil Engineering)', 'Data Science (Computer)', 'Cyber Security'] },
-  { id: 'bdes', label: 'B.Des', badge: 'DESIGN', color: 'border-yellow-500', bgColor: 'bg-yellow-500', lightBg: 'bg-yellow-50', programs: ['Product Design', 'Interior Design', 'Fasion Design', 'Communication Design'] },
-  { id: 'mdes', label: 'M.Des', badge: 'MASTERS', color: 'border-teal-600', bgColor: 'bg-teal-600', lightBg: 'bg-teal-50', programs: ['Fasion Design', 'Interior Design', 'UI-UX Design'] },
-  { id: 'bsc', label: 'B.Sc', badge: 'SCIENCE', color: 'border-blue-400', bgColor: 'bg-blue-400', lightBg: 'bg-blue-50', programs: ['Data Science', 'B.Sc(CA & IT)', 'B.Sc Clical Research and HealthCare Management', 'B.Sc Mathematics', 'B.Sc Physics', 'B.Sc Chemistry', 'Cyber Security', 'B.Sc Micro Biology', 'Computer Science (AI and ML)'] },
-  { id: 'msc', label: 'M.Sc', badge: 'MASTERS', color: 'border-indigo-600', bgColor: 'bg-indigo-600', lightBg: 'bg-indigo-50', programs: ['M.Sc-Information Technology', 'M.Sc-Clinical Research', 'M.Sc-Mathematics', 'M.Sc-Physics', 'M.Sc-Chemistry', 'M.Sc-Cyber Security', 'M.Sc-Microbiology'] },
-  { id: 'mba-avia', label: 'MBA/BBA', badge: 'BUSINESS', color: 'border-purple-600', bgColor: 'bg-purple-600', lightBg: 'bg-purple-50', programs: ['Aviation', 'BBA (General)', 'Marketing', 'Finance', 'Human Resource'] },
-  { id: 'bca', label: 'BCA', badge: 'COMPUTER', color: 'border-cyan-500', bgColor: 'bg-cyan-500', lightBg: 'bg-cyan-50', programs: ['BCA'] },
-  { id: 'mca', label: 'MCA', badge: 'POST-GRAD', color: 'border-rose-500', bgColor: 'bg-rose-500', lightBg: 'bg-rose-50', programs: ['Master of Computer Application'] }
+  { id: 'btech', label: 'B.Tech', badge: 'Undergraduate', color: 'border-blue-500', bgColor: 'bg-blue-500', lightBg: 'bg-blue-50', programs: ['Information and Communication Technology', 'Civil Engineering', 'Automobile Engineering', 'Mechanical Engineering', 'Metallurgical Engineering', 'Electrical Engineering', 'Electronics and Communication Engineering', 'Computer Engineering', 'Cyber Security', 'Information Technology', 'Computer Science Engineering', 'Aircraft Maintenance Engineering', 'Aeronautical Engineering', 'Aerospace Engineering', 'Defence Aerospace Engineering'] },
+  { id: 'btech-dtd', label: 'B.Tech (D to D)', badge: 'Undergraduate (Lateral)', color: 'border-amber-700', bgColor: 'bg-amber-700', lightBg: 'bg-amber-50', programs: ['Information and Communication Technology', 'Civil Engineering', 'Automobile Engineering', 'Mechanical Engineering', 'Metallurgical Engineering', 'Electrical Engineering', 'Electronics and Communication Engineering', 'Computer Engineering', 'Cyber Security', 'Information Technology', 'Computer Science Engineering'] },
+  { id: 'diploma', label: 'Diploma', badge: 'Diploma Program', color: 'border-orange-500', bgColor: 'bg-orange-500', lightBg: 'bg-orange-50', programs: ['Information and Communication Technology', 'Civil Engineering', 'Automobile Engineering', 'Mechanical Engineering', 'Computer Engineering', 'Electrical Engineering', 'Electronics and Communication Engineering'] },
+  { id: 'mtech', label: 'M.Tech', badge: 'Post Graduate', color: 'border-red-600', bgColor: 'bg-red-600', lightBg: 'bg-red-50', programs: ['CAD/CAM (Mechanical Engineering)', 'Construction Project Management (Civil Engineering)', 'Digital Communication (EC Engineering)', 'Electrical Power System', 'Industrial Metallury', 'Structural Engineering (Civil Engineering)', 'Data Science (Computer)', 'Cyber Security'] },
+  { id: 'bdes', label: 'B.Des', badge: 'Undergraduate', color: 'border-yellow-500', bgColor: 'bg-yellow-500', lightBg: 'bg-yellow-50', programs: ['Product Design', 'Interior Design', 'Fasion Design', 'Communication Design'] },
+  { id: 'mdes', label: 'M.Des', badge: 'Post Graduate', color: 'border-teal-600', bgColor: 'bg-teal-600', lightBg: 'bg-teal-50', programs: ['Fasion Design', 'Interior Design', 'UI-UX Design'] },
+  { id: 'bsc', label: 'B.Sc', badge: 'Undergraduate', color: 'border-blue-400', bgColor: 'bg-blue-400', lightBg: 'bg-blue-50', programs: ['Data Science', 'B.Sc(CA & IT)', 'B.Sc Clical Research and HealthCare Management', 'B.Sc Mathematics', 'B.Sc Physics', 'B.Sc Chemistry', 'Cyber Security', 'B.Sc Micro Biology', 'Computer Science (AI and ML)'] },
+  { id: 'msc', label: 'M.Sc', badge: 'Post Graduate', color: 'border-indigo-600', bgColor: 'bg-indigo-600', lightBg: 'bg-indigo-50', programs: ['M.Sc-Information Technology', 'M.Sc-Clinical Research', 'M.Sc-Mathematics', 'M.Sc-Physics', 'M.Sc-Chemistry', 'M.Sc-Cyber Security', 'M.Sc-Microbiology'] },
+  { id: 'mba-avia', label: 'MBA/BBA', badge: 'Undergraduate / Post Graduate', color: 'border-purple-600', bgColor: 'bg-purple-600', lightBg: 'bg-purple-50', programs: ['Aviation', 'BBA (General)', 'Marketing', 'Finance', 'Human Resource'] },
+  { id: 'bca', label: 'BCA', badge: 'Undergraduate', color: 'border-cyan-500', bgColor: 'bg-cyan-500', lightBg: 'bg-cyan-50', programs: ['BCA'] },
+  { id: 'mca', label: 'MCA', badge: 'Post Graduate', color: 'border-rose-500', bgColor: 'bg-rose-500', lightBg: 'bg-rose-50', programs: ['Master of Computer Application'] }
 ];
 
 function Programs({ setActivePage, setAdmissionData }) {
@@ -220,8 +220,8 @@ function Programs({ setActivePage, setAdmissionData }) {
               <div className={`absolute inset-0 ${cat.bgColor} opacity-10 group-hover:opacity-20 transition-opacity duration-700`}></div>
               
               <div className="relative z-10 flex-1 flex flex-col">
-                <div className={`text-[11px] font-black tracking-[0.3em] mb-3 uppercase mt-1 ${cat.color.replace('border-', 'text-')}`}>
-                  {cat.badge} • PROGRAMS
+                <div className={`text-[10px] font-black tracking-[0.15em] mb-3 uppercase mt-1 ${cat.color.replace('border-', 'text-')}`}>
+                  {cat.badge}
                 </div>
                 <h3 className="text-2xl lg:text-3xl font-black text-slate-900 leading-[1.1] mb-2 tracking-tight">
                   {cat.label}
@@ -234,7 +234,7 @@ function Programs({ setActivePage, setAdmissionData }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </div>
-              <div className={`absolute -bottom-16 -right-16 w-56 h-56 ${cat.bgColor} rounded-full opacity-20 group-hover:scale-150 transition-transform duration-[1000ms]`}></div>
+              <div className={`absolute -bottom-8 -right-8 w-32 h-32 ${cat.bgColor} rounded-full opacity-20 group-hover:scale-125 transition-transform duration-[1000ms]`}></div>
             </div>
           ))}
         </div>
