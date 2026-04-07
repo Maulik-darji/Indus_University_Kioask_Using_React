@@ -38,9 +38,9 @@ function About({ setActivePage }) {
   ];
 
   const cards = [
-    { title: 'Governance', content: 'Information regarding the leadership and administrative structure of the university.', icon: '' },
-    { title: 'Awards and Recognition', content: 'Discover our accreditations, rankings, and major achievements.', icon: '' },
-    { title: 'Committees', content: 'Details about various institutional committees and their organizational functions.', icon: '' },
+    { title: 'Governance', content: 'Information regarding the leadership and administrative structure of the university.', icon: 'account_balance', color: 'border-blue-600', lightBg: 'bg-blue-50', textColor: 'text-blue-700' },
+    { title: 'Awards and Recognition', content: 'Discover our accreditations, rankings, and major achievements.', icon: 'emoji_events', color: 'border-amber-500', lightBg: 'bg-amber-50', textColor: 'text-amber-700' },
+    { title: 'Committees', content: 'Details about various institutional committees and their organizational functions.', icon: 'groups', color: 'border-emerald-600', lightBg: 'bg-emerald-50', textColor: 'text-emerald-700' },
   ];
 
   if (selectedCard === 'Governance') {
@@ -260,11 +260,11 @@ function About({ setActivePage }) {
         <h1 className="text-4xl font-bold text-gray-900 mb-3">About Indus University</h1>
         <p className="text-lg text-gray-500">Knowledge Enlightens the World</p>
       </header>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-16 px-4">
         {cards.map((card, idx) => (
           <div 
             key={idx} 
-            className="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-gray-100 flex flex-col justify-between hover:scale-[1.03] hover:shadow-xl transition-all duration-300 cursor-pointer group" 
+            className={`${card.lightBg} p-10 md:p-12 rounded-[2.5rem] shadow-sm border-t-[20px] ${card.color} flex flex-col justify-between hover:scale-[1.03] hover:shadow-2xl transition-all duration-500 cursor-pointer group relative overflow-hidden`} 
             onClick={() => {
               if (card.title === 'Committees' && typeof setActivePage === 'function') {
                 setActivePage('committees');
@@ -273,13 +273,22 @@ function About({ setActivePage }) {
               }
             }}
           >
-            <div>
-              <h3 className="text-xl font-bold text-gray-800 mb-3">{card.title}</h3>
-              <p className="text-gray-600 leading-relaxed text-sm md:text-base mb-6">{card.content}</p>
+            <div className="relative z-10 flex flex-col gap-6">
+              <div className={`w-16 h-16 rounded-2xl ${card.textColor.replace('text-', 'bg-').replace('700', '100')} flex items-center justify-center`}>
+                <span className={`material-symbols-outlined !text-[36px] ${card.textColor}`}>{card.icon}</span>
+              </div>
+              <div>
+                <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight leading-tight">{card.title}</h3>
+                <p className="text-gray-700 leading-relaxed text-base font-bold mb-8">{card.content}</p>
+              </div>
             </div>
-            <button className="py-2.5 px-4 text-sm border border-gray-200 rounded-xl font-semibold text-gray-700 group-hover:bg-brand-brown group-hover:text-white group-hover:border-brand-brown hover:bg-brand-brown hover:text-white hover:border-brand-brown transition-all w-full text-center">
+            
+            <button className={`mt-auto py-4 px-6 text-sm bg-white border border-gray-100 rounded-2xl font-black ${card.textColor} group-hover:bg-slate-900 group-hover:text-white transition-all w-full text-center uppercase tracking-widest shadow-sm`}>
               Discover More
             </button>
+
+            {/* Decorative element */}
+            <div className={`absolute -bottom-10 -right-10 w-32 h-32 rounded-full ${card.textColor.replace('text-', 'bg-').replace('700', '500')} opacity-5 group-hover:scale-150 transition-transform duration-700`}></div>
           </div>
         ))}
       </div>

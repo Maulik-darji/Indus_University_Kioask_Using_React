@@ -120,11 +120,20 @@ function Placements() {
     { name: "SRK", logo: srkLogo }
   ];
 
+  const [visibleCount, setVisibleCount] = useState(12);
+
   const filteredCompanies = useMemo(() => {
     return companies.filter(company => 
       company.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
   }, [searchTerm, companies]);
+
+  // Reset visible count when search changes
+  React.useEffect(() => {
+    setVisibleCount(12);
+  }, [searchTerm]);
+
+  const visibleCompanies = filteredCompanies.slice(0, visibleCount);
 
   return (
     <div className="fade-in pb-24 h-full overflow-y-auto pr-2">
@@ -146,7 +155,7 @@ function Placements() {
           <input
             type="text"
             placeholder="Search company..."
-            className="w-full bg-white border border-gray-200 rounded-2xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-brand-brown/20 focus:border-brand-brown transition-all shadow-sm text-black placeholder-gray-400"
+            className="w-full bg-white border border-gray-200 rounded-2xl py-3 pl-12 pr-4 focus:outline-none focus:ring-2 focus:ring-slate-900/10 focus:border-slate-900 transition-all shadow-sm text-black placeholder-gray-400"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -154,17 +163,21 @@ function Placements() {
       </header>
 
       {/* Stats Section */}
-      <section className="mb-16">
-        <h2 className="text-2xl font-bold text-black mb-8 border-l-4 border-brand-brown pl-4">Placement Offers (Lakhs per Year)</h2>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-6">
+      <section className="mb-14">
+        <h2 className="text-xl md:text-2xl font-black text-slate-900 mb-10 border-l-8 border-slate-900 pl-5 tracking-tight uppercase">Placement Offers (Lakhs per Year)</h2>
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-3 md:gap-6">
           {stats.map((stat, index) => (
             <div 
               key={index} 
               style={{ backgroundColor: stat.color }}
-              className="p-10 rounded-[2.5rem] text-white text-center shadow-xl transition-all cursor-default"
+              className="p-4 sm:p-6 md:p-8 rounded-[1.8rem] md:rounded-[2rem] text-white text-center shadow-lg transition-all hover:scale-105 cursor-default flex flex-col justify-center min-h-[110px] sm:min-h-[140px] md:min-h-[180px]"
             >
-              <div className="text-4xl md:text-5xl font-black mb-2">{stat.value}</div>
-              <div className="text-xs uppercase font-extrabold tracking-wider leading-tight opacity-90">{stat.label}</div>
+              <div className={`font-black mb-1 drop-shadow-sm whitespace-nowrap leading-none ${stat.value.length > 3 ? 'text-2xl md:text-3xl lg:text-4xl' : 'text-3xl md:text-4xl lg:text-5xl'}`}>
+                {stat.value}
+              </div>
+              <div className="text-[10px] md:text-xs uppercase font-black tracking-widest leading-tight opacity-95">
+                {stat.label}
+              </div>
             </div>
           ))}
         </div>
@@ -173,7 +186,7 @@ function Placements() {
       {/* Companies Section */}
       <section className="pb-20">
         <div className="flex items-baseline justify-between mb-8">
-          <h2 className="text-2xl font-bold text-black border-l-4 border-brand-brown pl-4">Placements in Campus</h2>
+          <h2 className="text-2xl font-bold text-black border-l-8 border-slate-900 pl-5 tracking-tight uppercase">Placements in Campus</h2>
           {searchTerm && (
             <p className="text-sm text-gray-500 italic">
               Showing {filteredCompanies.length} result{filteredCompanies.length !== 1 ? 's' : ''}
@@ -182,8 +195,8 @@ function Placements() {
         </div>
         
         <div className="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-6 gap-6">
-          {filteredCompanies.length > 0 ? (
-            filteredCompanies.map((company, index) => {
+          {visibleCompanies.length > 0 ? (
+            visibleCompanies.map((company, index) => {
               const isNoPadding = ["Simform", "Silver Touch", "Ninjacart", "Adani Gas", "Reliance Industries", "Home First", "Cybercom", "Cygnet Infotech", "Bridgestone", "Capgemini"].includes(company.name);
               let scaleClass = "";
               if (company.name === "Reliance Industries") scaleClass = "scale-[2.0]";
@@ -200,6 +213,7 @@ function Placements() {
                     <img 
                       src={company.logo} 
                       alt={company.name} 
+                      loading="lazy"
                       className={`max-h-full max-w-full object-contain transition-all duration-300 transform ${scaleClass} ${company.name === "Reliance Industries" ? "block mx-auto" : ""}`} 
                     />
                   </div>
@@ -220,6 +234,17 @@ function Placements() {
             </div>
           )}
         </div>
+
+        {filteredCompanies.length > visibleCount && (
+          <div className="mt-16 flex justify-center">
+            <button 
+              onClick={() => setVisibleCount(prev => prev + 12)}
+              className="px-10 py-5 bg-white border-2 border-slate-900 text-slate-900 text-sm font-black uppercase tracking-widest rounded-2xl hover:bg-slate-900 hover:text-white transition-all shadow-lg active:scale-95"
+            >
+              Load More Partners
+            </button>
+          </div>
+        )}
       </section>
     </div>
   );

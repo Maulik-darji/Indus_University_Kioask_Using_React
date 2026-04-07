@@ -1,53 +1,77 @@
 import React from 'react';
 import Clock from './Clock';
 import logo from '../images/logo.png';
+import smallLogo from '../images/University Logo/smallicon_sidebar.png';
 
 function Sidebar({ activePage, setActivePage, isOpen, setIsOpen }) {
   const menuItems = [
-    { id: 'home', label: 'Home' },
-    { id: 'about', label: 'About Indus' },
-    { id: 'programs', label: 'Programs' },
-    { id: 'institutes', label: 'Institutes' },
-    { id: 'map', label: 'Campus Map' },
-    { id: 'events', label: 'Events' },
+    { id: 'home', label: 'Home', icon: 'home', color: 'text-blue-600 bg-blue-50' },
+    { id: 'about', label: 'About Indus', icon: 'info', color: 'text-indigo-600 bg-indigo-50' },
+    { id: 'programs', label: 'Programs', icon: 'school', color: 'text-emerald-600 bg-emerald-50' },
+    { id: 'institutes', label: 'Institutes', icon: 'apartment', color: 'text-orange-600 bg-orange-50' },
+    { id: 'map', label: 'Campus Map', icon: 'map', color: 'text-rose-600 bg-rose-50' },
+    { id: 'events', label: 'Events', icon: 'event', color: 'text-violet-600 bg-violet-50' },
   ];
 
   const handleNavigate = (id) => {
     setActivePage(id);
-    setIsOpen(false);
+    // Explicit selection only - sidebar stays in its current state
   };
 
   return (
     <>
       <aside 
-        className={`fixed inset-y-0 left-0 z-50 w-72 bg-white p-6 flex flex-col justify-between border-r border-gray-200 transition-transform duration-300 md:sticky md:top-0 md:h-full md:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 left-0 z-50 bg-white flex flex-col justify-between border-r border-gray-200 transition-all duration-300 ease-in-out md:sticky md:top-0 md:h-screen ${
+          isOpen 
+            ? 'w-72 p-6 translate-x-0 opacity-100' 
+            : 'w-24 p-4 -translate-x-full opacity-100 md:translate-x-0'
         }`}
       >
-        <div>
-          <div className="mb-10 px-2">
-            {/* Logo Image */}
+        <div className={`transition-all duration-300 shrink-0 ${!isOpen ? 'mb-10 px-0 flex justify-center' : 'opacity-100 mb-10 px-2'}`}>
+          {/* Logo Image - only visible when expanded */}
+          {isOpen ? (
             <img src={logo} alt="Indus University Logo" className="w-full h-auto scale-110 origin-left transition-transform" />
-          </div>
+          ) : (
+            <img src={smallLogo} alt="Indus Icon" className="w-12 h-12 object-contain" />
+          )}
+        </div>
 
-          <ul className="space-y-2">
-            {menuItems.map((item) => (
-              <li
-                key={item.id}
-                className={`p-4 rounded-xl cursor-pointer transition-all duration-200 font-bold ${
-                  activePage === item.id 
-                    ? 'bg-[#e5e7eb] text-slate-900 shadow-sm' 
-                    : 'text-slate-600 hover:bg-slate-50'
-                }`}
-                onClick={() => handleNavigate(item.id)}
-              >
-                {item.label}
-              </li>
-            ))}
+        <div className="flex-1 flex flex-col justify-center">
+          <ul className="space-y-4">
+            {menuItems.map((item) => {
+              const textColorClass = item.color.split(' ')[0]; // Extract 'text-xxx-600'
+              return (
+                <li
+                  key={item.id}
+                  className={`rounded-xl cursor-pointer transition-all duration-300 font-bold flex items-center group shadow-sm ${
+                    isOpen ? 'p-3 gap-4 mb-2' : 'p-2 justify-center mb-3'
+                  } ${
+                    activePage === item.id 
+                      ? `${item.color.split(' ')[1]} shadow-md ring-1 ring-slate-100` 
+                      : 'text-slate-600 hover:bg-slate-50'
+                  }`}
+                  title={!isOpen ? item.label : ""}
+                  onClick={() => handleNavigate(item.id)}
+                >
+                  <div className={`rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 shadow-sm ${item.color} ${isOpen ? 'w-11 h-11' : 'w-12 h-12'}`}>
+                    <span className="material-symbols-outlined !text-[27px]">{item.icon}</span>
+                  </div>
+                  {isOpen && (
+                    <span className={`text-sm md:text-base tracking-tight whitespace-nowrap overflow-hidden text-ellipsis transition-colors duration-200 ${
+                      activePage === item.id ? textColorClass + ' font-black' : 'text-slate-600'
+                    }`}>
+                      {item.label}
+                    </span>
+                  )}
+                </li>
+              );
+            })}
           </ul>
         </div>
 
-        <Clock />
+        <div className={`transition-all duration-300 shrink-0 mt-10 ${!isOpen ? 'opacity-0 scale-50 h-0 overflow-hidden' : 'opacity-100 scale-100'}`}>
+          <Clock />
+        </div>
       </aside>
       
       {/* Mobile Overlay */}

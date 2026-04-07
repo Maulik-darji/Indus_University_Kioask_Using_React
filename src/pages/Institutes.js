@@ -34,7 +34,19 @@ function Institutes() {
         {institutes.map((inst, i) => (
           <div 
             key={i} 
-            className="group bg-white p-8 rounded-3xl shadow-sm border border-slate-100 flex gap-8 items-start cursor-default hover:border-blue-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 relative overflow-hidden"
+            className={`group p-8 rounded-3xl shadow-sm border border-slate-100 flex gap-8 items-start cursor-default hover:border-blue-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 relative overflow-hidden ${
+              inst.color === 'bg-blue-500' ? 'bg-blue-100/60' :
+              inst.color === 'bg-orange-700' ? 'bg-orange-100/60' :
+              inst.color === 'bg-yellow-500' ? 'bg-yellow-100/60' :
+              inst.color === 'bg-indigo-600' ? 'bg-indigo-100/60' :
+              inst.color === 'bg-red-600' ? 'bg-red-100/60' :
+              inst.color === 'bg-emerald-600' ? 'bg-emerald-100/60' :
+              inst.color === 'bg-slate-700' ? 'bg-slate-100/60' :
+              inst.color === 'bg-teal-500' ? 'bg-teal-100/60' :
+              inst.color === 'bg-sky-500' ? 'bg-sky-100/60' :
+              inst.color === 'bg-purple-600' ? 'bg-purple-100/60' :
+              inst.color === 'bg-green-700' ? 'bg-green-100/60' : 'bg-slate-100/60'
+            }`}
           >
             {/* Left Color Bar */}
             <div className={`w-3 h-full absolute left-0 top-0 ${inst.color || 'bg-slate-200'} opacity-80 group-hover:opacity-100 transition-opacity`}></div>
