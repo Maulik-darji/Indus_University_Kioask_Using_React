@@ -263,7 +263,7 @@ export default function Admin() {
         </div>
 
         {/* Navigation Tabs */}
-        <div className="flex flex-wrap gap-3 mb-10">
+        <div className="flex gap-3 md:flex-wrap overflow-x-auto md:overflow-visible mb-8 md:mb-10 custom-scrollbar">
           {[
             { id: 'events', label: 'News & Events' },
             { id: 'institutes', label: 'Our Institutes' },
@@ -274,7 +274,7 @@ export default function Admin() {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
-              className={`px-8 py-4 rounded-xl font-black text-sm uppercase tracking-wider transition-all duration-300 ${activeTab === tab.id ? 'bg-[#13141c] text-white shadow-[0_8px_20px_rgba(43,58,74,0.3)] scale-105' : 'bg-white text-slate-400 hover:bg-slate-50 border border-slate-100'}`}
+              className={`px-4 md:px-8 py-3 md:py-4 rounded-xl font-black text-xs md:text-sm uppercase tracking-wider transition-all duration-300 whitespace-nowrap flex-none ${activeTab === tab.id ? 'bg-[#13141c] text-white shadow-[0_8px_20px_rgba(43,58,74,0.3)] md:scale-105' : 'bg-white text-slate-400 hover:bg-slate-50 border border-slate-100'}`}
             >
               {tab.label}
             </button>
@@ -289,7 +289,7 @@ export default function Admin() {
         {activeTab === 'events' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 fade-in">
             <div className="lg:col-span-4">
-              <div className="bg-[#f2f0ee] p-7 rounded-[1.5rem] shadow-sm border border-slate-200 sticky top-10">
+              <div className="bg-[#f2f0ee] p-7 rounded-[1.5rem] shadow-sm border border-slate-200 lg:sticky lg:top-10">
                 <h3 className="text-xl font-black mb-8 text-slate-800 tracking-tight uppercase tracking-widest">{eventForm.id ? 'Edit Event' : 'New Event'}</h3>
                 <form onSubmit={saveEvent} className="space-y-6 text-left">
                   <div>
@@ -396,7 +396,7 @@ export default function Admin() {
         {activeTab === 'institutes' && (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 fade-in">
             <div className="lg:col-span-4">
-              <div className="bg-[#f2f0ee] p-7 rounded-[1.5rem] shadow-sm border border-slate-200 sticky top-10">
+              <div className="bg-[#f2f0ee] p-7 rounded-[1.5rem] shadow-sm border border-slate-200 lg:sticky lg:top-10">
                 <h3 className="text-xl font-black mb-8 text-slate-800 tracking-tight uppercase tracking-widest">{instituteForm.id ? 'Edit Unit' : 'Add Institute'}</h3>
                 <form onSubmit={saveInstitute} className="space-y-6 text-left">
                   <div>
@@ -417,7 +417,7 @@ export default function Admin() {
 
             <div className="lg:col-span-8 bg-[#f2f0ee] p-7 rounded-[1.5rem] shadow-sm border border-slate-200">
               <h3 className="text-lg font-black text-slate-800 mb-8 uppercase tracking-[0.2em] leading-none">Units Directory</h3>
-              <div className="flex flex-col gap-4 max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="flex flex-col gap-4 max-h-[60vh] md:max-h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
                 {institutes.map(inst => (
                   <div key={inst.id} className="bg-white p-6 rounded-[1.25rem] shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between border border-slate-100 hover:border-slate-800/10 hover:shadow-lg transition-all group gap-6">
                     <div className="flex-1 space-y-1">

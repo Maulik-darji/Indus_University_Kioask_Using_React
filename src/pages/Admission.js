@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { INDIA_STATES, INDIA_CITIES_BY_STATE } from '../data/indiaLocations';
 
 const programData = {
   UG: {
@@ -67,6 +68,12 @@ function Admission({ admissionData, setAdmissionData }) {
   const [level, setLevel] = useState('');
   const [program, setProgram] = useState('');
   const [specialization, setSpecialization] = useState('');
+  const [state, setState] = useState('');
+  const [customState, setCustomState] = useState('');
+  const [city, setCity] = useState('');
+  const [customCity, setCustomCity] = useState('');
+  const [contactedBy, setContactedBy] = useState('');
+  const [customContactedBy, setCustomContactedBy] = useState('');
 
   React.useEffect(() => {
     if (admissionData) {
@@ -189,6 +196,7 @@ function Admission({ admissionData, setAdmissionData }) {
 
   const inputClasses = "w-full p-4 border border-gray-200 rounded-xl bg-white focus:border-brand-brown focus:ring-2 focus:ring-brand-brown/10 outline-none transition-all duration-200 text-gray-700 placeholder:text-gray-400";
   const labelClasses = "block text-sm font-semibold text-gray-700 mb-2 ml-1";
+  const citiesForState = state && state !== '__other__' ? (INDIA_CITIES_BY_STATE[state] || []) : [];
 
   return (
     <div className="fade-in w-full max-w-5xl mx-auto px-4 md:px-0 md:-mt-8">
@@ -278,14 +286,96 @@ function Admission({ admissionData, setAdmissionData }) {
           </div>
 
           <div className="space-y-1.5">
-            <label className={labelClasses}>Your City</label>
-            <input type="text" className={`${inputClasses} py-3`} placeholder="Where are you from?" />
+            <label className={labelClasses}>Select State *</label>
+            <select
+              className={`${inputClasses} py-3`}
+              value={state}
+              onChange={(e) => {
+                const nextState = e.target.value;
+                setState(nextState);
+                setCity('');
+                setCustomCity('');
+                if (nextState !== '__other__') setCustomState('');
+              }}
+              required
+            >
+              <option value="">Select State</option>
+              {INDIA_STATES.map((s) => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+              <option value="__other__">Other (Type Manually)</option>
+            </select>
+
+            {state === '__other__' && (
+              <input
+                type="text"
+                className={`${inputClasses} py-3 mt-3`}
+                placeholder="Enter your state"
+                value={customState}
+                onChange={(e) => setCustomState(e.target.value)}
+                required
+              />
+            )}
           </div>
 
           <div className="space-y-1.5">
-            <label className={labelClasses}>Referred By</label>
-            <select className={`${inputClasses} py-3 text-slate-500`}>
-              <option value="" disabled selected hidden>Select Referrer</option>
+            <label className={labelClasses}>Select City *</label>
+            {state && state !== '__other__' ? (
+              <>
+                <select
+                  className={`${inputClasses} py-3 transition-opacity duration-300 ${!state ? 'opacity-40' : 'opacity-100'}`}
+                  value={city}
+                  onChange={(e) => {
+                    const nextCity = e.target.value;
+                    setCity(nextCity);
+                    if (nextCity !== '__other__') setCustomCity('');
+                  }}
+                  required
+                  disabled={!state}
+                >
+                  <option value="">Select City</option>
+                  {citiesForState.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                  <option value="__other__">Other (Type Manually)</option>
+                </select>
+
+                {city === '__other__' && (
+                  <input
+                    type="text"
+                    className={`${inputClasses} py-3 mt-3`}
+                    placeholder="Enter your city"
+                    value={customCity}
+                    onChange={(e) => setCustomCity(e.target.value)}
+                    required
+                  />
+                )}
+              </>
+            ) : (
+              <input
+                type="text"
+                className={`${inputClasses} py-3 transition-opacity duration-300 ${!state ? 'opacity-40' : 'opacity-100'}`}
+                placeholder="Enter your city"
+                value={customCity}
+                onChange={(e) => setCustomCity(e.target.value)}
+                required={!!state}
+                disabled={!state}
+              />
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <label className={labelClasses}>Contacted By</label>
+            <select
+              className={`${inputClasses} py-3 text-slate-500`}
+              value={contactedBy}
+              onChange={(e) => {
+                const next = e.target.value;
+                setContactedBy(next);
+                if (next !== '__other__') setCustomContactedBy('');
+              }}
+            >
+              <option value="">Select Referrer</option>
               <option value="Rajesh Vaghela" className="text-slate-800 font-medium">Rajesh Vaghela</option>
               <option value="Bhavin Chaudhary">Bhavin Chaudhary</option>
               <option value="Swapnil Kachewar">Swapnil Kachewar</option>
@@ -297,8 +387,18 @@ function Admission({ admissionData, setAdmissionData }) {
               <option value="Kinjal Parmar">Kinjal Parmar</option>
               <option value="Riddhi Sharma">Riddhi Sharma</option>
               <option value="Hewant Pasi">Hewant Pasi</option>
-              <option value="Social Media">Social Media / News</option>
+              <option value="__other__">Other (Type Manually)</option>
             </select>
+
+            {contactedBy === '__other__' && (
+              <input
+                type="text"
+                className={`${inputClasses} py-3 mt-3`}
+                placeholder="Enter referrer name"
+                value={customContactedBy}
+                onChange={(e) => setCustomContactedBy(e.target.value)}
+              />
+            )}
           </div>
         </div>
 

@@ -11,6 +11,11 @@
     -webkit-font-smoothing: antialiased;
   }
 
+  /* Slightly reduce the "extra-heavy" look across the UI */
+  .font-black {
+    font-weight: 800 !important;
+  }
+
   .material-symbols-outlined {
     font-variation-settings:
     'FILL' 0,
@@ -20,11 +25,17 @@
   }
 
   body {
-    @apply flex min-h-screen bg-[#f2f0ee] text-[#37352f] select-none;
+    @apply flex min-h-screen bg-[#f2f0ee] text-[#37352f] select-none overflow-x-hidden;
+    text-rendering: optimizeLegibility;
   }
 
   #root {
     @apply w-full;
+  }
+
+  img {
+    max-width: 100%;
+    height: auto;
   }
 }
 
@@ -100,5 +111,36 @@
   @keyframes marquee {
     0% { transform: translateX(0); }
     100% { transform: translateX(-50%); }
+  }
+
+  .ticker-viewport {
+    @apply w-full overflow-hidden flex items-center;
+  }
+
+  .ticker-track {
+    display: flex;
+    width: max-content;
+    will-change: transform;
+    animation: ticker-scroll var(--ticker-duration, 40s) linear infinite;
+  }
+
+  .ticker-group {
+    display: inline-flex;
+    align-items: center;
+    white-space: nowrap;
+    flex: 0 0 auto;
+    min-width: max-content;
+  }
+
+  @keyframes ticker-scroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .ticker-track {
+      animation: none !important;
+      transform: none !important;
+    }
   }
 }

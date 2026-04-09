@@ -437,7 +437,7 @@ export default function AdminCategories({ confirmDelete, setModalConfig }) {
     return (
       <div className="space-y-8 fade-in">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-6">
+          <div className="flex flex-wrap items-center gap-4 min-w-0">
             <button
               onClick={() => setSelectedCategoryNav(null)}
               className="group flex items-center px-6 py-3 bg-white border border-slate-200 rounded-xl font-bold text-slate-600 hover:bg-slate-50 transition-all shadow-sm"
@@ -445,15 +445,15 @@ export default function AdminCategories({ confirmDelete, setModalConfig }) {
               <svg className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M15 19l-7-7 7-7" /></svg>
               BACK TO TRACKS
             </button>
-            <h2 className="text-3xl font-black text-slate-900 tracking-tight">{selectedCategoryNav.label} Courses</h2>
+            <h2 className="text-3xl font-black text-slate-900 tracking-tight break-words">{selectedCategoryNav.label} Courses</h2>
           </div>
-          <div className="relative">
+          <div className="relative w-full md:w-auto">
             <input
               type="text"
               placeholder="Search courses..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="bg-white border border-slate-200 px-7 py-4 rounded-xl outline-none font-black text-lg w-[350px] shadow-sm focus:border-slate-800 transition-colors"
+              className="bg-white border border-slate-200 px-7 py-4 rounded-xl outline-none font-black text-lg w-full md:w-[350px] shadow-sm focus:border-slate-800 transition-colors"
             />
           </div>
         </div>

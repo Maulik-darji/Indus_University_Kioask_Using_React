@@ -22,7 +22,7 @@ function SalientFeatures() {
   ];
 
   return (
-    <div className="fade-in pb-20 px-10 md:px-16">
+    <div className="fade-in pb-20 px-4 md:px-10 lg:px-16">
       <header className="mb-10">
         <h1 className="text-4xl md:text-5xl font-bold text-black leading-tight mb-4">
           Salient Features
@@ -30,7 +30,7 @@ function SalientFeatures() {
         <p className="text-lg text-gray-500">Discover what makes Indus University stand out</p>
       </header>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pr-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {features.map((feature, index) => (
           <div 
             key={index}

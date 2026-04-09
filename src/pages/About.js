@@ -45,7 +45,7 @@ function About({ setActivePage }) {
 
   if (selectedCard === 'Governance') {
     return (
-      <div className="fade-in h-full overflow-y-auto custom-scrollbar pr-2 md:pr-4 pb-10 flex flex-col" style={{ maxHeight: 'calc(100vh - 120px)' }}>
+      <div className="fade-in pb-10 flex flex-col">
         <div className="mb-10 shrink-0">
           <button 
             onClick={() => setSelectedCard(null)}
@@ -60,8 +60,8 @@ function About({ setActivePage }) {
 
         <h1 className="text-4xl md:text-5xl font-bold text-center text-gray-900 mb-12 uppercase tracking-wide shrink-0">INDUS UNIVERSITY GOVERNANCE</h1>
 
-        <div className="w-[calc(100%+3rem)] -mx-6 md:-mx-10 lg:-mx-12 bg-[#d3d3d3] py-16 px-10 md:px-24 flex flex-col md:flex-row items-center md:items-start gap-12 flex-none">
-          <div className="w-[300px] h-[340px] shrink-0 shadow-sm overflow-hidden flex items-center justify-center">
+        <div className="w-[calc(100%+3rem)] -mx-6 md:-mx-10 lg:-mx-12 bg-[#d3d3d3] py-12 md:py-16 px-6 md:px-16 lg:px-24 flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-12 flex-none">
+          <div className="w-full max-w-[320px] aspect-[15/17] md:w-[300px] md:h-[340px] shrink-0 shadow-sm overflow-hidden flex items-center justify-center">
              <img src={drRituBhandariImg} alt="Dr. Ritu Bhandari" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 mt-4 md:mt-2">
@@ -73,7 +73,7 @@ function About({ setActivePage }) {
           </div>
         </div>
 
-        <div className="w-[calc(100%+3rem)] -mx-6 md:-mx-10 lg:-mx-12 bg-white py-16 px-10 md:px-24 flex flex-col-reverse md:flex-row items-center md:items-start gap-12 flex-none border-b border-gray-100">
+        <div className="w-[calc(100%+3rem)] -mx-6 md:-mx-10 lg:-mx-12 bg-white py-12 md:py-16 px-6 md:px-16 lg:px-24 flex flex-col-reverse md:flex-row items-center md:items-start gap-10 md:gap-12 flex-none border-b border-gray-100">
           <div className="flex-1 mt-4 md:mt-2">
              <div className="text-right">
                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Dr. Nagesh Bhandari</h2>
@@ -86,13 +86,13 @@ function About({ setActivePage }) {
                <p>Dr. Nagesh has also significantly contributed to developing novel instrumentation systems, eventually adding to the cost-effective treatment procedures in his chosen field. He is actively involved in philanthropic and charity works through Bhandari Charitable Trust. Dr. Bhandari is also the founder of Ahmedabad Aviation Aeronautics Ltd & Western India Institute of Aeronautics at Ahmedabad.</p>
              </div>
           </div>
-          <div className="w-[300px] h-[340px] shrink-0 shadow-sm overflow-hidden flex items-center justify-center">
+          <div className="w-full max-w-[320px] aspect-[15/17] md:w-[300px] md:h-[340px] shrink-0 shadow-sm overflow-hidden flex items-center justify-center">
              <img src={drNageshBhandariImg} alt="Dr. Nagesh Bhandari" className="w-full h-full object-cover" />
           </div>
         </div>
 
-        <div className="w-[calc(100%+3rem)] -mx-6 md:-mx-10 lg:-mx-12 bg-[#d3d3d3] py-16 px-10 md:px-24 flex flex-col md:flex-row items-center md:items-start gap-12 flex-none">
-          <div className="w-[300px] h-[340px] shrink-0 shadow-sm overflow-hidden flex items-center justify-center">
+        <div className="w-[calc(100%+3rem)] -mx-6 md:-mx-10 lg:-mx-12 bg-[#d3d3d3] py-12 md:py-16 px-6 md:px-16 lg:px-24 flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-12 flex-none">
+          <div className="w-full max-w-[320px] aspect-[15/17] md:w-[300px] md:h-[340px] shrink-0 shadow-sm overflow-hidden flex items-center justify-center">
              <img src={sandeepChakravortyImg} alt="Prof. (Dr.) Sandeep Chakravorty" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 mt-4 md:mt-2">
@@ -106,7 +106,7 @@ function About({ setActivePage }) {
           </div>
         </div>
 
-        <div className="w-[calc(100%+3rem)] -mx-6 md:-mx-10 lg:-mx-12 bg-white py-16 px-10 md:px-24 flex flex-col-reverse md:flex-row items-center md:items-start gap-12 flex-none border-b border-gray-100">
+        <div className="w-[calc(100%+3rem)] -mx-6 md:-mx-10 lg:-mx-12 bg-white py-12 md:py-16 px-6 md:px-16 lg:px-24 flex flex-col-reverse md:flex-row items-center md:items-start gap-10 md:gap-12 flex-none border-b border-gray-100">
           <div className="flex-1 mt-4 md:mt-2">
              <div className="text-right">
                <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Dr. R.K. Singh</h2>
@@ -118,13 +118,13 @@ function About({ setActivePage }) {
                <p>Dr. R.K. Singh has in-depth knowledge of higher education rules, regulations, practices, and conventions advocated by agencies such as the UGC, AICTE, NBA, and NAAC.</p>
              </div>
           </div>
-          <div className="w-[300px] h-[340px] shrink-0 shadow-sm overflow-hidden flex items-center justify-center">
+          <div className="w-full max-w-[320px] aspect-[15/17] md:w-[300px] md:h-[340px] shrink-0 shadow-sm overflow-hidden flex items-center justify-center">
              <img src={drRKSinghImg} alt="Dr. R.K. Singh" className="w-full h-full object-cover" />
           </div>
         </div>
 
-        <div className="w-[calc(100%+3rem)] -mx-6 md:-mx-10 lg:-mx-12 bg-[#d3d3d3] py-16 px-10 md:px-24 flex flex-col md:flex-row items-center md:items-start gap-12 flex-none">
-          <div className="w-[300px] h-[340px] shrink-0 shadow-sm overflow-hidden flex items-center justify-center">
+        <div className="w-[calc(100%+3rem)] -mx-6 md:-mx-10 lg:-mx-12 bg-[#d3d3d3] py-12 md:py-16 px-6 md:px-16 lg:px-24 flex flex-col md:flex-row items-center md:items-start gap-10 md:gap-12 flex-none">
+          <div className="w-full max-w-[320px] aspect-[15/17] md:w-[300px] md:h-[340px] shrink-0 shadow-sm overflow-hidden flex items-center justify-center">
              <img src={suketuJaniImg} alt="Dr. Suketu Jani" className="w-full h-full object-cover" />
           </div>
           <div className="flex-1 mt-4 md:mt-2">
@@ -148,7 +148,7 @@ function About({ setActivePage }) {
     ];
 
     return (
-      <div className="fade-in h-full overflow-y-auto custom-scrollbar pr-2 md:pr-4 pb-20 flex flex-col" style={{ maxHeight: 'calc(100vh - 120px)' }}>
+      <div className="fade-in pb-20 flex flex-col">
         <div className="mb-10 shrink-0">
           <button 
             onClick={() => {
@@ -255,16 +255,16 @@ function About({ setActivePage }) {
   }
 
   return (
-    <div className="fade-in h-full overflow-y-auto custom-scrollbar px-10 md:px-16 pb-10" style={{ maxHeight: 'calc(100vh - 120px)' }}>
+    <div className="fade-in pb-10 px-4 md:px-10 lg:px-16">
       <header className="mb-12">
         <h1 className="text-4xl font-bold text-gray-900 mb-3">About Indus University</h1>
         <p className="text-lg text-gray-500">Knowledge Enlightens the World</p>
       </header>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 mb-16 px-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10 mb-12 md:mb-16 px-4">
         {cards.map((card, idx) => (
           <div 
             key={idx} 
-            className={`${card.lightBg} p-10 md:p-12 rounded-[2.5rem] shadow-sm border-t-[20px] ${card.color} flex flex-col justify-between hover:scale-[1.03] hover:shadow-2xl transition-all duration-500 cursor-pointer group relative overflow-hidden`} 
+            className={`${card.lightBg} p-7 sm:p-8 md:p-10 rounded-[2.5rem] shadow-sm border-t-[16px] md:border-t-[20px] ${card.color} flex flex-col justify-between hover:scale-[1.03] hover:shadow-2xl transition-all duration-500 cursor-pointer group relative overflow-hidden`} 
             onClick={() => {
               if (card.title === 'Committees' && typeof setActivePage === 'function') {
                 setActivePage('committees');
@@ -273,17 +273,17 @@ function About({ setActivePage }) {
               }
             }}
           >
-            <div className="relative z-10 flex flex-col gap-6">
+            <div className="relative z-10 flex flex-col gap-5">
               <div className={`w-16 h-16 rounded-2xl ${card.textColor.replace('text-', 'bg-').replace('700', '100')} flex items-center justify-center`}>
                 <span className={`material-symbols-outlined !text-[36px] ${card.textColor}`}>{card.icon}</span>
               </div>
               <div>
                 <h3 className="text-2xl font-black text-gray-900 mb-4 tracking-tight leading-tight">{card.title}</h3>
-                <p className="text-gray-700 leading-relaxed text-base font-bold mb-8">{card.content}</p>
+                <p className="text-gray-700 leading-relaxed text-base font-bold mb-6">{card.content}</p>
               </div>
             </div>
-            
-            <button className={`mt-auto py-4 px-6 text-sm bg-white border border-gray-100 rounded-2xl font-black ${card.textColor} group-hover:bg-slate-900 group-hover:text-white transition-all w-full text-center uppercase tracking-widest shadow-sm`}>
+             
+            <button className={`mt-auto py-3.5 px-6 text-sm bg-white border border-gray-100 rounded-2xl font-black ${card.textColor} group-hover:bg-slate-900 group-hover:text-white transition-all w-full text-center uppercase tracking-widest shadow-sm`}>
               Discover More
             </button>
 

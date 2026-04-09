@@ -53,13 +53,13 @@ function Events() {
             style={{ borderLeftColor: e.color || '#f97316' }}
           >
             {/* Left Date Section */}
-            <div className="bg-gray-50 py-8 px-8 flex flex-col items-center justify-center border-r border-gray-100 min-w-[120px]">
+            <div className="bg-gray-50 py-6 md:py-8 px-5 md:px-8 flex flex-col items-center justify-center border-r border-gray-100 min-w-[96px] md:min-w-[120px]">
               <span className="text-sm font-bold text-gray-400 tracking-wider mb-1">{e.month}</span>
               <span className="text-4xl font-black text-gray-800 leading-none">{e.day}</span>
             </div>
             
             {/* Right Info Section */}
-            <div className="p-8 flex flex-col justify-center flex-1 text-left">
+            <div className="p-5 md:p-8 flex flex-col justify-center flex-1 text-left">
               <div className="flex items-center gap-3 mb-3">
                  <span 
                    className="text-[10px] font-bold uppercase tracking-widest bg-gray-50 px-3 py-1 rounded-full border border-gray-100"

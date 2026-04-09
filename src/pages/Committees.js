@@ -298,7 +298,7 @@ function Committees() {
   return (
     <div className="fade-in w-full h-full flex flex-col">
       {/* Top Tabs Grid */}
-      <div className="flex flex-wrap gap-3 mb-10 bg-slate-100/50 p-2 rounded-2xl">
+      <div className="flex gap-3 md:flex-wrap overflow-x-auto md:overflow-visible mb-8 md:mb-10 bg-slate-100/50 p-2 rounded-2xl custom-scrollbar">
         {committeeData.map((comm) => (
           <button
             key={comm.id}
@@ -307,7 +307,7 @@ function Committees() {
               backgroundColor: activeTab === comm.id ? '#fecd55' : 'white',
               borderColor: activeTab === comm.id ? '#fecd55' : 'transparent'
             }}
-            className={`px-6 py-4 text-sm font-black tracking-tight rounded-2xl transition-all flex-1 min-w-[max-content] border-2
+            className={`px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-black tracking-tight rounded-2xl transition-all flex-none md:flex-1 whitespace-nowrap border-2
               ${activeTab === comm.id 
                 ? 'text-slate-900 shadow-lg shadow-[#fecd55]/20 transform -translate-y-1' 
                 : 'text-slate-500 hover:bg-slate-50 hover:border-slate-200'}
@@ -323,14 +323,14 @@ function Committees() {
         {/* Header Ribbon */}
         <div 
           style={{ backgroundColor: activeCommittee.color || '#fecd55' }}
-          className="h-16 flex items-center px-10 relative overflow-hidden shrink-0 shadow-md border-b border-black/5"
+          className="h-14 md:h-16 flex items-center px-4 md:px-10 relative overflow-hidden shrink-0 shadow-md border-b border-black/5"
         >
-             <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase drop-shadow-sm">{activeCommittee.title}</h2>
+             <h2 className="text-lg md:text-xl font-black text-slate-900 tracking-tight uppercase drop-shadow-sm">{activeCommittee.title}</h2>
         </div>
 
         {/* Content Body */}
-        <div className="p-10 md:p-12 overflow-y-auto custom-scrollbar flex-1">
-          <div className="max-w-full space-y-8 px-2">
+        <div className="p-5 md:p-10 lg:p-12 overflow-y-auto custom-scrollbar flex-1">
+          <div className="max-w-full space-y-8 px-0 md:px-2">
             <p className="text-xl font-bold text-slate-800 leading-relaxed italic opacity-90">
               "{activeCommittee.objective}"
             </p>
@@ -344,26 +344,28 @@ function Committees() {
             {/* Members Table */}
             {activeCommittee.members && (
               <div className="mt-12 rounded-3xl border border-slate-100 overflow-hidden shadow-sm">
-                <div 
-                  style={{ backgroundColor: `${activeCommittee.color}30` }}
-                  className={`grid ${activeCommittee.id === 'iqac' ? 'grid-cols-3' : 'grid-cols-2'} p-6 border-b border-black/5`}
-                >
-                  {activeCommittee.id === 'iqac' ? (
-                    <>
-                      <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-700">Guidelines</span>
-                      <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-700">Nominations</span>
-                      <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-700 text-right">Remarks</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-700">Name of the Member</span>
-                      <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-700 text-right">Profession</span>
-                    </>
-                  )}
-                </div>
-                <div className="divide-y divide-slate-100">
-                  {activeCommittee.members.map((member, idx) => (
-                    <div key={idx} className={`grid ${activeCommittee.id === 'iqac' ? 'grid-cols-3' : 'grid-cols-2'} py-4 px-6 items-start hover:bg-slate-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-200/40'}`}>
+                <div className="overflow-x-auto">
+                  <div className="min-w-[720px]">
+                    <div 
+                      style={{ backgroundColor: `${activeCommittee.color}30` }}
+                      className={`grid ${activeCommittee.id === 'iqac' ? 'grid-cols-3' : 'grid-cols-2'} p-6 border-b border-black/5`}
+                    >
+                      {activeCommittee.id === 'iqac' ? (
+                        <>
+                          <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-700">Guidelines</span>
+                          <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-700">Nominations</span>
+                          <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-700 text-right">Remarks</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-700">Name of the Member</span>
+                          <span className="text-sm font-black uppercase tracking-[0.2em] text-slate-700 text-right">Profession</span>
+                        </>
+                      )}
+                    </div>
+                    <div className="divide-y divide-slate-100">
+                      {activeCommittee.members.map((member, idx) => (
+                        <div key={idx} className={`grid ${activeCommittee.id === 'iqac' ? 'grid-cols-3' : 'grid-cols-2'} py-4 px-6 items-start hover:bg-slate-50 transition-colors ${idx % 2 === 0 ? 'bg-white' : 'bg-slate-200/40'}`}>
                        {activeCommittee.id === 'iqac' ? (
                          <>
                            <span className="font-bold text-slate-600 text-xs uppercase tracking-tight pr-4">{member.guideline}</span>
@@ -380,20 +382,22 @@ function Committees() {
                            <div className="flex justify-end items-center gap-3">
                               {member.link && (
                                  <a 
-                                    href={member.link} 
-                                    target="_blank" 
-                                    rel="noopener noreferrer"
-                                    className="px-3 py-1 bg-[#ffae4f] text-slate-900 text-[10px] font-black uppercase rounded-lg hover:scale-105 transition-transform shadow-sm"
+                                     href={member.link} 
+                                     target="_blank" 
+                                     rel="noopener noreferrer"
+                                     className="px-3 py-1 bg-[#ffae4f] text-slate-900 text-[10px] font-black uppercase rounded-lg hover:scale-105 transition-transform shadow-sm"
                                  >
-                                    {member.id === 'online' ? 'Submit Online' : 'Check Links'}
+                                     {member.id === 'online' ? 'Submit Online' : 'Check Links'}
                                  </a>
                               )}
                               <span className="text-slate-500 font-bold text-right text-xs uppercase tracking-wider">{member.profession}</span>
                            </div>
                          </>
                        )}
+                        </div>
+                      ))}
                     </div>
-                  ))}
+                  </div>
                 </div>
               </div>
             )}

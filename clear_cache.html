@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Kiosk Cache</title>
+</head>
+<body>
+    <h1>Clear Kiosk Cache</h1>
+    <button onclick="clearCache()">Clear Local Storage</button>
+    <div id="status"></div>
+    <script>
+        function clearCache() {
+            localStorage.removeItem('indus_categories');
+            localStorage.removeItem('indus_programData');
+            localStorage.removeItem('indus_inquiry_number');
+            document.getElementById('status').innerHTML = '<p style="color: green;">Cache cleared successfully! Please refresh the kiosk.</p>';
+        }
+    </script>
+</body>
+</html>

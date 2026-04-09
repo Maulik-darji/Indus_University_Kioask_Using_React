@@ -23,7 +23,7 @@ function Home({ setActivePage }) {
         {cards.map((card) => (
           <div 
             key={card.id}
-            className={`group p-10 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-pointer border-2 ${card.border} ${card.bg} ${card.hover} min-h-[220px] flex flex-col justify-center relative overflow-hidden`}
+            className={`group p-7 sm:p-8 md:p-10 rounded-3xl shadow-sm hover:shadow-xl hover:-translate-y-2 transition-all duration-300 cursor-pointer border-2 ${card.border} ${card.bg} ${card.hover} min-h-[180px] md:min-h-[220px] flex flex-col justify-center relative overflow-hidden`}
             onClick={() => {
               if (card.id === 'University') {
                 window.open('https://indusuni.ac.in/', '_blank');
@@ -38,7 +38,7 @@ function Home({ setActivePage }) {
             </div>
 
             <div className="relative z-10">
-              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-6 shadow-sm ${card.bg.replace('/60', '')} ${card.color} border border-white/50 transition-transform duration-300 group-hover:scale-110`}>
+              <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-5 md:mb-6 shadow-sm ${card.bg.replace('/60', '')} ${card.color} border border-white/50 transition-transform duration-300 group-hover:scale-110`}>
                 <span className="material-symbols-outlined !text-[32px]">{card.icon}</span>
               </div>
               <h3 className={`text-2xl font-black mb-3 transition-colors ${card.color} leading-snug`}>{card.title}</h3>

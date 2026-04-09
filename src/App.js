@@ -14,12 +14,20 @@ import Committees from './pages/Committees';
 import Admin from './pages/Admin';
 
 function ScrollingTicker() {
-  const [tickerItems, setTickerItems] = React.useState([
-    "🎓 Admissions Open for 2026-27! Register today for B.Tech, M.Tech, and Designing courses.",
-    "🚀 INDUS CUP 2026: Regional sports meet registrations are now live! Participate & Win big prizes.",
-    "🏢 Placement Success: Direct on-campus hiring for Google, Meta, and Microsoft starts next week.",
-    "⭐ Research & Innovation: Congratulations to our PhD scholars for the recent Science Journal publication."
-  ]);
+  const [tickerItems, setTickerItems] = React.useState(() => {
+    const cached = localStorage.getItem('indus_ticker_items_cache');
+    if (!cached) return [];
+    try {
+      const parsed = JSON.parse(cached);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [durationSec, setDurationSec] = React.useState(40);
+  const [isReady, setIsReady] = React.useState(false);
+  const groupRef = React.useRef(null);
 
   React.useEffect(() => {
     // Real-time Cloud Synchronization
@@ -31,11 +39,51 @@ function ScrollingTicker() {
       });
       if (items.length > 0) {
         setTickerItems(items);
+        try {
+          localStorage.setItem('indus_ticker_items_cache', JSON.stringify(items));
+        } catch {
+          // ignore storage write failures
+        }
       }
     });
 
     return () => unsubscribe();
   }, []);
+
+  React.useEffect(() => {
+    const el = groupRef.current;
+    if (!el) return;
+
+    const SPEED_PX_PER_SEC = 90;
+
+    const recompute = () => {
+      const w = el.scrollWidth || 0;
+      if (w <= 0) {
+        setIsReady(false);
+        return;
+      }
+      const seconds = Math.min(120, Math.max(20, Math.round((w / SPEED_PX_PER_SEC) * 10) / 10));
+      setDurationSec(seconds);
+      setIsReady(true);
+    };
+
+    recompute();
+
+    // Fonts can change measured widths after initial paint
+    const fontsReady = document.fonts?.ready;
+    if (fontsReady && typeof fontsReady.then === 'function') {
+      fontsReady.then(recompute).catch(() => {});
+    }
+
+    const ro = new ResizeObserver(() => recompute());
+    ro.observe(el);
+
+    window.addEventListener('resize', recompute);
+    return () => {
+      window.removeEventListener('resize', recompute);
+      ro.disconnect();
+    };
+  }, [tickerItems]);
 
   const content = tickerItems.map((item, idx) => (
     <div key={idx} className="flex items-center group">
@@ -47,8 +95,22 @@ function ScrollingTicker() {
   ));
   
   return (
-    <div className="flex animate-marquee-slower whitespace-nowrap items-center py-2 h-full">
-      {content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}{content}
+    <div className="ticker-viewport h-full">
+      <div
+        className="ticker-track h-full"
+        style={{
+          '--ticker-duration': `${durationSec}s`,
+          animationPlayState: isReady ? 'running' : 'paused',
+          opacity: tickerItems.length > 0 ? 1 : 0,
+        }}
+      >
+        <div ref={groupRef} className="ticker-group h-full" aria-label="News ticker">
+          {content}
+        </div>
+        <div className="ticker-group h-full" aria-hidden="true">
+          {content}
+        </div>
+      </div>
     </div>
   );
 }
@@ -130,11 +192,16 @@ function App() {
 
       <Sidebar activePage={activePage} setActivePage={setActivePage} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
 
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
-        <main className="flex-1 h-full w-full overflow-hidden flex flex-col relative">
-          <div id="main-scroll-container" className="w-full max-w-[1920px] mx-auto h-full overflow-y-auto px-4 md:px-10 lg:px-12 py-6 md:py-10 pb-40 scroll-smooth">
+      <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden relative">
+        <main className="flex-1 min-w-0 h-full w-full overflow-hidden flex flex-col relative">
+          <div
+            id="main-scroll-container"
+            className={`w-full max-w-[1920px] mx-auto h-full overflow-y-auto px-4 md:px-10 lg:px-12 pb-28 md:pb-40 scroll-smooth ${
+              activePage === 'programs' ? 'pt-3 md:pt-4' : 'pt-5 md:pt-8'
+            }`}
+          >
             {/* Responsive Header Row */}
-            <div className="flex flex-col xl:flex-row xl:items-center justify-between mb-8 gap-6">
+            <div className={`flex flex-col xl:flex-row xl:items-center justify-between ${activePage === 'programs' ? 'mb-2 md:mb-3 gap-3 md:gap-4' : 'mb-6 md:mb-8 gap-4 md:gap-6'}`}>
               <div className="flex items-center gap-4 flex-wrap">
                 <button 
                   onClick={() => setIsSidebarOpen(!isSidebarOpen)}
@@ -163,7 +230,7 @@ function App() {
               </div>
               
               <div className="flex-1 flex justify-center xl:justify-center">
-                <h1 className="text-xl md:text-2xl 2xl:text-3xl font-black text-gray-900 tracking-tight text-center uppercase">
+                <h1 className="text-xl md:text-2xl 2xl:text-3xl font-extrabold text-gray-900 tracking-tight text-center">
                   {activePage === 'programs' && "Academic Categories"}
                   {activePage === 'about' && "About Indus"}
                   {activePage === 'institutes' && "Our Institutes"}
@@ -190,7 +257,7 @@ function App() {
       </div>
 
       {/* Unified Intelligent Scroll Controls */}
-      <div className="fixed bottom-24 right-10 flex flex-col gap-4 z-[1000000]">
+      <div className="fixed bottom-20 right-4 md:bottom-24 md:right-10 flex flex-col gap-3 md:gap-4 z-[1000000]">
         <button 
           onPointerDown={(e) => {
             e.preventDefault();
@@ -216,9 +283,9 @@ function App() {
               setTimeout(() => { if (target.scrollTop === start) target.scrollTop -= 400; }, 40);
             }
           }}
-          className="w-16 h-16 bg-white border-2 border-slate-200 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex items-center justify-center text-slate-800 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer pointer-events-auto"
+          className="w-12 h-12 md:w-16 md:h-16 bg-white border-2 border-slate-200 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex items-center justify-center text-slate-800 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer pointer-events-auto"
         >
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 15l7-7 7 7" />
           </svg>
         </button>
@@ -247,9 +314,9 @@ function App() {
               setTimeout(() => { if (target.scrollTop === start) target.scrollTop += 400; }, 40);
             }
           }}
-          className="w-16 h-16 bg-white border-2 border-slate-200 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex items-center justify-center text-slate-800 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer pointer-events-auto"
+          className="w-12 h-12 md:w-16 md:h-16 bg-white border-2 border-slate-200 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex items-center justify-center text-slate-800 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer pointer-events-auto"
         >
-          <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M19 9l-7 7-7-7" />
           </svg>
         </button>

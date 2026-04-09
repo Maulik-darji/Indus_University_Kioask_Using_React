@@ -30,11 +30,11 @@ function Institutes() {
 
   return (
     <div className="fade-in w-full h-full">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4 max-h-[calc(100vh-180px)] overflow-y-auto px-10 pt-4 pb-20 -mx-10 custom-scrollbar">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 py-4 pb-16">
         {institutes.map((inst, i) => (
           <div 
             key={i} 
-            className={`group p-8 rounded-3xl shadow-sm border border-slate-100 flex gap-8 items-start cursor-default hover:border-blue-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 relative overflow-hidden ${
+            className={`group p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100 flex gap-5 md:gap-8 items-start cursor-default hover:border-blue-200 hover:shadow-xl hover:-translate-y-1 transition-all duration-500 relative overflow-hidden ${
               inst.color === 'bg-blue-500' ? 'bg-blue-100/60' :
               inst.color === 'bg-orange-700' ? 'bg-orange-100/60' :
               inst.color === 'bg-yellow-500' ? 'bg-yellow-100/60' :
@@ -51,12 +51,12 @@ function Institutes() {
             {/* Left Color Bar */}
             <div className={`w-3 h-full absolute left-0 top-0 ${inst.color || 'bg-slate-200'} opacity-80 group-hover:opacity-100 transition-opacity`}></div>
             
-            <div className="flex-1 pl-4">
+            <div className="flex-1 min-w-0 pl-4">
               <div className="mb-4">
                 <span className={`inline-block px-4 py-1.5 rounded-xl ${inst.color || 'bg-slate-200'} bg-opacity-10 text-[11px] font-black tracking-[0.2em] uppercase ${inst.color?.replace('bg-', 'text-') || 'text-slate-400'}`}>
                   {inst.name}
                 </span>
-                <h3 className="text-2xl font-black text-slate-900 mt-3 leading-tight tracking-tight">{inst.fullName || inst.name}</h3>
+                <h3 className="text-2xl font-black text-slate-900 mt-3 leading-tight tracking-tight break-words">{inst.fullName || inst.name}</h3>
               </div>
               <p className="text-slate-500 font-medium text-[15px] leading-relaxed line-clamp-2 md:line-clamp-none">
                 {inst.desc}
