@@ -11,8 +11,32 @@ const defaultCategories = [
   { id: 'msc', label: 'M.Sc', badge: 'MASTERS', color: 'border-indigo-600', bgColor: 'bg-indigo-600', lightBg: 'bg-indigo-50', programs: ['Information Technology (IT)', 'Clinical Research', 'Mathematics', 'Physics', 'Chemistry', 'Cyber Security', 'Microbiology'] },
   { id: 'mba-avia', label: 'MBA/BBA', badge: 'BUSINESS', color: 'border-purple-600', bgColor: 'bg-purple-600', lightBg: 'bg-purple-50', programs: ['Aviation Management', 'BBA', 'Marketing', 'Finance', 'Human Resource'] },
   { id: 'bca', label: 'BCA', badge: 'COMPUTER', color: 'border-cyan-500', bgColor: 'bg-cyan-500', lightBg: 'bg-cyan-50', programs: ['BCA'] },
-  { id: 'mca', label: 'MCA', badge: 'POST-GRAD', color: 'border-rose-500', bgColor: 'bg-rose-500', lightBg: 'bg-rose-50', programs: ['MCA'] }
+  { id: 'mca', label: 'MCA', badge: 'POST-GRAD', color: 'border-rose-500', bgColor: 'bg-rose-500', lightBg: 'bg-rose-50', programs: ['MCA'] },
+  { id: 'barch', label: 'B.Arch', badge: 'UNDERGRADUATE', color: 'border-fuchsia-600', bgColor: 'bg-fuchsia-600', lightBg: 'bg-fuchsia-50', programs: ['B.Arch (Bachelor of Architecture)'] },
+  { id: 'bcom', label: 'B.Com (Hons.)', badge: 'UNDERGRADUATE', color: 'border-emerald-600', bgColor: 'bg-emerald-600', lightBg: 'bg-emerald-50', programs: ['B.Com (Hons.)'] },
+  { id: 'ba', label: 'B.A', badge: 'UNDERGRADUATE', color: 'border-sky-600', bgColor: 'bg-sky-600', lightBg: 'bg-sky-50', programs: ['English (Hons)'] },
+  { id: 'bpharm', label: 'B.Pharm', badge: 'UNDERGRADUATE', color: 'border-green-700', bgColor: 'bg-green-700', lightBg: 'bg-green-50', programs: ['B.Pharm'] }
 ];
+
+const mergeCategories = (saved, defaults) => {
+  if (!Array.isArray(saved) || saved.length === 0) return defaults;
+  const merged = saved.map((c) => ({ ...c }));
+
+  for (const def of defaults || []) {
+    const existingIndex = merged.findIndex((c) => c?.id === def.id);
+    if (existingIndex === -1) {
+      merged.push(def);
+      continue;
+    }
+
+    const existing = merged[existingIndex];
+    if (!Array.isArray(existing.programs) || existing.programs.length === 0) {
+      merged[existingIndex] = { ...existing, programs: def.programs };
+    }
+  }
+
+  return merged;
+};
 
 const getProgramFee = (categoryId, programName) => {
   if (categoryId === 'diploma') return '32,106';
@@ -114,7 +138,22 @@ export default function AdminCategories({ confirmDelete, setModalConfig }) {
   useEffect(() => {
     const loadCategories = () => {
       const storedCat = localStorage.getItem('indus_categories');
-      setCategories(storedCat ? JSON.parse(storedCat) : defaultCategories);
+      if (!storedCat) {
+        setCategories(defaultCategories);
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(storedCat);
+        const merged = mergeCategories(parsed, defaultCategories);
+        setCategories(merged);
+
+        if (Array.isArray(parsed) && merged.length !== parsed.length) {
+          localStorage.setItem('indus_categories', JSON.stringify(merged));
+        }
+      } catch {
+        setCategories(defaultCategories);
+      }
     };
 
     loadCategories();

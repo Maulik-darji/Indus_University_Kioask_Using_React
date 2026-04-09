@@ -12,6 +12,9 @@ import SalientFeatures from './pages/SalientFeatures';
 import Placements from './pages/Placements';
 import Committees from './pages/Committees';
 import Admin from './pages/Admin';
+import AccessGate from './pages/AccessGate';
+import { getOrCreateDeviceId } from './auth/deviceId';
+import { clearKioskSession, getKioskSession, isKioskSessionValid } from './auth/kioskSession';
 
 function ScrollingTicker() {
   const [tickerItems, setTickerItems] = React.useState(() => {
@@ -27,7 +30,10 @@ function ScrollingTicker() {
 
   const [durationSec, setDurationSec] = React.useState(40);
   const [isReady, setIsReady] = React.useState(false);
+  const viewportRef = React.useRef(null);
   const groupRef = React.useRef(null);
+  const baseWidthRef = React.useRef(0);
+  const [repeatCount, setRepeatCount] = React.useState(1);
 
   React.useEffect(() => {
     // Real-time Cloud Synchronization
@@ -54,15 +60,30 @@ function ScrollingTicker() {
     const el = groupRef.current;
     if (!el) return;
 
-    const SPEED_PX_PER_SEC = 90;
+    const SPEED_PX_PER_SEC = 140;
 
     const recompute = () => {
-      const w = el.scrollWidth || 0;
-      if (w <= 0) {
+      const groupWidth = el.scrollWidth || 0;
+      const viewportWidth = viewportRef.current?.clientWidth || 0;
+      if (groupWidth <= 0 || viewportWidth <= 0) {
         setIsReady(false);
         return;
       }
-      const seconds = Math.min(120, Math.max(20, Math.round((w / SPEED_PX_PER_SEC) * 10) / 10));
+
+      // Ensure the group is at least as wide as the viewport to avoid blank space.
+      if (!baseWidthRef.current || repeatCount === 1) {
+        baseWidthRef.current = groupWidth;
+      }
+      const baseWidth = baseWidthRef.current || groupWidth;
+      const neededRepeats = Math.max(1, Math.ceil((viewportWidth + 200) / baseWidth));
+      if (neededRepeats !== repeatCount) {
+        setRepeatCount(neededRepeats);
+        setIsReady(false);
+        return;
+      }
+
+      // Keep a consistent scroll speed; avoid forcing a high minimum duration (which makes short tickers feel slow).
+      const seconds = Math.min(120, Math.max(8, Math.round((groupWidth / SPEED_PX_PER_SEC) * 10) / 10));
       setDurationSec(seconds);
       setIsReady(true);
     };
@@ -83,19 +104,35 @@ function ScrollingTicker() {
       window.removeEventListener('resize', recompute);
       ro.disconnect();
     };
-  }, [tickerItems]);
+  }, [tickerItems, repeatCount]);
 
-  const content = tickerItems.map((item, idx) => (
-    <div key={idx} className="flex items-center group">
-       <span className="text-slate-800 font-bold text-[13.5px] tracking-wide uppercase whitespace-nowrap hover:text-blue-700 transition-colors">
-          {item}
-       </span>
-       <span className="mx-14 text-slate-300 font-light opacity-60">|</span>
-    </div>
-  ));
+  React.useEffect(() => {
+    baseWidthRef.current = 0;
+    setRepeatCount(1);
+  }, [tickerItems.join('||')]);
+
+  const content = React.useMemo(() => {
+    const items = Array.isArray(tickerItems) ? tickerItems : [];
+    const repeats = Math.max(1, repeatCount || 1);
+    const out = [];
+    for (let r = 0; r < repeats; r++) {
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        out.push(
+          <div key={`${r}-${i}`} className="flex items-center group">
+            <span className="text-slate-800 font-bold text-[13.5px] tracking-wide uppercase whitespace-nowrap hover:text-blue-700 transition-colors">
+              {item}
+            </span>
+            <span className="mx-10 text-slate-300 font-light opacity-60">|</span>
+          </div>
+        );
+      }
+    }
+    return out;
+  }, [repeatCount, tickerItems]);
   
   return (
-    <div className="ticker-viewport h-full">
+    <div ref={viewportRef} className="ticker-viewport h-full">
       <div
         className="ticker-track h-full"
         style={{
@@ -116,6 +153,17 @@ function ScrollingTicker() {
 }
 
 function App() {
+  const deviceId = React.useMemo(() => getOrCreateDeviceId(), []);
+  const [isKioskAuth, setIsKioskAuth] = useState(() => {
+    const session = getKioskSession();
+    return isKioskSessionValid(session, deviceId);
+  });
+
+  const terminateKioskSession = React.useCallback(() => {
+    clearKioskSession();
+    setIsKioskAuth(false);
+  }, []);
+
   const [activePage, setActivePage] = useState(() => {
     // 1. Check if we're explicitly hitting the admin path
     if (window.location.hash === '#/admin' || window.location.pathname === '/admin') return 'admin';
@@ -154,6 +202,10 @@ function App() {
 
 
 
+  if (!isKioskAuth) {
+    return <AccessGate onAuthenticated={() => setIsKioskAuth(true)} />;
+  }
+
   const renderPage = () => {
     switch (activePage) {
       case 'home': return <Home setActivePage={setActivePage} />;
@@ -188,9 +240,25 @@ function App() {
           <button className="p-2 text-2xl hover:bg-gray-100 rounded-lg transition-colors" onClick={() => setIsSidebarOpen(true)}>&#9776;</button>
           <div className="font-bold text-gray-900 tracking-tight">INDUS UNIVERSITY</div>
         </div>
+        <button
+          onClick={() => {
+            if (window.confirm('Terminate this session and lock the kiosk?')) terminateKioskSession();
+          }}
+          className="px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-xl font-black text-[10px] uppercase tracking-wider active:scale-95 transition-all"
+        >
+          Terminate
+        </button>
       </header>
 
-      <Sidebar activePage={activePage} setActivePage={setActivePage} isOpen={isSidebarOpen} setIsOpen={setIsSidebarOpen} />
+      <Sidebar
+        activePage={activePage}
+        setActivePage={setActivePage}
+        isOpen={isSidebarOpen}
+        setIsOpen={setIsSidebarOpen}
+        onTerminateSession={() => {
+          if (window.confirm('Terminate this session and lock the kiosk?')) terminateKioskSession();
+        }}
+      />
 
       <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden relative">
         <main className="flex-1 min-w-0 h-full w-full overflow-hidden flex flex-col relative">
@@ -239,7 +307,17 @@ function App() {
                 </h1>
               </div>
 
-              <div className="hidden xl:block w-48"></div> {/* Visual balancer for centered title */}
+              <div className="flex justify-end xl:w-48">
+                <button
+                  onClick={() => {
+                    if (window.confirm('Terminate this session and lock the kiosk?')) terminateKioskSession();
+                  }}
+                  className="px-5 py-3 bg-red-50 text-red-700 border border-red-200 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-red-100 active:scale-95 transition-all shadow-sm"
+                  title="Terminate kiosk session"
+                >
+                  Terminate Session
+                </button>
+              </div>
             </div>
             
             <div className="fade-in max-w-full">

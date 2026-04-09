@@ -3,7 +3,7 @@ import Clock from './Clock';
 import logo from '../images/logo.png';
 import smallLogo from '../images/University Logo/smallicon_sidebar.png';
 
-function Sidebar({ activePage, setActivePage, isOpen, setIsOpen }) {
+function Sidebar({ activePage, setActivePage, isOpen, setIsOpen, onTerminateSession }) {
   const menuItems = [
     { id: 'home', label: 'Home', icon: 'home', color: 'text-blue-600 bg-blue-50' },
     { id: 'about', label: 'About Indus', icon: 'info', color: 'text-indigo-600 bg-indigo-50' },
@@ -70,7 +70,16 @@ function Sidebar({ activePage, setActivePage, isOpen, setIsOpen }) {
         </div>
 
         <div className={`transition-all duration-300 shrink-0 mt-10 ${!isOpen ? 'opacity-0 scale-50 h-0 overflow-hidden' : 'opacity-100 scale-100'}`}>
-          <Clock />
+          <div className="flex flex-col gap-4">
+            <button
+              type="button"
+              onClick={() => onTerminateSession?.()}
+              className="w-full px-4 py-3 bg-red-50 text-red-700 border border-red-200 rounded-2xl font-black text-[10px] uppercase tracking-[0.22em] hover:bg-red-100 active:scale-95 transition-all"
+            >
+              Terminate Session
+            </button>
+            <Clock />
+          </div>
         </div>
       </aside>
       

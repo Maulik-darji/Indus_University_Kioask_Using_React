@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminCategories from './AdminCategories';
 import { db } from '../firebase';
-import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, updateDoc, doc, serverTimestamp } from 'firebase/firestore';
+import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, updateDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 // Custom Modal Component for "Center of the Screen" Popups
 const CenterModal = ({ isOpen, onClose, title, children }) => {
@@ -18,6 +18,7 @@ const CenterModal = ({ isOpen, onClose, title, children }) => {
 };
 
 export default function Admin() {
+  const kioskAllowlistEnabled = String(process.env.REACT_APP_KIOSK_DEVICE_ALLOWLIST || '').toLowerCase() === 'true';
   const [isAuth, setIsAuth] = useState(() => {
     return localStorage.getItem('indus_admin_session') === 'active';
   });
@@ -31,6 +32,7 @@ export default function Admin() {
   const [events, setEvents] = useState([]);
   const [institutes, setInstitutes] = useState([]);
   const [ticker, setTicker] = useState([]);
+  const [kioskDevices, setKioskDevices] = useState([]);
   const [inquiryNumber, setInquiryNumber] = useState('');
 
   // Form States (for creating/editing)
@@ -63,14 +65,48 @@ export default function Admin() {
       setTicker(items);
     });
 
+    let unsubscribeDevices = () => {};
+    if (kioskAllowlistEnabled) {
+      // Kiosk Devices (Access Allowlist) - Realtime Cloud Sync
+      const qDevices = query(collection(db, "kiosk_devices"), orderBy("requestedAt", "desc"));
+      unsubscribeDevices = onSnapshot(qDevices, (snapshot) => {
+        const items = snapshot.docs.map(d => ({ ...d.data(), id: d.id }));
+        setKioskDevices(items);
+      });
+    }
+
     setInquiryNumber(localStorage.getItem('indus_inquiry_number') || '+91 74054 13342');
 
     return () => {
       unsubscribeTicker();
       unsubscribeEvents();
       unsubscribeInst();
+      unsubscribeDevices();
     };
-  }, []);
+  }, [kioskAllowlistEnabled]);
+
+  const formatTs = (ts) => {
+    try {
+      if (!ts) return '—';
+      const d = typeof ts.toDate === 'function' ? ts.toDate() : new Date(ts);
+      if (Number.isNaN(d.getTime())) return '—';
+      return d.toLocaleString();
+    } catch {
+      return '—';
+    }
+  };
+
+  const setDeviceAllowed = async (deviceId, allowed) => {
+    try {
+      await setDoc(
+        doc(db, "kiosk_devices", deviceId),
+        { allowed: !!allowed, reviewedAt: serverTimestamp() },
+        { merge: true }
+      );
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   // --- EVENTS LOGIC ---
   const saveEvent = async (e) => {
@@ -248,17 +284,18 @@ export default function Admin() {
             >
               Return to Website
             </button>
-            <button
-              onClick={() => {
-                setIsAuth(false);
-                localStorage.removeItem('indus_admin_session');
-                localStorage.setItem('indus_active_page', 'home');
-                window.location.href = '/';
-              }}
-              className="px-6 py-3 bg-red-100 text-red-600 rounded-xl font-bold hover:bg-red-200 text-sm transition-colors"
-            >
-              Terminate Session
-            </button>
+              <button
+                onClick={() => {
+                  setIsAuth(false);
+                  localStorage.removeItem('indus_admin_session');
+                  localStorage.removeItem('indus_kiosk_session_v1');
+                  localStorage.setItem('indus_active_page', 'home');
+                  window.location.href = '/';
+                }}
+                className="px-6 py-3 bg-red-100 text-red-600 rounded-xl font-bold hover:bg-red-200 text-sm transition-colors"
+              >
+                Terminate Session
+              </button>
           </div>
         </div>
 
@@ -268,6 +305,7 @@ export default function Admin() {
             { id: 'events', label: 'News & Events' },
             { id: 'institutes', label: 'Our Institutes' },
             { id: 'categories', label: 'Categories & Courses' },
+            ...(kioskAllowlistEnabled ? [{ id: 'devices', label: 'Kiosk Devices' }] : []),
             { id: 'settings', label: 'Global Settings' },
             { id: 'admin', label: 'Personnel Admin' },
           ].map(tab => (
@@ -284,6 +322,93 @@ export default function Admin() {
         {/* Tab Contents */}
         {activeTab === 'categories' && (
           <AdminCategories confirmDelete={confirmDelete} setModalConfig={setModalConfig} />
+        )}
+
+        {activeTab === 'devices' && (
+          <div className="bg-white p-10 rounded-[1.5rem] shadow-2xl border border-slate-100 fade-in mt-6">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-slate-100 pb-8">
+              <div>
+                <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Kiosk Device Allowlist</h3>
+                <p className="text-slate-500 font-bold text-sm">
+                  Approve/deny computers that can unlock the kiosk (even if password is known).
+                </p>
+              </div>
+              <div className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
+                Total: {kioskDevices.length}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {kioskDevices.map((d) => {
+                const allowed = d.allowed === true;
+                const deviceId = d.deviceId || d.id;
+                return (
+                  <div
+                    key={d.id}
+                    className={`rounded-[1.25rem] border p-6 shadow-sm transition-all bg-white ${
+                      allowed ? 'border-emerald-200' : 'border-slate-100'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="min-w-0">
+                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Device ID</div>
+                        <div className="mt-1 font-black text-slate-900 text-xs break-all">{deviceId}</div>
+                        <div className="mt-3 grid grid-cols-2 gap-3 text-[10px] font-bold text-slate-500">
+                          <div>
+                            <div className="uppercase tracking-widest text-slate-400 font-black text-[9px]">Status</div>
+                            <div className={`mt-1 font-black ${allowed ? 'text-emerald-700' : 'text-slate-700'}`}>
+                              {allowed ? 'Authorized' : 'Not Authorized'}
+                            </div>
+                          </div>
+                          <div>
+                            <div className="uppercase tracking-widest text-slate-400 font-black text-[9px]">Requested</div>
+                            <div className="mt-1 font-black text-slate-700">{formatTs(d.requestedAt)}</div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          try {
+                            navigator.clipboard.writeText(String(deviceId));
+                          } catch {
+                            // ignore
+                          }
+                        }}
+                        className="px-4 py-3 rounded-xl bg-slate-50 border border-slate-200 text-slate-700 font-black text-[10px] uppercase tracking-wider hover:bg-white active:scale-95 transition-all shrink-0"
+                      >
+                        Copy
+                      </button>
+                    </div>
+
+                    <div className="mt-5 flex gap-3">
+                      <button
+                        type="button"
+                        onClick={() => setDeviceAllowed(deviceId, true)}
+                        className="flex-1 py-3 rounded-xl bg-emerald-600 text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-emerald-700 active:scale-95 transition-all"
+                      >
+                        Allow
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDeviceAllowed(deviceId, false)}
+                        className="flex-1 py-3 rounded-xl bg-red-50 text-red-700 border border-red-200 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-red-100 active:scale-95 transition-all"
+                      >
+                        Deny
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {kioskDevices.length === 0 && (
+              <div className="text-center py-20 opacity-30 font-black text-[10px] uppercase tracking-[0.3em]">
+                No device requests yet
+              </div>
+            )}
+          </div>
         )}
 
         {activeTab === 'events' && (
