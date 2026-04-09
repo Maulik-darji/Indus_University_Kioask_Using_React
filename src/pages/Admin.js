@@ -710,7 +710,7 @@ export default function Admin({ siteVariant = 'indus' }) {
                     setTickerForm(''); 
                   } 
                 }} className="flex gap-4 mb-8">
-                  <input required type="text" placeholder="Type breaking news alert..." value={tickerForm} onChange={(e) => setTickerForm(e.target.value)} className="flex-1 bg-slate-50 px-5 py-4 rounded-xl outline-none font-black text-base focus:ring-2 focus:ring-slate-800/10 border border-transparent focus:bg-white transition-all shadow-inner" />
+                  <input required type="text" placeholder="News Ticker" value={tickerForm} onChange={(e) => setTickerForm(e.target.value)} className="flex-1 bg-slate-50 px-5 py-4 rounded-xl outline-none font-black text-base focus:ring-2 focus:ring-slate-800/10 border border-transparent focus:bg-white transition-all shadow-inner" />
                   <button type="submit" className="px-10 bg-slate-900 text-white rounded-xl font-black hover:bg-black transition-all uppercase text-[10px] tracking-widest shadow-lg shadow-slate-900/10 active:scale-95">Add</button>
                 </form>
 
