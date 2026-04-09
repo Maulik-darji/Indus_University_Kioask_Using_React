@@ -2160,7 +2160,6 @@ function Programs({ setActivePage, setAdmissionData }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
               </div>
-              <div className={`absolute -bottom-8 -right-8 w-32 h-32 ${cat.bgColor} rounded-full opacity-20 group-hover:scale-125 transition-transform duration-[1000ms]`}></div>
             </div>
           ))}
         </div>
@@ -2215,14 +2214,14 @@ function Programs({ setActivePage, setAdmissionData }) {
       </div>
 
       {/* Programs Grid */}
-      <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(280px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(320px,1fr))] gap-6 overflow-y-visible px-0 md:px-10 pt-4 md:pt-8 pb-16 md:pb-24 -mx-0 md:-mx-10 content-start items-start">
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6 overflow-y-visible px-0 md:px-10 pt-4 md:pt-8 pb-16 md:pb-24 -mx-0 md:-mx-10 content-start items-start">
         {selectedCategory.programs
           .filter(prog => prog.toLowerCase().includes(searchQuery.toLowerCase()))
           .map((prog, idx) => (
             <div 
               key={idx}
               onClick={() => setSelectedProgram(prog)}
-              className={`p-5 md:p-6 rounded-[1.5rem] shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-700 group cursor-pointer relative overflow-hidden flex flex-col hover:-translate-y-1`}
+              className={`p-5 md:p-6 rounded-[1.5rem] shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-700 group cursor-pointer relative overflow-hidden flex flex-col hover:-translate-y-1 h-[168px] md:h-[180px]`}
               style={{ 
                 backgroundColor: 'white',
                 borderTop: `8px solid ${selectedCategory.color.includes('blue') ? '#3b82f6' : selectedCategory.color.includes('amber') ? '#b45309' : selectedCategory.color.includes('orange') ? '#f97316' : selectedCategory.color.includes('red') ? '#dc2626' : selectedCategory.color.includes('yellow') ? '#eab308' : selectedCategory.color.includes('teal') ? '#0d9488' : selectedCategory.color.includes('indigo') ? '#4f46e5' : selectedCategory.color.includes('purple') ? '#9333ea' : selectedCategory.color.includes('cyan') ? '#0891b2' : selectedCategory.color.includes('rose') ? '#e11d48' : '#64748b'}`
@@ -2231,8 +2230,8 @@ function Programs({ setActivePage, setAdmissionData }) {
               {/* Vibrant background layer */}
               <div className={`absolute inset-0 ${selectedCategory.bgColor} opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-700`}></div>
               
-              <div className="relative z-10">
-                <h4 className="text-lg font-black text-slate-900 leading-tight group-hover:text-slate-900 transition-colors uppercase tracking-tight break-words">{prog}</h4>
+              <div className="relative z-10 flex-1 overflow-hidden">
+                <h4 className="text-lg font-black text-slate-900 leading-tight group-hover:text-slate-900 transition-colors uppercase tracking-tight break-words max-h-[4.8rem] overflow-hidden">{prog}</h4>
               </div>
                
               <div className={`mt-4 flex items-center text-[9px] font-black tracking-[0.1em] group-hover:text-slate-900 transition-colors uppercase pt-3 border-t border-slate-900/5 ${selectedCategory.color.replace('border-', 'text-')} mt-auto`}>
@@ -2241,9 +2240,6 @@ function Programs({ setActivePage, setAdmissionData }) {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" />
                 </svg>
               </div>
-
-              {/* Decorative circle */}
-              <div className={`absolute -bottom-10 -right-10 w-24 h-24 ${selectedCategory.bgColor} rounded-full opacity-10 group-hover:scale-150 transition-all duration-1000`}></div>
             </div>
           ))}
 
