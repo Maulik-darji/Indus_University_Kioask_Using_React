@@ -2262,7 +2262,7 @@ function Programs({ setActivePage, setAdmissionData }) {
     {/* Program Details Sidebar */}
     {selectedProgram && (
       <div 
-        className="fixed inset-0 bottom-18 z-[999999] flex flex-col bg-[#fcfbf9] animate-[fadeIn_0.5s_ease-out_forwards]"
+        className="fixed inset-0 z-[999999] flex flex-col bg-[#fcfbf9] h-[100dvh] animate-[fadeIn_0.5s_ease-out_forwards]"
         aria-labelledby="modal-title" 
         role="dialog" 
         aria-modal="true"
@@ -2288,7 +2288,7 @@ function Programs({ setActivePage, setAdmissionData }) {
            </div>
 
           {/* Main Content Area - Grid of Detail Squares */}
-          <div id="modal-details-container" className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-10 pb-32 md:pb-64 relative h-full">
+          <div id="modal-details-container" className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-10 pb-6 md:pb-8 relative h-full">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 md:pt-10 pb-4">
               {[
                 { title: 'CURRICULUM & LEARNING', color: 'bg-[#ffae4f]', id: 'CURRICULUM & LEARNING' },
@@ -2318,7 +2318,7 @@ function Programs({ setActivePage, setAdmissionData }) {
             </div>
 
             {/* Detail Content (Populated with actual data) */}
-            <div ref={detailContentRef} className="mt-4 px-5 md:px-8 py-5 md:py-6 bg-white rounded-3xl border border-slate-100 min-h-[360px] shadow-sm relative overflow-hidden">
+            <div ref={detailContentRef} className="mt-4 px-5 md:px-8 py-5 md:py-6 bg-white rounded-3xl border border-slate-100 min-h-[240px] md:min-h-[280px] shadow-sm relative overflow-hidden">
                 {((selectedProgramKey && programData[selectedProgramKey] && programData[selectedProgramKey][selectedDetailSection]) || selectedDetailSection === 'FEES STRUCTURE' || selectedDetailSection === 'ELIGIBILITY' || selectedDetailSection === 'ADMISSION') ? (
                   <div className="fade-in">
                     <h3 className="text-2xl font-bold text-slate-900 mb-4 pb-3 border-b border-gray-50">
@@ -2404,7 +2404,7 @@ function Programs({ setActivePage, setAdmissionData }) {
           </div>
 
           {/* Bottom Contact / Action Bar */}
-          <div className="px-4 md:px-10 py-3 bg-white border-t border-slate-100 flex items-center justify-between z-[40]">
+          <div className="px-4 md:px-10 py-3 bg-white border-t border-slate-100 flex items-center justify-between z-[40] shrink-0">
             <div>
               <p className="text-[9px] font-black text-slate-400 tracking-[0.2em] uppercase mb-0.5">Inquiry Support</p>
               <p className="text-lg font-black text-slate-900 leading-tight">{inquiryNumber}</p>
