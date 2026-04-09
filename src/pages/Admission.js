@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { INDIA_STATES, INDIA_CITIES_BY_STATE } from '../data/indiaLocations';
 
-const programData = {
+const PROGRAM_DATA_BASE = {
   UG: {
     "B.Tech": [
       "Civil Engineering", "Automobile Engineering", "Mechanical Engineering", "Metallurgical Engineering",
@@ -64,7 +64,26 @@ const programData = {
   }
 };
 
-function Admission({ admissionData, setAdmissionData }) {
+const PROGRAM_DATA_WIIA = {
+  ...PROGRAM_DATA_BASE,
+  UG: {
+    ...PROGRAM_DATA_BASE.UG,
+    'B.Tech': [
+      ...PROGRAM_DATA_BASE.UG['B.Tech'],
+      'B.Tech Aeronautical',
+      'B.Tech Aerospace',
+      'B.Tech Defence Aerospace',
+      'B.Tech Aircraft Maintenance Engineering',
+      'B1.1 - Aeroplane Turbine',
+      'B2 - Avionics',
+      'B1.2 - Aeroplane Piston',
+      'B1.3 - Helicopter Turbine',
+    ],
+  },
+};
+
+function Admission({ admissionData, setAdmissionData, siteVariant = 'indus' }) {
+  const programData = React.useMemo(() => (siteVariant === 'wiia' ? PROGRAM_DATA_WIIA : PROGRAM_DATA_BASE), [siteVariant]);
   const [level, setLevel] = useState('');
   const [program, setProgram] = useState('');
   const [specialization, setSpecialization] = useState('');

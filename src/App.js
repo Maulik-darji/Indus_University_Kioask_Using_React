@@ -13,6 +13,7 @@ import Placements from './pages/Placements';
 import Committees from './pages/Committees';
 import Admin from './pages/Admin';
 import AccessGate from './pages/AccessGate';
+import AdminSitePicker from './pages/AdminSitePicker';
 import { getOrCreateDeviceId } from './auth/deviceId';
 import { clearKioskSession, getKioskSession, isKioskSessionValid } from './auth/kioskSession';
 
@@ -29,11 +30,7 @@ function ScrollingTicker() {
   });
 
   const [durationSec, setDurationSec] = React.useState(40);
-  const [isReady, setIsReady] = React.useState(false);
-  const viewportRef = React.useRef(null);
   const groupRef = React.useRef(null);
-  const baseWidthRef = React.useRef(0);
-  const [repeatCount, setRepeatCount] = React.useState(1);
 
   React.useEffect(() => {
     // Real-time Cloud Synchronization
@@ -43,14 +40,22 @@ function ScrollingTicker() {
       snapshot.forEach((doc) => {
         items.push(doc.data().text);
       });
-      if (items.length > 0) {
-        setTickerItems(items);
-        try {
-          localStorage.setItem('indus_ticker_items_cache', JSON.stringify(items));
-        } catch {
-          // ignore storage write failures
+      const nextSignature = items.join('\u0001');
+      setTickerItems((prev) => {
+        const prevItems = Array.isArray(prev) ? prev : [];
+        const prevSignature = prevItems.join('\u0001');
+        if (prevSignature === nextSignature) return prevItems;
+
+        if (items.length > 0) {
+          try {
+            localStorage.setItem('indus_ticker_items_cache', JSON.stringify(items));
+          } catch {
+            // ignore storage write failures
+          }
         }
-      }
+
+        return items;
+      });
     });
 
     return () => unsubscribe();
@@ -60,66 +65,33 @@ function ScrollingTicker() {
     const el = groupRef.current;
     if (!el) return;
 
+    // Compute duration from the rendered width (avoid pausing/restarting loops).
     const SPEED_PX_PER_SEC = 140;
 
-    const recompute = () => {
+    const computeOnce = () => {
       const groupWidth = el.scrollWidth || 0;
-      const viewportWidth = viewportRef.current?.clientWidth || 0;
-      if (groupWidth <= 0 || viewportWidth <= 0) {
-        setIsReady(false);
-        return;
-      }
-
-      // Ensure the group is at least as wide as the viewport to avoid blank space.
-      if (!baseWidthRef.current || repeatCount === 1) {
-        baseWidthRef.current = groupWidth;
-      }
-      const baseWidth = baseWidthRef.current || groupWidth;
-      const neededRepeats = Math.max(1, Math.ceil((viewportWidth + 200) / baseWidth));
-      if (neededRepeats !== repeatCount) {
-        setRepeatCount(neededRepeats);
-        setIsReady(false);
-        return;
-      }
-
-      // Keep a consistent scroll speed; avoid forcing a high minimum duration (which makes short tickers feel slow).
-      const seconds = Math.min(120, Math.max(8, Math.round((groupWidth / SPEED_PX_PER_SEC) * 10) / 10));
-      setDurationSec(seconds);
-      setIsReady(true);
+      if (groupWidth <= 0) return;
+      const seconds = Math.min(120, Math.max(12, Math.round((groupWidth / SPEED_PX_PER_SEC) * 10) / 10));
+      setDurationSec((prev) => (Math.abs(prev - seconds) >= 0.2 ? seconds : prev));
     };
 
-    recompute();
-
-    // Fonts can change measured widths after initial paint
+    // Measure after paint and after fonts settle (no continuous observers = no flicker).
+    requestAnimationFrame(() => computeOnce());
     const fontsReady = document.fonts?.ready;
     if (fontsReady && typeof fontsReady.then === 'function') {
-      fontsReady.then(recompute).catch(() => {});
+      fontsReady.then(() => computeOnce()).catch(() => {});
     }
-
-    const ro = new ResizeObserver(() => recompute());
-    ro.observe(el);
-
-    window.addEventListener('resize', recompute);
-    return () => {
-      window.removeEventListener('resize', recompute);
-      ro.disconnect();
-    };
-  }, [tickerItems, repeatCount]);
-
-  React.useEffect(() => {
-    baseWidthRef.current = 0;
-    setRepeatCount(1);
   }, [tickerItems.join('||')]);
 
   const content = React.useMemo(() => {
     const items = Array.isArray(tickerItems) ? tickerItems : [];
-    const repeats = Math.max(1, repeatCount || 1);
+    const REPEAT_MULTIPLIER = 6; // fixed => stable width, smooth loop
     const out = [];
-    for (let r = 0; r < repeats; r++) {
+    for (let r = 0; r < REPEAT_MULTIPLIER; r++) {
       for (let i = 0; i < items.length; i++) {
         const item = items[i];
         out.push(
-          <div key={`${r}-${i}`} className="flex items-center group">
+          <div key={`${r}-${i}`} className="flex items-center">
             <span className="text-slate-800 font-bold text-[13.5px] tracking-wide uppercase whitespace-nowrap hover:text-blue-700 transition-colors">
               {item}
             </span>
@@ -129,15 +101,14 @@ function ScrollingTicker() {
       }
     }
     return out;
-  }, [repeatCount, tickerItems]);
+  }, [tickerItems]);
   
   return (
-    <div ref={viewportRef} className="ticker-viewport h-full">
+    <div className="ticker-viewport h-full">
       <div
         className="ticker-track h-full"
         style={{
           '--ticker-duration': `${durationSec}s`,
-          animationPlayState: isReady ? 'running' : 'paused',
           opacity: tickerItems.length > 0 ? 1 : 0,
         }}
       >
@@ -153,6 +124,31 @@ function ScrollingTicker() {
 }
 
 function App() {
+  const adminTarget = React.useMemo(() => {
+    const pathname = window.location.pathname || '/';
+    const isAdminPath = pathname.endsWith('/admin') || window.location.hash === '#/admin';
+    if (!isAdminPath) return null;
+
+    const params = new URLSearchParams(window.location.search || '');
+    const site = (params.get('site') || '').toLowerCase();
+
+    if (pathname === '/admin' && !site) return 'picker';
+    if (pathname.startsWith('/wiia')) return 'wiia';
+    if (site === 'wiia') return 'wiia';
+    return 'indus';
+  }, []);
+
+  const siteVariant = React.useMemo(() => {
+    const pathname = window.location.pathname || '/';
+    const hash = window.location.hash || '';
+    if (pathname.startsWith('/wiia')) return 'wiia';
+    if (hash.startsWith('#/wiia') || hash.includes('/wiia')) return 'wiia';
+    if (adminTarget === 'wiia') return 'wiia';
+    return 'indus';
+  }, [adminTarget]);
+
+  const activePageStorageKey = siteVariant === 'wiia' ? 'wiia_active_page' : 'indus_active_page';
+
   const deviceId = React.useMemo(() => getOrCreateDeviceId(), []);
   const [isKioskAuth, setIsKioskAuth] = useState(() => {
     const session = getKioskSession();
@@ -164,19 +160,46 @@ function App() {
     setIsKioskAuth(false);
   }, []);
 
+  const [terminatePromptOpen, setTerminatePromptOpen] = React.useState(false);
+  const requestTerminate = React.useCallback(() => setTerminatePromptOpen(true), []);
+  const cancelTerminate = React.useCallback(() => setTerminatePromptOpen(false), []);
+  const confirmTerminate = React.useCallback(() => {
+    setTerminatePromptOpen(false);
+
+    // Always reset to Home after unlocking again
+    try {
+      localStorage.setItem('indus_active_page', 'home');
+      localStorage.setItem('wiia_active_page', 'home');
+    } catch {
+      // ignore storage failures
+    }
+
+    const pathname = window.location.pathname || '/';
+    const hash = window.location.hash || '';
+    const wasWiia = pathname.startsWith('/wiia') || hash.startsWith('#/wiia') || hash.includes('/wiia');
+
+    terminateKioskSession();
+
+    // When terminating inside /wiia, route to the common "/" lock screen.
+    if (wasWiia) {
+      window.location.href = '/';
+    }
+  }, [terminateKioskSession]);
+
   const [activePage, setActivePage] = useState(() => {
     // 1. Check if we're explicitly hitting the admin path
-    if (window.location.hash === '#/admin' || window.location.pathname === '/admin') return 'admin';
-    
+    const pathname = window.location.pathname || '/';
+    if (window.location.hash === '#/admin' || pathname.endsWith('/admin')) return 'admin';
+     
     // 2. Try to recover from localStorage
-    const saved = localStorage.getItem('indus_active_page');
+    const saved = localStorage.getItem(activePageStorageKey);
     return saved || 'home';
   });
 
   // Persist page changes
   React.useEffect(() => {
-    localStorage.setItem('indus_active_page', activePage);
-  }, [activePage]);
+    localStorage.setItem(activePageStorageKey, activePage);
+  }, [activePage, activePageStorageKey]);
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [admissionData, setAdmissionData] = useState(null);
@@ -200,18 +223,65 @@ function App() {
     return () => window.removeEventListener('kiosk-scroll', handleScroll);
   }, []);
 
+  // Preserve scroll position per page (so returning to a page doesn't force re-scrolling)
+  const scrollSaveTimeoutRef = React.useRef(null);
+  React.useLayoutEffect(() => {
+    const el = document.getElementById('main-scroll-container');
+    if (!el) return;
+
+    const storageKey = `${siteVariant}_scroll_${activePage}`;
+
+    const restore = () => {
+      try {
+        const raw = localStorage.getItem(storageKey);
+        const n = raw == null ? null : Number(raw);
+        if (Number.isFinite(n)) {
+          const prevBehavior = el.style.scrollBehavior;
+          el.style.scrollBehavior = 'auto';
+          el.scrollTop = n;
+          el.style.scrollBehavior = prevBehavior;
+        }
+      } catch {
+        // ignore storage read failures
+      }
+    };
+
+    const save = () => {
+      try {
+        localStorage.setItem(storageKey, String(el.scrollTop || 0));
+      } catch {
+        // ignore storage write failures
+      }
+    };
+
+    restore();
+
+    const onScroll = () => {
+      if (scrollSaveTimeoutRef.current) clearTimeout(scrollSaveTimeoutRef.current);
+      scrollSaveTimeoutRef.current = setTimeout(save, 150);
+    };
+
+    el.addEventListener('scroll', onScroll, { passive: true });
+
+    return () => {
+      el.removeEventListener('scroll', onScroll);
+      if (scrollSaveTimeoutRef.current) clearTimeout(scrollSaveTimeoutRef.current);
+      save();
+    };
+  }, [activePage, siteVariant]);
+
 
 
   if (!isKioskAuth) {
-    return <AccessGate onAuthenticated={() => setIsKioskAuth(true)} />;
+    return <AccessGate siteVariant={siteVariant} onAuthenticated={() => setIsKioskAuth(true)} />;
   }
 
   const renderPage = () => {
     switch (activePage) {
       case 'home': return <Home setActivePage={setActivePage} />;
-      case 'admission': return <Admission admissionData={admissionData} setAdmissionData={setAdmissionData} />;
+      case 'admission': return <Admission admissionData={admissionData} setAdmissionData={setAdmissionData} siteVariant={siteVariant} />;
       case 'about': return <About setActivePage={setActivePage} />;
-      case 'programs': return <Programs setActivePage={setActivePage} setAdmissionData={setAdmissionData} />;
+      case 'programs': return <Programs setActivePage={setActivePage} setAdmissionData={setAdmissionData} siteVariant={siteVariant} />;
       case 'institutes': return <Institutes />;
       case 'events': return <Events />;
       case 'committees': return <Committees />;
@@ -222,16 +292,21 @@ function App() {
           <div className="fade-in">
             <h2 className="text-3xl font-bold mb-6 text-black">Campus Map</h2>
             <div className="bg-gray-200 h-96 rounded-2xl flex items-center justify-center text-gray-500 italic">
-              Interactive Map Loading...
+              Comming Soon...
             </div>
           </div>
         );
-      case 'admin': return <Admin />;
+      case 'admin':
+        if (adminTarget === 'picker') return <AdminSitePicker />;
+        return <Admin siteVariant={adminTarget || siteVariant} />;
       default: return <Home setActivePage={setActivePage} />;
     }
   };
 
-  if (activePage === 'admin') return <Admin />;
+  if (activePage === 'admin') {
+    if (adminTarget === 'picker') return <AdminSitePicker />;
+    return <Admin siteVariant={adminTarget || siteVariant} />;
+  }
 
   return (
     <div className="flex flex-col md:flex-row h-screen w-full overflow-hidden bg-[#f2f0ee]">
@@ -242,7 +317,7 @@ function App() {
         </div>
         <button
           onClick={() => {
-            if (window.confirm('Terminate this session and lock the kiosk?')) terminateKioskSession();
+            requestTerminate();
           }}
           className="px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-xl font-black text-[10px] uppercase tracking-wider active:scale-95 transition-all"
         >
@@ -253,10 +328,11 @@ function App() {
       <Sidebar
         activePage={activePage}
         setActivePage={setActivePage}
+        siteVariant={siteVariant}
         isOpen={isSidebarOpen}
         setIsOpen={setIsSidebarOpen}
         onTerminateSession={() => {
-          if (window.confirm('Terminate this session and lock the kiosk?')) terminateKioskSession();
+          requestTerminate();
         }}
       />
 
@@ -265,7 +341,7 @@ function App() {
           <div
             id="main-scroll-container"
             className={`w-full max-w-[1920px] mx-auto h-full overflow-y-auto px-4 md:px-10 lg:px-12 pb-28 md:pb-40 scroll-smooth ${
-              activePage === 'programs' ? 'pt-3 md:pt-4' : 'pt-5 md:pt-8'
+              activePage === 'programs' ? 'pt-3 md:pt-4 pb-20 md:pb-24' : 'pt-5 md:pt-8 pb-28 md:pb-40'
             }`}
           >
             {/* Responsive Header Row */}
@@ -310,7 +386,7 @@ function App() {
               <div className="flex justify-end xl:w-48">
                 <button
                   onClick={() => {
-                    if (window.confirm('Terminate this session and lock the kiosk?')) terminateKioskSession();
+                    requestTerminate();
                   }}
                   className="px-5 py-3 bg-red-50 text-red-700 border border-red-200 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-red-100 active:scale-95 transition-all shadow-sm"
                   title="Terminate kiosk session"
@@ -399,6 +475,57 @@ function App() {
           </svg>
         </button>
       </div>
+
+      {terminatePromptOpen && (
+        <div className="fixed inset-0 z-[2000000] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" onClick={cancelTerminate} />
+          <div
+            className="relative w-full max-w-md bg-white rounded-[2rem] shadow-[0_40px_120px_rgba(0,0,0,0.35)] border border-slate-200 p-7 md:p-8"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="terminate-title"
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 id="terminate-title" className="text-xl md:text-2xl font-black text-slate-900 tracking-tight">
+                  Terminate Session?
+                </h3>
+                <p className="mt-2 text-slate-600 font-bold text-sm">
+                  Terminate this session and lock the kiosk?
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={cancelTerminate}
+                className="w-10 h-10 rounded-full bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all flex items-center justify-center"
+                aria-label="Close"
+                title="Close"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mt-6 flex items-center justify-end gap-3">
+              <button
+                type="button"
+                onClick={cancelTerminate}
+                className="px-5 py-3 rounded-2xl bg-white border border-slate-200 text-slate-700 font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-50 active:scale-95 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={confirmTerminate}
+                className="px-5 py-3 rounded-2xl bg-red-600 text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-red-700 active:scale-95 transition-all shadow-sm"
+              >
+                Terminate
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

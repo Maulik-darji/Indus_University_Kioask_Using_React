@@ -1,9 +1,13 @@
 import React from 'react';
 import Clock from './Clock';
-import logo from '../images/logo.png';
+import logo from '../images/University Logo/Indus_logo.png';
+import wiiaLogo from '../images/University Logo/WIIA.png';
 import smallLogo from '../images/University Logo/smallicon_sidebar.png';
 
-function Sidebar({ activePage, setActivePage, isOpen, setIsOpen, onTerminateSession }) {
+function Sidebar({ activePage, setActivePage, siteVariant = 'indus', isOpen, setIsOpen, onTerminateSession }) {
+  const isWiia = siteVariant === 'wiia';
+  const primaryLogo = isWiia ? wiiaLogo : logo;
+  const compactLogo = isWiia ? wiiaLogo : smallLogo;
   const menuItems = [
     { id: 'home', label: 'Home', icon: 'home', color: 'text-blue-600 bg-blue-50' },
     { id: 'about', label: 'About Indus', icon: 'info', color: 'text-indigo-600 bg-indigo-50' },
@@ -30,9 +34,9 @@ function Sidebar({ activePage, setActivePage, isOpen, setIsOpen, onTerminateSess
         <div className={`transition-all duration-300 shrink-0 ${!isOpen ? 'mb-10 px-0 flex justify-center' : 'opacity-100 mb-10 px-2'}`}>
           {/* Logo Image - only visible when expanded */}
           {isOpen ? (
-            <img src={logo} alt="Indus University Logo" className="w-full h-auto scale-110 origin-left transition-transform" />
+            <img src={primaryLogo} alt={isWiia ? 'WIIA Logo' : 'Indus University Logo'} className="w-full h-auto scale-110 origin-left transition-transform" />
           ) : (
-            <img src={smallLogo} alt="Indus Icon" className="w-12 h-12 object-contain" />
+            <img src={compactLogo} alt={isWiia ? 'WIIA Icon' : 'Indus Icon'} className="w-12 h-12 object-contain" />
           )}
         </div>
 
@@ -53,7 +57,7 @@ function Sidebar({ activePage, setActivePage, isOpen, setIsOpen, onTerminateSess
                   title={!isOpen ? item.label : ""}
                   onClick={() => handleNavigate(item.id)}
                 >
-                  <div className={`rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-105 shadow-sm ${item.color} ${isOpen ? 'w-11 h-11' : 'w-12 h-12'}`}>
+                  <div className={`rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 ${item.color} ${isOpen ? 'w-11 h-11' : 'w-12 h-12'}`}>
                     <span className="material-symbols-outlined !text-[27px]">{item.icon}</span>
                   </div>
                   {isOpen && (

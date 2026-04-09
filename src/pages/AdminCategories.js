@@ -18,6 +18,55 @@ const defaultCategories = [
   { id: 'bpharm', label: 'B.Pharm', badge: 'UNDERGRADUATE', color: 'border-green-700', bgColor: 'bg-green-700', lightBg: 'bg-green-50', programs: ['B.Pharm'] }
 ];
 
+const defaultWiiaCategories = [
+  {
+    id: 'btech',
+    label: 'B.Tech',
+    badge: 'DEGREE',
+    color: 'border-blue-500',
+    bgColor: 'bg-blue-500',
+    lightBg: 'bg-blue-50',
+    programs: [
+      'B.Tech Aeronautical',
+      'B.Tech Aerospace',
+      'B.Tech Defence Aerospace',
+      'B.Tech Aircraft Maintenance Engineering',
+      'Aircraft Maintenance Engineering',
+      'B1.1 - Aeroplane Turbine',
+      'B2 - Avionics',
+      'B1.2 - Aeroplane Piston',
+      'B1.3 - Helicopter Turbine',
+    ],
+  },
+  {
+    id: 'mba-avia',
+    label: 'MBA/BBA',
+    badge: 'BUSINESS',
+    color: 'border-purple-600',
+    bgColor: 'bg-purple-600',
+    lightBg: 'bg-purple-50',
+    programs: ['Aviation'],
+  },
+];
+
+const ALLOWED_WIIA_CATEGORY_IDS = new Set(defaultWiiaCategories.map((c) => c.id));
+
+const WIIA_PROGRAM_TO_BASE_KEY = {
+  'B.Tech Aeronautical': 'Aeronautical Engineering',
+  'B.Tech Aerospace': 'Aerospace Engineering',
+  'B.Tech Defence Aerospace': 'Defence Aerospace Engineering',
+  'B.Tech Aircraft Maintenance Engineering': 'Aircraft Maintenance Engineering',
+  'B1.1 - Aeroplane Turbine': 'Aircraft Maintenance Engineering',
+  'B2 - Avionics': 'Aircraft Maintenance Engineering',
+  'B1.2 - Aeroplane Piston': 'Aircraft Maintenance Engineering',
+  'B1.3 - Helicopter Turbine': 'Aircraft Maintenance Engineering',
+};
+
+const resolveProgramDataKeyForAdmin = (siteVariant, programName) => {
+  if (siteVariant !== 'wiia') return programName;
+  return WIIA_PROGRAM_TO_BASE_KEY[programName] || programName;
+};
+
 const mergeCategories = (saved, defaults) => {
   if (!Array.isArray(saved) || saved.length === 0) return defaults;
   const merged = saved.map((c) => ({ ...c }));
@@ -119,7 +168,11 @@ const getProgramEligibility = (categoryId, programName) => {
   return e;
 };
 
-export default function AdminCategories({ confirmDelete, setModalConfig }) {
+export default function AdminCategories({ confirmDelete, setModalConfig, siteVariant = 'indus' }) {
+  const isWiia = siteVariant === 'wiia';
+  const categoriesStorageKey = isWiia ? 'wiia_categories' : 'indus_categories';
+  const programDataStorageKey = isWiia ? 'wiia_programData' : 'indus_programData';
+  const categoryDefaults = isWiia ? defaultWiiaCategories : defaultCategories;
   const [categories, setCategories] = useState([]);
   const [catForm, setCatForm] = useState({ id: '', label: '', badge: '', color: 'border-blue-500', bgColor: 'bg-blue-500', lightBg: 'bg-blue-50', programs: '' });
 
@@ -137,40 +190,45 @@ export default function AdminCategories({ confirmDelete, setModalConfig }) {
 
   useEffect(() => {
     const loadCategories = () => {
-      const storedCat = localStorage.getItem('indus_categories');
+      const storedCat = localStorage.getItem(categoriesStorageKey);
       if (!storedCat) {
-        setCategories(defaultCategories);
+        setCategories(categoryDefaults);
         return;
       }
 
       try {
         const parsed = JSON.parse(storedCat);
-        const merged = mergeCategories(parsed, defaultCategories);
-        setCategories(merged);
+        const merged = mergeCategories(parsed, categoryDefaults);
+        const filtered = isWiia ? merged.filter((c) => ALLOWED_WIIA_CATEGORY_IDS.has(c?.id)) : merged;
+        setCategories(filtered);
 
-        if (Array.isArray(parsed) && merged.length !== parsed.length) {
-          localStorage.setItem('indus_categories', JSON.stringify(merged));
+        if (Array.isArray(parsed)) {
+          const shouldPersist =
+            (isWiia && filtered.length !== parsed.length) || (!isWiia && merged.length !== parsed.length);
+          if (shouldPersist) {
+            localStorage.setItem(categoriesStorageKey, JSON.stringify(filtered));
+          }
         }
       } catch {
-        setCategories(defaultCategories);
+        setCategories(categoryDefaults);
       }
     };
 
     loadCategories();
-    const storedProg = localStorage.getItem('indus_programData');
+    const storedProg = localStorage.getItem(programDataStorageKey);
     setProgramData(storedProg ? JSON.parse(storedProg) : {});
 
     window.addEventListener('storage', loadCategories);
     return () => window.removeEventListener('storage', loadCategories);
-  }, []);
+  }, [categoriesStorageKey, categoryDefaults, isWiia, programDataStorageKey]);
 
   const saveCats = (data) => {
     setCategories(data);
-    localStorage.setItem('indus_categories', JSON.stringify(data));
+    localStorage.setItem(categoriesStorageKey, JSON.stringify(data));
   };
   const saveProgData = (data) => {
     setProgramData(data);
-    localStorage.setItem('indus_programData', JSON.stringify(data));
+    localStorage.setItem(programDataStorageKey, JSON.stringify(data));
   };
 
   const saveCategory = (e) => {
@@ -197,7 +255,8 @@ export default function AdminCategories({ confirmDelete, setModalConfig }) {
   const handleProgramSelect = (prog) => {
     setSelectedProgramEdit(prog);
     const catId = categories.find(c => c.programs.includes(prog))?.id;
-    const data = programData[prog] || { 'CURRICULUM & LEARNING': { sections: [{ title: 'Overview', items: ['Point 1'] }] } };
+    const programKey = resolveProgramDataKeyForAdmin(siteVariant, prog);
+    const data = programData[programKey] || { 'CURRICULUM & LEARNING': { sections: [{ title: 'Overview', items: ['Point 1'] }] } };
 
     // Auto-seed centralized rules into the raw editor schema if missing
     if (!data['FEES STRUCTURE']) {
@@ -229,7 +288,8 @@ export default function AdminCategories({ confirmDelete, setModalConfig }) {
     try {
       const parsed = JSON.parse(jsonInput);
       setJsonError('');
-      saveProgData({ ...programData, [selectedProgramEdit]: parsed });
+      const programKey = resolveProgramDataKeyForAdmin(siteVariant, selectedProgramEdit);
+      saveProgData({ ...programData, [programKey]: parsed });
       setOriginalJsonInput(jsonInput);
       setModalConfig({
         isOpen: true,

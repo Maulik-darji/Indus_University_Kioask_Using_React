@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import AdminCategories from './AdminCategories';
 import { db } from '../firebase';
 import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, updateDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { sha256Hex } from '../auth/sha256';
 
 // Custom Modal Component for "Center of the Screen" Popups
 const CenterModal = ({ isOpen, onClose, title, children }) => {
@@ -17,10 +18,15 @@ const CenterModal = ({ isOpen, onClose, title, children }) => {
   );
 };
 
-export default function Admin() {
+export default function Admin({ siteVariant = 'indus' }) {
+  const basePath = siteVariant === 'wiia' ? '/wiia' : '/';
+  const activePageStorageKey = siteVariant === 'wiia' ? 'wiia_active_page' : 'indus_active_page';
+  const adminSessionKey = siteVariant === 'wiia' ? 'wiia_admin_session' : 'indus_admin_session';
   const kioskAllowlistEnabled = String(process.env.REACT_APP_KIOSK_DEVICE_ALLOWLIST || '').toLowerCase() === 'true';
+  const passwordSettingsRef = doc(db, 'kiosk_settings', 'global');
+  const passwordHashCacheKey = 'indus_kiosk_password_sha256_cache_v1';
   const [isAuth, setIsAuth] = useState(() => {
-    return localStorage.getItem('indus_admin_session') === 'active';
+    return localStorage.getItem(adminSessionKey) === 'active';
   });
   const [password, setPassword] = useState('');
   const [activeTab, setActiveTab] = useState('events');
@@ -34,6 +40,9 @@ export default function Admin() {
   const [ticker, setTicker] = useState([]);
   const [kioskDevices, setKioskDevices] = useState([]);
   const [inquiryNumber, setInquiryNumber] = useState('');
+  const [accessPassword, setAccessPassword] = useState('');
+  const [accessPasswordConfirm, setAccessPasswordConfirm] = useState('');
+  const [accessPasswordBusy, setAccessPasswordBusy] = useState(false);
 
   // Form States (for creating/editing)
   const [eventForm, setEventForm] = useState({ id: null, month: '', day: '', title: '', desc: '', type: '', isFeatured: false, color: '#f97316', link: '' });
@@ -84,6 +93,60 @@ export default function Admin() {
       unsubscribeDevices();
     };
   }, [kioskAllowlistEnabled]);
+
+  const handleAccessPasswordSave = async (e) => {
+    e.preventDefault();
+    if (accessPasswordBusy) return;
+
+    const next = String(accessPassword || '').trim();
+    const nextConfirm = String(accessPasswordConfirm || '').trim();
+
+    if (!next) {
+      setModalConfig({
+        isOpen: true,
+        title: 'Missing Password',
+        content: <p className="text-slate-600 mb-6 font-bold text-center">Please enter a new access password.</p>,
+      });
+      return;
+    }
+
+    if (next !== nextConfirm) {
+      setModalConfig({
+        isOpen: true,
+        title: 'Password Mismatch',
+        content: <p className="text-slate-600 mb-6 font-bold text-center">New password and confirm password do not match.</p>,
+      });
+      return;
+    }
+
+    setAccessPasswordBusy(true);
+    try {
+      const hash = await sha256Hex(next);
+      await setDoc(passwordSettingsRef, { passwordHash: hash, updatedAt: serverTimestamp() }, { merge: true });
+      try {
+        localStorage.setItem(passwordHashCacheKey, hash);
+      } catch {
+        // ignore
+      }
+
+      setAccessPassword('');
+      setAccessPasswordConfirm('');
+      setModalConfig({
+        isOpen: true,
+        title: 'Access Password Updated',
+        content: <p className="text-slate-600 mb-6 font-bold text-center">The kiosk access password has been updated.</p>,
+      });
+    } catch (err) {
+      console.error(err);
+      setModalConfig({
+        isOpen: true,
+        title: 'Update Failed',
+        content: <p className="text-slate-600 mb-6 font-bold text-center">Unable to update the access password. Please check network/firestore permissions.</p>,
+      });
+    } finally {
+      setAccessPasswordBusy(false);
+    }
+  };
 
   const formatTs = (ts) => {
     try {
@@ -219,7 +282,7 @@ export default function Admin() {
     e.preventDefault();
     if (password === '0000' || localStorage.getItem(`admin_${password}`)) {
       setIsAuth(true);
-      localStorage.setItem('indus_admin_session', 'active');
+      localStorage.setItem(adminSessionKey, 'active');
     } else {
       setModalConfig({
         isOpen: true,
@@ -245,12 +308,26 @@ export default function Admin() {
   if (!isAuth) {
     return (
       <div className="flex-1 flex items-center justify-center bg-[#faf9f8] min-h-screen p-6">
-        <div className="bg-white p-12 rounded-[1.5rem] shadow-2xl max-w-md w-full border border-gray-100 text-center">
+        <div className="bg-white p-12 rounded-[1.5rem] shadow-2xl max-w-md w-full border border-gray-100 text-center relative">
+          <button
+            type="button"
+            onClick={() => {
+              localStorage.setItem(activePageStorageKey, 'home');
+              window.location.href = basePath;
+            }}
+            className="absolute top-5 right-5 w-10 h-10 rounded-full bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all flex items-center justify-center"
+            aria-label="Exit admin"
+            title="Exit admin"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
           <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
             <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
           </div>
           <h2 className="text-3xl font-black text-slate-800 mb-2">Admin Access</h2>
-          <p className="text-slate-500 mb-8 font-medium">Use developer pin (0000) or staff code.</p>
+          <p className="text-slate-500 mb-8 font-medium">Use pin (0000)</p>
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-slate-50 px-6 py-4 rounded-2xl border-none outline-none focus:ring-2 focus:ring-slate-200 text-center text-3xl tracking-[0.5em] font-black text-slate-900" placeholder="••••" />
@@ -272,13 +349,15 @@ export default function Admin() {
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-gray-200 pb-8">
           <div>
             <h1 className="text-4xl md:text-5xl font-black text-slate-900 mb-2">Institutional Management</h1>
-            <p className="text-slate-500 font-bold text-lg italic">Welcome to the central control panel</p>
+            <p className="text-slate-500 font-bold text-lg italic">
+              Welcome to the central control panel • {siteVariant === 'wiia' ? 'WIIA' : 'INDUS'} ADMIN
+            </p>
           </div>
           <div className="flex gap-4 items-center">
             <button 
               onClick={() => {
-                localStorage.setItem('indus_active_page', 'home');
-                window.location.href = '/';
+                localStorage.setItem(activePageStorageKey, 'home');
+                window.location.href = basePath;
               }} 
               className="px-6 py-3 bg-slate-200 border border-slate-300/50 text-slate-800 rounded-xl font-black hover:bg-slate-300 text-sm transition-all shadow-sm uppercase tracking-wider"
             >
@@ -287,10 +366,10 @@ export default function Admin() {
               <button
                 onClick={() => {
                   setIsAuth(false);
-                  localStorage.removeItem('indus_admin_session');
-                  localStorage.removeItem('indus_kiosk_session_v1');
-                  localStorage.setItem('indus_active_page', 'home');
-                  window.location.href = '/';
+                  localStorage.removeItem(adminSessionKey);
+                  setPassword('');
+                  localStorage.setItem(activePageStorageKey, 'home');
+                  window.location.href = basePath;
                 }}
                 className="px-6 py-3 bg-red-100 text-red-600 rounded-xl font-bold hover:bg-red-200 text-sm transition-colors"
               >
@@ -321,7 +400,7 @@ export default function Admin() {
 
         {/* Tab Contents */}
         {activeTab === 'categories' && (
-          <AdminCategories confirmDelete={confirmDelete} setModalConfig={setModalConfig} />
+          <AdminCategories confirmDelete={confirmDelete} setModalConfig={setModalConfig} siteVariant={siteVariant} />
         )}
 
         {activeTab === 'devices' && (
@@ -577,6 +656,40 @@ export default function Admin() {
                     <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold">📞</span>
                     <input type="text" value={inquiryNumber} onChange={(e) => setInquiryNumber(e.target.value)} className="w-full bg-slate-50 pl-14 pr-6 py-5 rounded-xl outline-none font-black focus:bg-white focus:ring-2 focus:ring-slate-800/10 text-slate-900 text-xl border border-transparent transition-all" />
                   </div>
+                </div>
+
+                <div className="mb-2 text-left">
+                  <label className="block text-[9px] font-black tracking-widest text-slate-400 uppercase mb-4">Kiosk Access Password</label>
+                  <form onSubmit={handleAccessPasswordSave} className="space-y-4">
+                    <input
+                      type="password"
+                      value={accessPassword}
+                      onChange={(e) => setAccessPassword(e.target.value)}
+                      placeholder="New access password"
+                      className="w-full bg-slate-50 px-6 py-4 rounded-xl outline-none font-black focus:bg-white focus:ring-2 focus:ring-slate-800/10 text-slate-900 border border-transparent transition-all"
+                      autoComplete="new-password"
+                    />
+                    <input
+                      type="password"
+                      value={accessPasswordConfirm}
+                      onChange={(e) => setAccessPasswordConfirm(e.target.value)}
+                      placeholder="Confirm new password"
+                      className="w-full bg-slate-50 px-6 py-4 rounded-xl outline-none font-black focus:bg-white focus:ring-2 focus:ring-slate-800/10 text-slate-900 border border-transparent transition-all"
+                      autoComplete="new-password"
+                    />
+                    <button
+                      type="submit"
+                      disabled={accessPasswordBusy}
+                      className={`w-full py-4 rounded-xl font-black shadow-lg uppercase tracking-widest text-xs transition-all ${
+                        accessPasswordBusy ? 'bg-slate-300 text-slate-500 cursor-not-allowed' : 'bg-slate-900 text-white hover:bg-black'
+                      }`}
+                    >
+                      {accessPasswordBusy ? 'Updating…' : 'Update Access Password'}
+                    </button>
+                    <p className="text-[11px] text-slate-400 font-bold">
+                      This password is shared across both the main site and WIIA.
+                    </p>
+                  </form>
                 </div>
 
                 <div className="mt-auto pt-8 border-t border-slate-100">

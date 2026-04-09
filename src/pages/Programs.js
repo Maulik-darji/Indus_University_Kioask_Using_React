@@ -7,6 +7,17 @@ const PROGRAM_KEY_ALIASES = {
   'Information & Communication Technology': 'Information and Communication Technology',
   'Electronics & Communication Engineering': 'Electronics and Communication Engineering',
   'Electronics & Communication Engineering ': 'Electronics and Communication Engineering',
+
+  // WIIA / Aviation display aliases
+  'B.Tech Aeronautical': 'Aeronautical Engineering',
+  'B.Tech Aerospace': 'Aerospace Engineering',
+  'B.Tech Defence Aerospace': 'Defence Aerospace Engineering',
+  'B.Tech Aircraft Maintenance Engineering': 'Aircraft Maintenance Engineering',
+  'B1.1 - Aeroplane Turbine': 'Aircraft Maintenance Engineering',
+  'B2 - Avionics': 'Aircraft Maintenance Engineering',
+  'B1.2 - Aeroplane Piston': 'Aircraft Maintenance Engineering',
+  'B1.3 - Helicopter Turbine': 'Aircraft Maintenance Engineering',
+
   'Fasion Design': 'Fashion Design',
   'B.Sc Clical Research and HealthCare Management': 'B.Sc Clinical Research and Healthcare Management',
   'B.Sc Micro Biology': 'B.Sc Microbiology',
@@ -35,31 +46,50 @@ const CATEGORY_PROGRAM_KEY_OVERRIDES = {
   bsc: {
     'Data Science': 'B.Sc Data Science',
     'B.Sc(CA & IT)': 'B.Sc (CA & IT)',
+    'Computer Application (CA) & (IT)': 'B.Sc (CA & IT)',
     'B.Sc Clinical Research and Healthcare Management': 'B.Sc Clinical Research and Healthcare Management',
+    'Clinical Research (Hons)': 'B.Sc Clinical Research and Healthcare Management',
     'B.Sc Mathematics': 'B.Sc Mathematics',
+    'Mathematics (Hons)': 'B.Sc Mathematics',
     'B.Sc Physics': 'B.Sc Physics',
+    'Physics (Hons)': 'B.Sc Physics',
     'B.Sc Chemistry': 'B.Sc Chemistry',
+    'Chemistry (Hons)': 'B.Sc Chemistry',
     'Cyber Security': 'B.Sc Cyber Security',
+    'Cyber Security (Hons)': 'B.Sc Cyber Security',
     'B.Sc Microbiology': 'B.Sc Microbiology',
+    'Microbiology (Hons)': 'B.Sc Microbiology',
     'Computer Science (AI and ML)': 'B.Sc Computer Science (AI and ML)',
   },
   msc: {
     'M.Sc-Information Technology': 'M.Sc Information Technology',
+    'Information Technology (IT)': 'M.Sc Information Technology',
+    'Information Technology': 'M.Sc Information Technology',
     'M.Sc-Clinical Research': 'M.Sc Clinical Research',
+    'Clinical Research': 'M.Sc Clinical Research',
     'M.Sc-Mathematics': 'M.Sc Mathematics',
+    Mathematics: 'M.Sc Mathematics',
     'M.Sc-Physics': 'M.Sc Physics',
+    Physics: 'M.Sc Physics',
     'M.Sc-Chemistry': 'M.Sc Chemistry',
+    Chemistry: 'M.Sc Chemistry',
     'M.Sc-Cyber Security': 'M.Sc Cyber Security',
+    'Cyber Security': 'M.Sc Cyber Security',
     'M.Sc-Microbiology': 'M.Sc Microbiology',
+    Microbiology: 'M.Sc Microbiology',
   },
   mtech: {
     'Cyber Security': 'M.Tech Cyber Security',
     'Industrial Metallurgy': 'M.Tech Industrial Metallurgy',
     'CAD/CAM (Mechanical Engineering)': 'M.Tech CAD/CAM (Mechanical Engineering)',
+    'CAD / CAM (Mechanical Engr.)': 'M.Tech CAD/CAM (Mechanical Engineering)',
     'Construction Project Management (Civil Engineering)': 'M.Tech Construction Project Management (Civil Engineering)',
+    'Construction Project Management (Civil Engg.)': 'M.Tech Construction Project Management (Civil Engineering)',
     'Digital Communication (EC Engineering)': 'M.Tech Digital Communication (EC Engineering)',
+    'Digital Communication (EC Engg.)': 'M.Tech Digital Communication (EC Engineering)',
     'Electrical Power System': 'M.Tech Electrical Power System',
     'Structural Engineering (Civil Engineering)': 'M.Tech Structural Engineering (Civil Engineering)',
+    'Structural Engineering (Civil Engg.)': 'M.Tech Structural Engineering (Civil Engineering)',
     'Data Science (Computer)': 'M.Tech Data Science (Computer)',
   },
   'mba-avia': {
@@ -136,12 +166,25 @@ const resolveProgramKey = (programData, categoryId, programName) => {
 
   const categoryOverrides = CATEGORY_PROGRAM_KEY_OVERRIDES[categoryId] || null;
   if (categoryOverrides) {
-    const overrideKey =
-      categoryOverrides[cleaned] ||
-      categoryOverrides[aliased] ||
-      categoryOverrides[aliased.replace(/\s*&\s*/g, ' and ')] ||
-      categoryOverrides[aliased.replace(/\sand\s/gi, ' & ')];
-    if (overrideKey) return overrideKey;
+    const overrideCandidates = [
+      cleaned,
+      aliased,
+      aliased.replace(/\s*&\s*/g, ' and '),
+      aliased.replace(/\sand\s/gi, ' & '),
+    ];
+
+    for (const candidate of overrideCandidates) {
+      const direct =
+        categoryOverrides[candidate] ||
+        categoryOverrides[normalizeProgramName(candidate)] ||
+        categoryOverrides[String(candidate || '').trim()];
+      if (direct) return direct;
+
+      // Case-insensitive / formatting-tolerant match (helps when Admin edits change casing like "ENGG.")
+      const candidateNorm = normalizeText(candidate);
+      const matchKey = Object.keys(categoryOverrides).find((k) => normalizeText(k) === candidateNorm);
+      if (matchKey) return categoryOverrides[matchKey];
+    }
   }
   const candidates = [
     cleaned,
@@ -210,6 +253,175 @@ const mergeProgramData = (saved, defaults) => {
   }
 
   return merged;
+};
+
+const normalizeProgramVisualKey = (name) => {
+  return String(name || '')
+    .toLowerCase()
+    .replace(/&/g, 'and')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim()
+    .replace(/\s+/g, ' ');
+};
+
+const BTECH_PROGRAM_VISUALS = {
+  'information and communication technology ict': { icon: 'hub', boxClass: 'bg-sky-50 border-sky-200', iconClass: 'text-sky-700' },
+  'information and communication technology': { icon: 'hub', boxClass: 'bg-sky-50 border-sky-200', iconClass: 'text-sky-700' },
+  'civil engineering': { icon: 'apartment', boxClass: 'bg-amber-50 border-amber-200', iconClass: 'text-amber-700' },
+  'automobile engineering': { icon: 'directions_car', boxClass: 'bg-rose-50 border-rose-200', iconClass: 'text-rose-700' },
+  'mechanical engineering': { icon: 'settings', boxClass: 'bg-slate-50 border-slate-200', iconClass: 'text-slate-800' },
+  'metallurgical engineering': { icon: 'local_fire_department', boxClass: 'bg-orange-50 border-orange-200', iconClass: 'text-orange-700' },
+  'electrical engineering': { icon: 'bolt', boxClass: 'bg-yellow-50 border-yellow-200', iconClass: 'text-amber-700' },
+  'electronics and communication engineering': { icon: 'wifi_tethering', boxClass: 'bg-indigo-50 border-indigo-200', iconClass: 'text-indigo-700' },
+  'computer engineering': { icon: 'memory', boxClass: 'bg-cyan-50 border-cyan-200', iconClass: 'text-cyan-800' },
+  'cyber security': { icon: 'shield_lock', boxClass: 'bg-emerald-50 border-emerald-200', iconClass: 'text-emerald-800' },
+  'information technology': { icon: 'dns', boxClass: 'bg-blue-50 border-blue-200', iconClass: 'text-blue-800' },
+  'computer science engineering': { icon: 'code', boxClass: 'bg-fuchsia-50 border-fuchsia-200', iconClass: 'text-fuchsia-800' },
+  'aircraft maintenance engineering': { icon: 'construction', boxClass: 'bg-slate-50 border-slate-200', iconClass: 'text-slate-800' },
+  'aeronautical engineering': { icon: 'flight', boxClass: 'bg-sky-50 border-sky-200', iconClass: 'text-sky-800' },
+  'aerospace engineering': { icon: 'rocket_launch', boxClass: 'bg-violet-50 border-violet-200', iconClass: 'text-violet-800' },
+  'defence aerospace engineering': { icon: 'radar', boxClass: 'bg-green-50 border-green-200', iconClass: 'text-green-800' },
+
+  // WIIA display names / AME categories
+  'b tech aeronautical': { icon: 'flight', boxClass: 'bg-sky-50 border-sky-200', iconClass: 'text-sky-800' },
+  'b tech aerospace': { icon: 'rocket_launch', boxClass: 'bg-violet-50 border-violet-200', iconClass: 'text-violet-800' },
+  'b tech defence aerospace': { icon: 'radar', boxClass: 'bg-green-50 border-green-200', iconClass: 'text-green-800' },
+  'b tech aircraft maintenance engineering': { icon: 'construction', boxClass: 'bg-slate-50 border-slate-200', iconClass: 'text-slate-800' },
+  'b1 1 aeroplane turbine': { icon: 'turbine', boxClass: 'bg-amber-50 border-amber-200', iconClass: 'text-amber-700' },
+  'b2 avionics': { icon: 'sensors', boxClass: 'bg-indigo-50 border-indigo-200', iconClass: 'text-indigo-700' },
+  'b1 2 aeroplane piston': { icon: 'settings', boxClass: 'bg-slate-50 border-slate-200', iconClass: 'text-slate-800' },
+  'b1 3 helicopter turbine': { icon: 'helicopter', boxClass: 'bg-emerald-50 border-emerald-200', iconClass: 'text-emerald-800' },
+};
+
+const DEFAULT_PROGRAM_VISUAL = { icon: 'school', boxClass: 'bg-slate-50 border-slate-200', iconClass: 'text-slate-800' };
+
+const PROGRAM_VISUALS = {
+  ...BTECH_PROGRAM_VISUALS,
+
+  // Diploma/B.Tech variants (aliases)
+  [normalizeProgramVisualKey('Electronics & Communication Engineering')]: BTECH_PROGRAM_VISUALS['electronics and communication engineering'],
+  [normalizeProgramVisualKey('Information & Communication Technology (ICT)')]: BTECH_PROGRAM_VISUALS['information and communication technology ict'],
+
+  // M.Tech
+  [normalizeProgramVisualKey('CAD/CAM (Mechanical Engineering)')]: { icon: 'precision_manufacturing', boxClass: 'bg-slate-50 border-slate-200', iconClass: 'text-slate-800' },
+  [normalizeProgramVisualKey('Construction Project Management (Civil Engineering)')]: { icon: 'construction', boxClass: 'bg-amber-50 border-amber-200', iconClass: 'text-amber-700' },
+  [normalizeProgramVisualKey('Digital Communication (EC Engineering)')]: { icon: 'cell_tower', boxClass: 'bg-indigo-50 border-indigo-200', iconClass: 'text-indigo-700' },
+  [normalizeProgramVisualKey('Electrical Power System')]: { icon: 'electrical_services', boxClass: 'bg-yellow-50 border-yellow-200', iconClass: 'text-amber-700' },
+  [normalizeProgramVisualKey('Industrial Metallurgy')]: { icon: 'factory', boxClass: 'bg-orange-50 border-orange-200', iconClass: 'text-orange-700' },
+  [normalizeProgramVisualKey('Structural Engineering (Civil Engineering)')]: { icon: 'foundation', boxClass: 'bg-stone-50 border-stone-200', iconClass: 'text-stone-800' },
+  [normalizeProgramVisualKey('Data Science (Computer)')]: { icon: 'query_stats', boxClass: 'bg-cyan-50 border-cyan-200', iconClass: 'text-cyan-800' },
+  [normalizeProgramVisualKey('Cyber Security')]: BTECH_PROGRAM_VISUALS['cyber security'],
+
+  // B.Des / M.Des
+  [normalizeProgramVisualKey('Product Design')]: { icon: 'design_services', boxClass: 'bg-yellow-50 border-yellow-200', iconClass: 'text-yellow-800' },
+  [normalizeProgramVisualKey('Interior Design')]: { icon: 'chair', boxClass: 'bg-amber-50 border-amber-200', iconClass: 'text-amber-800' },
+  [normalizeProgramVisualKey('Fashion Design')]: { icon: 'checkroom', boxClass: 'bg-rose-50 border-rose-200', iconClass: 'text-rose-700' },
+  [normalizeProgramVisualKey('Communication Design')]: { icon: 'palette', boxClass: 'bg-violet-50 border-violet-200', iconClass: 'text-violet-800' },
+  [normalizeProgramVisualKey('UI-UX Design')]: { icon: 'devices', boxClass: 'bg-teal-50 border-teal-200', iconClass: 'text-teal-800' },
+
+  // B.Sc / M.Sc
+  [normalizeProgramVisualKey('Data Science')]: { icon: 'analytics', boxClass: 'bg-sky-50 border-sky-200', iconClass: 'text-sky-800' },
+  [normalizeProgramVisualKey('B.Sc Data Science')]: { icon: 'analytics', boxClass: 'bg-sky-50 border-sky-200', iconClass: 'text-sky-800' },
+  [normalizeProgramVisualKey('B.Sc(CA & IT)')]: { icon: 'computer', boxClass: 'bg-blue-50 border-blue-200', iconClass: 'text-blue-800' },
+  [normalizeProgramVisualKey('B.Sc (CA & IT)')]: { icon: 'computer', boxClass: 'bg-blue-50 border-blue-200', iconClass: 'text-blue-800' },
+  [normalizeProgramVisualKey('B.Sc Clinical Research and Healthcare Management')]: { icon: 'biotech', boxClass: 'bg-emerald-50 border-emerald-200', iconClass: 'text-emerald-800' },
+  [normalizeProgramVisualKey('B.Sc Mathematics')]: { icon: 'calculate', boxClass: 'bg-indigo-50 border-indigo-200', iconClass: 'text-indigo-800' },
+  [normalizeProgramVisualKey('B.Sc Physics')]: { icon: 'science', boxClass: 'bg-violet-50 border-violet-200', iconClass: 'text-violet-800' },
+  [normalizeProgramVisualKey('B.Sc Chemistry')]: { icon: 'science', boxClass: 'bg-fuchsia-50 border-fuchsia-200', iconClass: 'text-fuchsia-800' },
+  [normalizeProgramVisualKey('B.Sc Microbiology')]: { icon: 'biotech', boxClass: 'bg-teal-50 border-teal-200', iconClass: 'text-teal-800' },
+  [normalizeProgramVisualKey('Computer Science (AI and ML)')]: { icon: 'smart_toy', boxClass: 'bg-purple-50 border-purple-200', iconClass: 'text-purple-800' },
+  [normalizeProgramVisualKey('M.Sc-Information Technology')]: { icon: 'dns', boxClass: 'bg-blue-50 border-blue-200', iconClass: 'text-blue-800' },
+  [normalizeProgramVisualKey('M.Sc Information Technology')]: { icon: 'dns', boxClass: 'bg-blue-50 border-blue-200', iconClass: 'text-blue-800' },
+  [normalizeProgramVisualKey('M.Sc-Clinical Research')]: { icon: 'biotech', boxClass: 'bg-emerald-50 border-emerald-200', iconClass: 'text-emerald-800' },
+  [normalizeProgramVisualKey('M.Sc Clinical Research')]: { icon: 'biotech', boxClass: 'bg-emerald-50 border-emerald-200', iconClass: 'text-emerald-800' },
+  [normalizeProgramVisualKey('M.Sc-Mathematics')]: { icon: 'calculate', boxClass: 'bg-indigo-50 border-indigo-200', iconClass: 'text-indigo-800' },
+  [normalizeProgramVisualKey('M.Sc Mathematics')]: { icon: 'calculate', boxClass: 'bg-indigo-50 border-indigo-200', iconClass: 'text-indigo-800' },
+  [normalizeProgramVisualKey('M.Sc-Physics')]: { icon: 'science', boxClass: 'bg-violet-50 border-violet-200', iconClass: 'text-violet-800' },
+  [normalizeProgramVisualKey('M.Sc Physics')]: { icon: 'science', boxClass: 'bg-violet-50 border-violet-200', iconClass: 'text-violet-800' },
+  [normalizeProgramVisualKey('M.Sc-Chemistry')]: { icon: 'science', boxClass: 'bg-fuchsia-50 border-fuchsia-200', iconClass: 'text-fuchsia-800' },
+  [normalizeProgramVisualKey('M.Sc Chemistry')]: { icon: 'science', boxClass: 'bg-fuchsia-50 border-fuchsia-200', iconClass: 'text-fuchsia-800' },
+  [normalizeProgramVisualKey('M.Sc-Cyber Security')]: BTECH_PROGRAM_VISUALS['cyber security'],
+  [normalizeProgramVisualKey('M.Sc Cyber Security')]: BTECH_PROGRAM_VISUALS['cyber security'],
+  [normalizeProgramVisualKey('M.Sc-Microbiology')]: { icon: 'biotech', boxClass: 'bg-teal-50 border-teal-200', iconClass: 'text-teal-800' },
+  [normalizeProgramVisualKey('M.Sc Microbiology')]: { icon: 'biotech', boxClass: 'bg-teal-50 border-teal-200', iconClass: 'text-teal-800' },
+
+  // MBA/BBA
+  [normalizeProgramVisualKey('Aviation')]: { icon: 'flight', boxClass: 'bg-sky-50 border-sky-200', iconClass: 'text-sky-800' },
+  [normalizeProgramVisualKey('BBA (General)')]: { icon: 'business_center', boxClass: 'bg-purple-50 border-purple-200', iconClass: 'text-purple-800' },
+  [normalizeProgramVisualKey('MBA')]: { icon: 'workspace_premium', boxClass: 'bg-purple-50 border-purple-200', iconClass: 'text-purple-800' },
+  [normalizeProgramVisualKey('Marketing')]: { icon: 'campaign', boxClass: 'bg-rose-50 border-rose-200', iconClass: 'text-rose-700' },
+  [normalizeProgramVisualKey('Finance')]: { icon: 'account_balance_wallet', boxClass: 'bg-emerald-50 border-emerald-200', iconClass: 'text-emerald-800' },
+  [normalizeProgramVisualKey('Human Resource')]: { icon: 'groups', boxClass: 'bg-indigo-50 border-indigo-200', iconClass: 'text-indigo-800' },
+
+  // Standalone programs
+  [normalizeProgramVisualKey('BCA')]: { icon: 'terminal', boxClass: 'bg-cyan-50 border-cyan-200', iconClass: 'text-cyan-800' },
+  [normalizeProgramVisualKey('Master of Computer Application')]: { icon: 'developer_mode', boxClass: 'bg-rose-50 border-rose-200', iconClass: 'text-rose-700' },
+  [normalizeProgramVisualKey('MCA')]: { icon: 'developer_mode', boxClass: 'bg-rose-50 border-rose-200', iconClass: 'text-rose-700' },
+  [normalizeProgramVisualKey('B.Arch (Bachelor of Architecture)')]: { icon: 'architecture', boxClass: 'bg-fuchsia-50 border-fuchsia-200', iconClass: 'text-fuchsia-800' },
+  [normalizeProgramVisualKey('B.Arch')]: { icon: 'architecture', boxClass: 'bg-fuchsia-50 border-fuchsia-200', iconClass: 'text-fuchsia-800' },
+  [normalizeProgramVisualKey('B.Com (Hons.)')]: { icon: 'paid', boxClass: 'bg-emerald-50 border-emerald-200', iconClass: 'text-emerald-800' },
+  [normalizeProgramVisualKey('English (Hons)')]: { icon: 'menu_book', boxClass: 'bg-sky-50 border-sky-200', iconClass: 'text-sky-800' },
+  [normalizeProgramVisualKey('B.A. English (Hons.)')]: { icon: 'menu_book', boxClass: 'bg-sky-50 border-sky-200', iconClass: 'text-sky-800' },
+  [normalizeProgramVisualKey('B.Pharm')]: { icon: 'vaccines', boxClass: 'bg-green-50 border-green-200', iconClass: 'text-green-800' },
+};
+
+const getProgramVisual = (programData, categoryId, programName) => {
+  const resolvedName = resolveProgramKey(programData, categoryId, programName);
+  const resolvedKey = normalizeProgramVisualKey(resolvedName);
+  const originalKey = normalizeProgramVisualKey(programName);
+
+  const candidates = [resolvedKey, originalKey];
+  const tryStrip = (k) => {
+    const prefixes = [
+      'b tech ',
+      'm tech ',
+      'b sc ',
+      'm sc ',
+      'b des ',
+      'm des ',
+      'b arch ',
+      'b com ',
+      'b a ',
+      'b pharm ',
+      'mca ',
+      'mba ',
+      'bba ',
+    ];
+    for (const p of prefixes) {
+      if (k.startsWith(p)) return k.slice(p.length);
+    }
+    return '';
+  };
+
+  const strippedResolved = tryStrip(resolvedKey);
+  const strippedOriginal = tryStrip(originalKey);
+  if (strippedResolved) candidates.push(strippedResolved);
+  if (strippedOriginal) candidates.push(strippedOriginal);
+
+  for (const key of candidates) {
+    const v = PROGRAM_VISUALS[key];
+    if (v) return v;
+  }
+
+  return DEFAULT_PROGRAM_VISUAL;
+};
+
+const CATEGORY_CARD_ICONS = {
+  btech: 'engineering',
+  'btech-dtd': 'swap_horiz',
+  diploma: 'school',
+  mtech: 'science',
+  bdes: 'draw',
+  mdes: 'palette',
+  bsc: 'biotech',
+  msc: 'functions',
+  'mba-avia': 'business_center',
+  bca: 'computer',
+  mca: 'terminal',
+  barch: 'architecture',
+  bcom: 'account_balance',
+  ba: 'menu_book',
+  bpharm: 'medication',
 };
 
 // Common B.Tech Eligibility
@@ -2073,25 +2285,148 @@ const defaultCategories = [
   { id: 'bpharm', label: 'B.Pharm', badge: 'Undergraduate', color: 'border-green-700', bgColor: 'bg-green-700', lightBg: 'bg-green-50', programs: ['B.Pharm'] }
 ];
 
-function Programs({ setActivePage, setAdmissionData }) {
+const defaultWiiaCategories = [
+  {
+    id: 'btech',
+    label: 'B.Tech',
+    badge: 'Undergraduate',
+    color: 'border-blue-500',
+    bgColor: 'bg-blue-500',
+    lightBg: 'bg-blue-50',
+    programs: [
+      'B.Tech Aeronautical',
+      'B.Tech Aerospace',
+      'B.Tech Defence Aerospace',
+      'B.Tech Aircraft Maintenance Engineering',
+      'Aircraft Maintenance Engineering',
+      'B1.1 - Aeroplane Turbine',
+      'B2 - Avionics',
+      'B1.2 - Aeroplane Piston',
+      'B1.3 - Helicopter Turbine',
+    ],
+  },
+  {
+    id: 'mba-avia',
+    label: 'MBA/BBA',
+    badge: 'Undergraduate / Post Graduate',
+    color: 'border-purple-600',
+    bgColor: 'bg-purple-600',
+    lightBg: 'bg-purple-50',
+    programs: ['Aviation'],
+  },
+];
+
+const AVIATION_PROGRAMS_BY_CATEGORY = {
+  btech: new Set([
+    'Aircraft Maintenance Engineering',
+    'Aeronautical Engineering',
+    'Aerospace Engineering',
+    'Defence Aerospace Engineering',
+  ]),
+  'mba-avia': new Set([
+    'Aviation',
+    'Aviation Management',
+    'BBA Aviation',
+  ]),
+};
+
+const normalizeForCompare = (v) => String(v || '').trim().toLowerCase().replace(/\s+/g, ' ');
+
+const filterCategoriesBySiteVariant = (cats, siteVariant) => {
+  const input = Array.isArray(cats) ? cats : [];
+  const variant = siteVariant === 'wiia' ? 'wiia' : 'indus';
+
+  const out = [];
+  for (const cat of input) {
+    const categoryId = cat?.id;
+    const aviationSet = AVIATION_PROGRAMS_BY_CATEGORY[categoryId];
+    const programs = Array.isArray(cat?.programs) ? cat.programs : [];
+
+    if (!aviationSet) {
+      if (variant === 'indus') out.push(cat);
+      continue;
+    }
+
+    const aviationNames = new Set(Array.from(aviationSet).map(normalizeForCompare));
+    const nextPrograms =
+      variant === 'wiia'
+        ? programs
+        : programs.filter((p) => !aviationNames.has(normalizeForCompare(p)));
+
+    if (variant === 'wiia' && nextPrograms.length === 0) continue;
+
+    out.push({ ...cat, programs: nextPrograms });
+  }
+  return out;
+};
+
+function Programs({ setActivePage, setAdmissionData, siteVariant = 'indus' }) {
+  const isWiia = siteVariant === 'wiia';
+  const categoriesStorageKey = isWiia ? 'wiia_categories' : 'indus_categories';
+  const programDataStorageKey = isWiia ? 'wiia_programData' : 'indus_programData';
+  const categoryDefaults = isWiia ? defaultWiiaCategories : defaultCategories;
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
   const [selectedDetailSection, setSelectedDetailSection] = useState('CURRICULUM & LEARNING');
   const [searchQuery, setSearchQuery] = useState('');
   const detailContentRef = React.useRef(null);
+  const viewScrollRef = React.useRef({ categories: 0, programsByCategory: {} });
+  const didInitViewScrollRef = React.useRef(false);
+
+  const saveMainScroll = React.useCallback((key, categoryId) => {
+    const el = document.getElementById('main-scroll-container');
+    if (!el) return;
+    const top = el.scrollTop || 0;
+
+    if (key === 'programs') {
+      const id = categoryId || 'default';
+      viewScrollRef.current.programsByCategory[id] = top;
+      return;
+    }
+
+    viewScrollRef.current.categories = top;
+  }, []);
+
+  const restoreMainScroll = React.useCallback((key, categoryId) => {
+    const el = document.getElementById('main-scroll-container');
+    if (!el) return;
+    const top =
+      key === 'programs'
+        ? Number(viewScrollRef.current.programsByCategory[categoryId || 'default'] || 0)
+        : Number(viewScrollRef.current.categories || 0);
+    const prevBehavior = el.style.scrollBehavior;
+    el.style.scrollBehavior = 'auto';
+    el.scrollTop = top;
+    el.style.scrollBehavior = prevBehavior;
+  }, []);
 
   const [categories, setCategories] = useState(() => {
-    const saved = localStorage.getItem('indus_categories');
-    if (!saved) return defaultCategories;
+    const saved = localStorage.getItem(categoriesStorageKey);
+    if (!saved) return filterCategoriesBySiteVariant(categoryDefaults, siteVariant);
     try {
-      return mergeCategories(JSON.parse(saved), defaultCategories);
+      const merged = mergeCategories(JSON.parse(saved), categoryDefaults);
+      return filterCategoriesBySiteVariant(merged, siteVariant);
     } catch {
-      return defaultCategories;
+      return filterCategoriesBySiteVariant(categoryDefaults, siteVariant);
     }
   });
 
+  React.useEffect(() => {
+    const saved = localStorage.getItem(categoriesStorageKey);
+    if (!saved) {
+      setCategories(filterCategoriesBySiteVariant(categoryDefaults, siteVariant));
+      return;
+    }
+    try {
+      const merged = mergeCategories(JSON.parse(saved), categoryDefaults);
+      setCategories(filterCategoriesBySiteVariant(merged, siteVariant));
+    } catch {
+      setCategories(filterCategoriesBySiteVariant(categoryDefaults, siteVariant));
+    }
+  }, [siteVariant, categoriesStorageKey, categoryDefaults]);
+
   const [programData, setProgramData] = useState(() => {
-    const saved = localStorage.getItem('indus_programData');
+    const saved = localStorage.getItem(programDataStorageKey);
     if (!saved) return defaultProgramData;
     try {
       return mergeProgramData(JSON.parse(saved), defaultProgramData);
@@ -2110,13 +2445,13 @@ function Programs({ setActivePage, setAdmissionData }) {
     setProgramData((prev) => {
       const merged = mergeProgramData(prev, defaultProgramData);
       try {
-        localStorage.setItem('indus_programData', JSON.stringify(merged));
+        localStorage.setItem(programDataStorageKey, JSON.stringify(merged));
       } catch {
         // ignore write failures (private mode / storage restrictions)
       }
       return merged;
     });
-  }, []);
+  }, [programDataStorageKey]);
 
   React.useEffect(() => {
     if (selectedProgram) {
@@ -2124,6 +2459,25 @@ function Programs({ setActivePage, setAdmissionData }) {
       if (el) el.scrollTop = 0;
     }
   }, [selectedProgram]);
+
+  React.useLayoutEffect(() => {
+    // Preserve where the user left off when switching between category list and program list.
+    if (!didInitViewScrollRef.current) {
+      didInitViewScrollRef.current = true;
+      return;
+    }
+    if (!selectedCategory) {
+      restoreMainScroll('categories');
+      return;
+    }
+    restoreMainScroll('programs', selectedCategory?.id);
+  }, [selectedCategory, restoreMainScroll]);
+
+  React.useLayoutEffect(() => {
+    // If a program modal closes, restore the program-list scroll position.
+    if (!didInitViewScrollRef.current) return;
+    if (!selectedProgram && selectedCategory) restoreMainScroll('programs', selectedCategory?.id);
+  }, [selectedProgram, selectedCategory, restoreMainScroll]);
 
   const handleDetailClick = (id) => {
     setSelectedDetailSection(id);
@@ -2134,18 +2488,48 @@ function Programs({ setActivePage, setAdmissionData }) {
 
   if (!selectedCategory) {
     return (
-      <div className="w-full flex-1 h-full overflow-hidden px-4 md:px-6 lg:px-8 pb-8 md:pb-10 fade-in">
+      <div className="w-full flex-1 h-full overflow-hidden px-4 md:px-6 lg:px-8 pb-4 md:pb-6 fade-in">
         {/* Categories Cards Grid */}
-        <div className="grid grid-cols-[repeat(auto-fit,minmax(240px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(280px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6 md:gap-10 overflow-y-visible px-4 md:px-8 pt-5 md:pt-8 pb-16 md:pb-24 -mx-4 md:-mx-8 content-start items-start">
-          {categories.map((cat) => (
-              <div 
-                key={cat.id} 
-                onClick={() => setSelectedCategory(cat)}
-                className={`rounded-[2.5rem] p-6 md:p-7 lg:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] border-t-[22px] md:border-t-[28px] ${cat.color} ${cat.lightBg || 'bg-slate-100'} relative overflow-hidden group hover:shadow-2xl transition-all duration-700 cursor-pointer hover:-translate-y-2 aspect-[4/3] md:aspect-square flex flex-col justify-between`}
-            >
+        <div
+          className={`grid gap-6 md:gap-10 overflow-y-visible px-4 md:px-8 pt-5 md:pt-8 pb-8 md:pb-12 -mx-4 md:-mx-8 content-start items-start ${
+            isWiia
+              ? 'max-w-5xl mx-auto grid-cols-1 md:grid-cols-2 lg:grid-cols-2'
+              : 'grid-cols-[repeat(auto-fit,minmax(240px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(280px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]'
+          }`}
+        >
+           {categories.map((cat) => (
+             <div 
+                 key={cat.id} 
+                 onClick={() => {
+                   saveMainScroll('categories');
+                   setSelectedCategory(cat);
+                 }}
+                 className={`rounded-[2.5rem] p-6 md:p-7 lg:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] border-t-[22px] md:border-t-[28px] ${cat.color} ${cat.lightBg || 'bg-slate-100'} relative overflow-hidden group hover:shadow-2xl transition-all duration-700 cursor-pointer hover:-translate-y-2 flex flex-col justify-between ${
+                   isWiia ? 'h-[260px] md:h-[300px] lg:h-[320px]' : 'aspect-[4/3] md:aspect-square'
+                 }`}
+             >
               <div className={`absolute inset-0 ${cat.bgColor} opacity-10 group-hover:opacity-20 transition-opacity duration-700`}></div>
+
+              {/* Decorative watermark icon */}
+              <div className="absolute -right-6 -bottom-8 z-0 pointer-events-none select-none">
+                <span
+                  className={`material-symbols-outlined ${cat.color.replace('border-', 'text-')} opacity-[0.10]`}
+                  style={{ fontSize: 170, lineHeight: 1 }}
+                  aria-hidden="true"
+                >
+                  {CATEGORY_CARD_ICONS[cat.id] || 'school'}
+                </span>
+              </div>
                
               <div className="relative z-10 flex-1 flex flex-col">
+                {/* Icon chip */}
+                <div className="mb-4">
+                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white/60 border border-white/70 flex items-center justify-center">
+                    <span className={`material-symbols-outlined !text-[30px] md:!text-[34px] ${cat.color.replace('border-', 'text-')}`}>
+                      {CATEGORY_CARD_ICONS[cat.id] || 'school'}
+                    </span>
+                  </div>
+                </div>
                 <div className={`text-[10px] font-black tracking-[0.15em] mb-3 uppercase mt-1 ${cat.color.replace('border-', 'text-')}`}>
                   {cat.badge}
                 </div>
@@ -2163,7 +2547,9 @@ function Programs({ setActivePage, setAdmissionData }) {
             </div>
           ))}
         </div>
-        <p className="mt-12 md:mt-16 text-center text-slate-300 text-sm font-black tracking-widest uppercase italic border-t border-slate-100 pt-8 md:pt-10">"Where Practice Meets Theory"</p>
+        <p className="mt-8 md:mt-10 text-center text-slate-300 text-sm font-black tracking-widest uppercase italic border-t border-slate-100 pt-6 md:pt-8">
+          "Where Practice Meets Theory"
+        </p>
       </div>
     );
   }
@@ -2177,6 +2563,7 @@ function Programs({ setActivePage, setAdmissionData }) {
         <div className="md:justify-self-start">
           <button 
             onClick={() => {
+              saveMainScroll('programs', selectedCategory?.id);
               setSelectedCategory(null);
               setSelectedProgram(null);
             }}
@@ -2217,31 +2604,48 @@ function Programs({ setActivePage, setAdmissionData }) {
       <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] sm:grid-cols-[repeat(auto-fill,minmax(280px,1fr))] lg:grid-cols-[repeat(auto-fill,minmax(320px,1fr))] gap-6 overflow-y-visible px-0 md:px-10 pt-4 md:pt-8 pb-16 md:pb-24 -mx-0 md:-mx-10 content-start items-start">
         {selectedCategory.programs
           .filter(prog => prog.toLowerCase().includes(searchQuery.toLowerCase()))
-          .map((prog, idx) => (
-            <div 
-              key={idx}
-              onClick={() => setSelectedProgram(prog)}
-              className={`p-5 md:p-6 rounded-[1.5rem] shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-700 group cursor-pointer relative overflow-hidden flex flex-col hover:-translate-y-1 h-[168px] md:h-[180px]`}
-              style={{ 
-                backgroundColor: 'white',
-                borderTop: `8px solid ${selectedCategory.color.includes('blue') ? '#3b82f6' : selectedCategory.color.includes('amber') ? '#b45309' : selectedCategory.color.includes('orange') ? '#f97316' : selectedCategory.color.includes('red') ? '#dc2626' : selectedCategory.color.includes('yellow') ? '#eab308' : selectedCategory.color.includes('teal') ? '#0d9488' : selectedCategory.color.includes('indigo') ? '#4f46e5' : selectedCategory.color.includes('purple') ? '#9333ea' : selectedCategory.color.includes('cyan') ? '#0891b2' : selectedCategory.color.includes('rose') ? '#e11d48' : '#64748b'}`
-              }}
-            >
-              {/* Vibrant background layer */}
-              <div className={`absolute inset-0 ${selectedCategory.bgColor} opacity-[0.03] group-hover:opacity-[0.05] transition-opacity duration-700`}></div>
-              
-              <div className="relative z-10 flex-1 overflow-hidden">
-                <h4 className="text-lg font-black text-slate-900 leading-tight group-hover:text-slate-900 transition-colors uppercase tracking-tight break-words max-h-[4.8rem] overflow-hidden">{prog}</h4>
+          .map((prog, idx) => {
+            const v = getProgramVisual(programData, selectedCategory?.id, prog);
+            const categoryTint = selectedCategory?.bgColor || 'bg-slate-500';
+
+            return (
+              <div 
+                key={idx}
+                onClick={() => {
+                  saveMainScroll('programs', selectedCategory?.id);
+                  setSelectedProgram(prog);
+                }}
+                className={`p-5 md:p-6 rounded-[1.5rem] shadow-sm border border-slate-100 hover:shadow-xl transition-all duration-700 group cursor-pointer relative overflow-hidden flex flex-col hover:-translate-y-1 h-[186px] md:h-[210px] bg-white`}
+                style={{ 
+                  borderTop: `8px solid ${selectedCategory.color.includes('blue') ? '#3b82f6' : selectedCategory.color.includes('amber') ? '#b45309' : selectedCategory.color.includes('orange') ? '#f97316' : selectedCategory.color.includes('red') ? '#dc2626' : selectedCategory.color.includes('yellow') ? '#eab308' : selectedCategory.color.includes('teal') ? '#0d9488' : selectedCategory.color.includes('indigo') ? '#4f46e5' : selectedCategory.color.includes('purple') ? '#9333ea' : selectedCategory.color.includes('cyan') ? '#0891b2' : selectedCategory.color.includes('rose') ? '#e11d48' : '#64748b'}`
+                }}
+              >
+                {/* Category tint layer (matches the top bar color) */}
+                <div className={`absolute inset-0 ${categoryTint} opacity-[0.07] group-hover:opacity-[0.10] transition-opacity duration-700`}></div>
+                
+                <div className="relative z-10 flex-1 overflow-hidden flex items-start gap-4">
+                  <h4 className="flex-1 text-lg font-black text-slate-900 leading-tight group-hover:text-slate-900 transition-colors uppercase tracking-tight break-words max-h-[7.5rem] overflow-hidden">
+                    {prog}
+                  </h4>
+
+                  <div className="shrink-0">
+                    <div className={`w-14 h-14 md:w-16 md:h-16 rounded-2xl border ${v.boxClass} flex items-center justify-center bg-white/60`}>
+                      <span className={`material-symbols-outlined ${v.iconClass} !text-[30px] md:!text-[34px]`}>
+                        {v.icon}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                 
+                <div className={`mt-4 flex items-center text-[9px] font-black tracking-[0.1em] group-hover:text-slate-900 transition-colors uppercase pt-3 border-t border-slate-900/5 ${selectedCategory.color.replace('border-', 'text-')} mt-auto`}>
+                  <span>Program Details</span>
+                  <svg className="w-5 h-5 ml-3 group-hover:translate-x-3 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </div>
               </div>
-               
-              <div className={`mt-4 flex items-center text-[9px] font-black tracking-[0.1em] group-hover:text-slate-900 transition-colors uppercase pt-3 border-t border-slate-900/5 ${selectedCategory.color.replace('border-', 'text-')} mt-auto`}>
-                <span>Program Details</span>
-                <svg className="w-5 h-5 ml-3 group-hover:translate-x-3 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                </svg>
-              </div>
-            </div>
-          ))}
+            );
+          })}
 
         {selectedCategory.programs.filter(prog => prog.toLowerCase().includes(searchQuery.toLowerCase())).length === 0 && (
           <div className="col-span-full py-40 text-center bg-white rounded-[3rem] border-2 border-dashed border-slate-100">

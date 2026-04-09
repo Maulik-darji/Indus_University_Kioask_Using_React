@@ -121,6 +121,8 @@
     display: flex;
     width: max-content;
     will-change: transform;
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
     animation: ticker-scroll var(--ticker-duration, 40s) linear infinite;
   }
 

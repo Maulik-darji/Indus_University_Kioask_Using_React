@@ -1,13 +1,15 @@
 import React from 'react';
 import { db } from '../firebase';
 import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import logo from '../images/logo.png';
+import indusLogo from '../images/logo.png';
 import { sha256Hex } from '../auth/sha256';
 import { getOrCreateDeviceId } from '../auth/deviceId';
 import { setKioskSession } from '../auth/kioskSession';
 
 const DEVICE_CACHE_PREFIX = 'indus_kiosk_device_allowed_cache_v1:';
 const LOCK_KEY = 'indus_kiosk_lock_v1';
+const PASSWORD_HASH_CACHE_KEY = 'indus_kiosk_password_sha256_cache_v1';
+const PASSWORD_SETTINGS_REF = doc(db, 'kiosk_settings', 'global');
 
 function getLock() {
   try {
@@ -47,7 +49,11 @@ function randomToken() {
     .join('');
 }
 
-export default function AccessGate({ onAuthenticated }) {
+export default function AccessGate({ onAuthenticated, siteVariant = 'indus' }) {
+  // Keep the lock screen common for both Indus + WIIA.
+  // (Branding within the unlocked site can still vary by `siteVariant`.)
+  void siteVariant;
+  const logo = indusLogo;
   const deviceId = React.useMemo(() => getOrCreateDeviceId(), []);
 
   const expectedHash = String(process.env.REACT_APP_KIOSK_PASSWORD_SHA256 || '').trim().toLowerCase();
@@ -61,6 +67,36 @@ export default function AccessGate({ onAuthenticated }) {
   const [deviceAllowed, setDeviceAllowed] = React.useState(false);
   const [deviceStatus, setDeviceStatus] = React.useState(allowlistEnabled ? 'checking' : 'skipped');
   const [requestSent, setRequestSent] = React.useState(false);
+  const [remotePasswordHash, setRemotePasswordHash] = React.useState(() => {
+    try {
+      return String(localStorage.getItem(PASSWORD_HASH_CACHE_KEY) || '').trim().toLowerCase();
+    } catch {
+      return '';
+    }
+  });
+
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const snap = await getDoc(PASSWORD_SETTINGS_REF);
+        const hash = String(snap.exists() ? snap.data()?.passwordHash : '').trim().toLowerCase();
+        if (!hash) return;
+        if (cancelled) return;
+        setRemotePasswordHash(hash);
+        try {
+          localStorage.setItem(PASSWORD_HASH_CACHE_KEY, hash);
+        } catch {
+          // ignore
+        }
+      } catch {
+        // ignore network failures; cached value still works
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const cacheKey = `${DEVICE_CACHE_PREFIX}${deviceId}`;
 
@@ -115,6 +151,10 @@ export default function AccessGate({ onAuthenticated }) {
 
   const verifyPassword = async (value) => {
     const trimmed = String(value || '').trim();
+    if (remotePasswordHash) {
+      const got = await sha256Hex(trimmed);
+      return got === remotePasswordHash;
+    }
     if (expectedHash) {
       const got = await sha256Hex(trimmed);
       return got === expectedHash;
@@ -166,7 +206,7 @@ export default function AccessGate({ onAuthenticated }) {
     }
   };
 
-  const showConfigHint = !expectedHash && !expectedPlain;
+  const showConfigHint = !remotePasswordHash && !expectedHash && !expectedPlain;
 
   return (
     <div className="min-h-screen w-full bg-[#f2f0ee] flex items-center justify-center p-6">
