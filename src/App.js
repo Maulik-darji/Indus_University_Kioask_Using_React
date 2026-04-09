@@ -196,6 +196,18 @@ function App() {
     return saved || 'home';
   });
 
+  const switchSiteVariant = React.useCallback(() => {
+    const targetVariant = siteVariant === 'wiia' ? 'indus' : 'wiia';
+    const targetKey = targetVariant === 'wiia' ? 'wiia_active_page' : 'indus_active_page';
+    const targetPath = targetVariant === 'wiia' ? '/wiia' : '/';
+    try {
+      localStorage.setItem(targetKey, activePage);
+    } catch {
+      // ignore
+    }
+    window.location.href = targetPath;
+  }, [activePage, siteVariant]);
+
   // Persist page changes
   React.useEffect(() => {
     localStorage.setItem(activePageStorageKey, activePage);
@@ -315,14 +327,24 @@ function App() {
           <button className="p-2 text-2xl hover:bg-gray-100 rounded-lg transition-colors" onClick={() => setIsSidebarOpen(true)}>&#9776;</button>
           <div className="font-bold text-gray-900 tracking-tight">INDUS UNIVERSITY</div>
         </div>
-        <button
-          onClick={() => {
-            requestTerminate();
-          }}
-          className="px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-xl font-black text-[10px] uppercase tracking-wider active:scale-95 transition-all"
-        >
-          Terminate
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={switchSiteVariant}
+            className="px-3 py-2 bg-white border border-slate-200 rounded-xl font-black text-[10px] uppercase tracking-wider text-slate-700 hover:bg-slate-50 active:scale-95 transition-all"
+            title={siteVariant === 'wiia' ? 'Switch to Indus' : 'Switch to WIIA'}
+          >
+            {siteVariant === 'wiia' ? 'Indus' : 'WIIA'}
+          </button>
+          <button
+            onClick={() => {
+              requestTerminate();
+            }}
+            className="px-4 py-2 bg-red-50 text-red-700 border border-red-200 rounded-xl font-black text-[10px] uppercase tracking-wider active:scale-95 transition-all"
+          >
+            Terminate
+          </button>
+        </div>
       </header>
 
       <Sidebar
@@ -383,7 +405,15 @@ function App() {
                 </h1>
               </div>
 
-              <div className="flex justify-end xl:w-48">
+              <div className="flex justify-end xl:w-64 gap-3">
+                <button
+                  type="button"
+                  onClick={switchSiteVariant}
+                  className="px-5 py-3 bg-white text-slate-700 border border-slate-200 rounded-2xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-slate-50 active:scale-95 transition-all shadow-sm"
+                  title={siteVariant === 'wiia' ? 'Switch to Indus' : 'Switch to WIIA'}
+                >
+                  {siteVariant === 'wiia' ? 'Indus Mode' : 'WIIA Mode'}
+                </button>
                 <button
                   onClick={() => {
                     requestTerminate();
