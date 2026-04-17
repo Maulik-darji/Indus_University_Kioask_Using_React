@@ -18,7 +18,7 @@ const kSegments = [
 ];
 const genAI = new GoogleGenerativeAI(process.env.REACT_APP_GEMINI_API_KEY || kSegments.join(''));
 
-const INITIAL_GREETING = { role: 'assistant', content: 'Hello! I am Niaa. How can I help you today?' };
+const INITIAL_GREETING = { role: 'assistant', content: 'Hello! I am Niaa, your Indus AI Assistant. What is your name and how can I help you today?' };
 const AIAssistant = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
@@ -223,7 +223,7 @@ const AIAssistant = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900 leading-none">Indus AI Assistant</h3>
-                  <p className="text-xs text-blue-600 font-medium mt-1">Online • Powered by Gemini</p>
+                  <p className="text-xs text-blue-600 font-medium mt-1">Online</p>
                 </div>
               </div>
               <div className="flex items-center gap-2">

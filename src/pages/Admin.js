@@ -230,6 +230,7 @@ export default function Admin({ siteVariant = 'indus' }) {
                 if (type === 'event') await deleteDoc(doc(db, "events_v3", id));
                 if (type === 'institute') await deleteDoc(doc(db, "institutes_v3", id));
                 if (type === 'ticker') await deleteTickerItem(id);
+                if (type === 'ai_log') await deleteDoc(doc(db, "ai_chat_logs", id));
                 if (type === 'category') {
                   const storedCats = localStorage.getItem('indus_categories');
                   if (storedCats) {
@@ -428,58 +429,78 @@ export default function Admin({ siteVariant = 'indus' }) {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              {aiLogs.map((log) => (
-                <div
-                  key={log.id}
-                  className="rounded-[1.25rem] border border-slate-100 p-6 bg-white hover:border-blue-200 transition-all group"
-                >
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="min-w-0">
-                      <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Session ID</div>
-                      <div className="mt-1 font-black text-slate-800 text-[10px] truncate">{log.id}</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Last Activity</div>
-                      <div className="mt-1 font-bold text-slate-600 text-[10px]">{formatTs(log.updatedAt)}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center gap-4 mb-6">
-                    <div className="bg-blue-50 px-3 py-1 rounded-lg">
-                      <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">
-                        {log.messages?.length || 0} Messages
-                      </span>
-                    </div>
-                    <div className="text-[10px] font-bold text-slate-400 truncate flex-1">
-                      Device: {log.deviceId?.substring(0, 15)}...
-                    </div>
-                  </div>
+              {aiLogs.map((log) => {
+                const extractName = (messages) => {
+                  if (!messages || !Array.isArray(messages)) return 'Anonymous Student';
+                  const firstUserMsg = messages.find(m => m.role === 'user');
+                  if (firstUserMsg) {
+                    const txt = firstUserMsg.content.trim();
+                    const match = txt.match(/(?:my name is|i am|i'm|this is|call me)\s+([a-zA-Z\s]{2,20})(?:[.,]|$)/i);
+                    if (match) return match[1].trim();
+                    if (txt.split(' ').length <= 2) return txt; // Likely just typed their name
+                  }
+                  return 'Anonymous Student';
+                };
 
-                  <button
-                    onClick={() => {
-                      setModalConfig({
-                        isOpen: true,
-                        title: 'Conversation Transcript',
-                        content: (
-                          <div className="space-y-4 py-2">
-                            {log.messages?.map((msg, i) => (
-                              <div key={i} className={`p-4 rounded-xl ${msg.role === 'user' ? 'bg-blue-50 border border-blue-100 ml-4' : 'bg-slate-50 border border-slate-100 mr-4'}`}>
-                                <div className="text-[8px] font-black uppercase tracking-widest mb-1 opacity-50">
-                                  {msg.role === 'user' ? 'Student' : 'AI Assistant'}
-                                </div>
-                                <div className="text-xs font-medium text-slate-800 break-words whitespace-pre-wrap">{msg.content}</div>
-                              </div>
-                            ))}
-                          </div>
-                        )
-                      });
-                    }}
-                    className="w-full py-3 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-black active:scale-95 transition-all shadow-lg shadow-slate-900/10"
+                return (
+                  <div
+                    key={log.id}
+                    className="rounded-[1.25rem] border border-slate-100 p-6 bg-white hover:border-blue-200 transition-all group"
                   >
-                    View Full Transcript
-                  </button>
-                </div>
-              ))}
+                    <div className="flex justify-between items-start mb-4 gap-4">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Student Name / ID</div>
+                        <div className="mt-1 font-black text-slate-800 text-sm truncate">{extractName(log.messages)}</div>
+                        <div className="mt-1 font-black text-slate-400 text-[9px] truncate">Device: {log.deviceId} | Session: {log.id}</div>
+                      </div>
+                      <div className="text-right shrink-0">
+                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Last Activity</div>
+                        <div className="mt-1 font-bold text-slate-600 text-[10px]">{formatTs(log.updatedAt)}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="bg-blue-50 px-3 py-1 rounded-lg">
+                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">
+                          {log.messages?.length || 0} Messages
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => {
+                          setModalConfig({
+                            isOpen: true,
+                            title: `Transcript: ${extractName(log.messages)}`,
+                            content: (
+                              <div className="space-y-4 py-2">
+                                {log.messages?.map((msg, i) => (
+                                  <div key={i} className={`p-4 rounded-xl ${msg.role === 'user' ? 'bg-blue-50 border border-blue-100 ml-4' : 'bg-slate-50 border border-slate-100 mr-4'}`}>
+                                    <div className="text-[8px] font-black uppercase tracking-widest mb-1 opacity-50">
+                                      {msg.role === 'user' ? 'Student' : 'AI Assistant'}
+                                    </div>
+                                    <div className="text-xs font-medium text-slate-800 break-words whitespace-pre-wrap">{msg.content}</div>
+                                  </div>
+                                ))}
+                              </div>
+                            )
+                          });
+                        }}
+                        className="flex-1 py-3 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-black active:scale-95 transition-all shadow-lg shadow-slate-900/10"
+                      >
+                        View Transcript
+                      </button>
+                      <button
+                        onClick={() => confirmDelete('ai_log', log.id, `Session ${log.id}`)}
+                        className="px-6 py-3 rounded-xl bg-red-50 text-red-600 font-black text-[10px] uppercase tracking-[0.2em] border border-red-100 hover:bg-red-100 active:scale-95 transition-all"
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
 
             {aiLogs.length === 0 && (
