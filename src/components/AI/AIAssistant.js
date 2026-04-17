@@ -34,8 +34,7 @@ const SUGGESTED_QUESTIONS = [
   "Eligibility for B.Tech?",
   "Tell me about the campus facilities."
 ];
-const AIAssistant = () => {
-  const [isOpen, setIsOpen] = useState(false);
+const AIAssistant = ({ isOpen, setIsOpen }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState(() => {
@@ -84,6 +83,7 @@ const AIAssistant = () => {
   const handleReset = () => {
     setMessages([INITIAL_GREETING]);
     setSessionId(null);
+    localStorage.removeItem('indus_ai_session_id');
     setTimeLeft(60);
     setShowResetWarning(false);
     setMessageQueue([]);
@@ -101,6 +101,7 @@ const AIAssistant = () => {
           messages: currentMessages
         });
         setSessionId(docRef.id);
+        localStorage.setItem('indus_ai_session_id', docRef.id);
         return docRef.id;
       } else {
         const docRef = doc(db, "ai_chat_logs", sId);
@@ -140,10 +141,13 @@ const AIAssistant = () => {
       setIsLoading(true);
 
       const modelsToTry = [
-        'gemini-2.5-flash',
-        'gemini-2.5-pro',
-        'gemini-flash-latest',
-        'gemini-3.1-pro-preview'
+        'gemini-2.0-flash',
+        'gemini-1.5-flash',
+        'gemini-1.5-flash-latest',
+        'gemini-1.5-flash-8b',
+        'gemini-1.5-pro',
+        'gemini-1.5-pro-latest',
+        'gemini-pro'
       ];
       let success = false;
       let sId = sessionId;
@@ -179,7 +183,7 @@ const AIAssistant = () => {
             
             STRICT RULES:
             1. Answer accurately based ONLY on the provided context.
-            2. If the user asks for a "list" (e.g. "I just want list", "list of courses"), YOU MUST provide ONLY the bullet points. DO NOT use introductory filler like "Certainly!" or "Here is the list". DO NOT add concluding paragraphs about admissions. Provide the raw list and nothing else.
+            2. If the user asks for a "list" (e.g. "I just want list", "list of courses"), YOU MUST provide ONLY the numbered list with numeric pointers (1., 2., 3., etc.). DO NOT use introductory filler like "Certainly!" or "Here is the list". DO NOT add concluding paragraphs about admissions. Provide the raw numbered list and nothing else.
             3. Be concise, professional, and helpful.
 
             Context: ${UNIVERSITY_KNOWLEDGE}

@@ -1,16 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import AdminCategories from './AdminCategories';
+import ReactMarkdown from 'react-markdown';
 import { db } from '../firebase';
 import { collection, onSnapshot, query, orderBy, addDoc, deleteDoc, updateDoc, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { sha256Hex } from '../auth/sha256';
 
 // Custom Modal Component for "Center of the Screen" Popups
-const CenterModal = ({ isOpen, onClose, title, children }) => {
+const CenterModal = ({ isOpen, onClose, title, children, maxWidth = 'max-w-sm' }) => {
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4">
       <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={onClose}></div>
-      <div className="relative bg-white rounded-[1.5rem] shadow-2xl w-full max-w-sm p-7 scale-in flex flex-col max-h-[90vh]">
+      <div className={`relative bg-white rounded-[1.5rem] shadow-2xl w-full ${maxWidth} p-7 scale-in flex flex-col max-h-[90vh]`}>
         <h3 className="text-xl font-black text-slate-800 mb-4 text-center tracking-tight uppercase">{title}</h3>
         <div className="overflow-y-auto custom-scrollbar flex-1">{children}</div>
       </div>
@@ -43,6 +44,10 @@ export default function Admin({ siteVariant = 'indus' }) {
   const [accessPassword, setAccessPassword] = useState('');
   const [accessPasswordConfirm, setAccessPasswordConfirm] = useState('');
   const [accessPasswordBusy, setAccessPasswordBusy] = useState(false);
+  const [skipDeleteConfirm, setSkipDeleteConfirm] = useState(() => {
+    return localStorage.getItem('indus_kiosk_skip_delete_confirm') === 'true';
+  });
+  const deleteCheckboxRef = React.useRef(null);
 
   // Form States (for creating/editing)
   const [eventForm, setEventForm] = useState({ id: null, month: '', day: '', title: '', desc: '', type: '', isFeatured: false, color: '#f97316', link: '' });
@@ -203,50 +208,63 @@ export default function Admin({ siteVariant = 'indus' }) {
     } catch (err) { console.error(err); }
   };
 
-  // --- INSTITUTES LOGIC ---
-  const saveInstitute = async (e) => {
-    e.preventDefault();
-    const payload = { ...instituteForm, timestamp: serverTimestamp() };
-    delete payload.id;
-
+  const performDelete = async (type, id) => {
     try {
-      if (instituteForm.id) {
-        await updateDoc(doc(db, "institutes_v3", instituteForm.id), payload);
-      } else {
-        await addDoc(collection(db, "institutes_v3"), payload);
+      if (type === 'event') await deleteDoc(doc(db, "events_v3", id));
+      if (type === 'institute') await deleteDoc(doc(db, "institutes_v3", id));
+      if (type === 'ticker') await deleteTickerItem(id);
+      if (type === 'ai_log') await deleteDoc(doc(db, "ai_chat_logs", id));
+      if (type === 'category') {
+        const storedCats = localStorage.getItem('indus_categories');
+        if (storedCats) {
+          const cats = JSON.parse(storedCats);
+          localStorage.setItem('indus_categories', JSON.stringify(cats.filter(c => c.id !== id)));
+          window.dispatchEvent(new Event('storage'));
+        }
       }
-      setInstituteForm({ id: null, name: '', desc: '' });
-    } catch (err) { console.error(err); }
+    } catch (err) {
+      console.error("Deletion failed:", err);
+    }
   };
 
   const closeModal = () => setModalConfig({ ...modalConfig, isOpen: false });
 
   const confirmDelete = (type, id, title) => {
+    if (skipDeleteConfirm) {
+      performDelete(type, id);
+      return;
+    }
+
     setModalConfig({
       isOpen: true,
       title: 'Confirm Deletion',
       content: (
         <div>
-          <p className="text-slate-600 mb-8 text-lg font-medium">Are you sure you want to delete <strong>{title}</strong>? This action cannot be undone.</p>
+          <p className="text-slate-600 mb-6 text-lg font-medium tracking-tight">Are you sure you want to delete <strong>{title}</strong>? This action cannot be undone.</p>
+          
+          <div className="flex items-center gap-3 mb-8 cursor-pointer" onClick={() => {
+            if (deleteCheckboxRef.current) deleteCheckboxRef.current.checked = !deleteCheckboxRef.current.checked;
+          }}>
+            <div className="relative flex items-center">
+              <input 
+                type="checkbox" 
+                ref={deleteCheckboxRef}
+                className="w-5 h-5 rounded border-2 border-slate-300 text-slate-900 focus:ring-slate-900 cursor-pointer accent-slate-900" 
+              />
+            </div>
+            <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest select-none">Don't ask me again</span>
+          </div>
+
           <div className="flex gap-4">
             <button onClick={closeModal} className="flex-1 py-4 bg-slate-100 rounded-xl font-bold text-slate-600 hover:bg-slate-200">Cancel</button>
             <button
               onClick={async () => {
-                try {
-                if (type === 'event') await deleteDoc(doc(db, "events_v3", id));
-                if (type === 'institute') await deleteDoc(doc(db, "institutes_v3", id));
-                if (type === 'ticker') await deleteTickerItem(id);
-                if (type === 'ai_log') await deleteDoc(doc(db, "ai_chat_logs", id));
-                if (type === 'category') {
-                  const storedCats = localStorage.getItem('indus_categories');
-                  if (storedCats) {
-                    const cats = JSON.parse(storedCats);
-                    localStorage.setItem('indus_categories', JSON.stringify(cats.filter(c => c.id !== id)));
-                    window.dispatchEvent(new Event('storage')); // trigger update for AdminCategories
-                  }
+                if (deleteCheckboxRef.current?.checked) {
+                  setSkipDeleteConfirm(true);
+                  localStorage.setItem('indus_kiosk_skip_delete_confirm', 'true');
                 }
+                await performDelete(type, id);
                 closeModal();
-                } catch(err) { console.error(err); }
               }}
               className="flex-1 py-4 bg-red-500 rounded-xl font-black text-white hover:bg-red-600 shadow-[0_4px_15px_rgba(239,68,68,0.3)]"
             >
@@ -357,9 +375,14 @@ export default function Admin({ siteVariant = 'indus' }) {
 
   return (
     <div className="flex-1 bg-[#faf9f8] min-h-screen overflow-y-auto p-6 md:p-12 relative pb-32 font-medium">
-      <CenterModal isOpen={modalConfig.isOpen} onClose={closeModal} title={modalConfig.title}>
-        {modalConfig.content}
-      </CenterModal>
+        <CenterModal 
+          isOpen={modalConfig.isOpen} 
+          onClose={() => setModalConfig({ ...modalConfig, isOpen: false })} 
+          title={modalConfig.title}
+          maxWidth={modalConfig.maxWidth || 'max-w-sm'}
+        >
+          {modalConfig.content}
+        </CenterModal>
 
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12 border-b border-gray-200 pb-8">
@@ -436,7 +459,9 @@ export default function Admin({ siteVariant = 'indus' }) {
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               {aiLogs.map((log) => {
-                const extractName = (messages) => {
+                const extractName = (logData) => {
+                  if (logData.userName) return logData.userName;
+                  const messages = logData.messages;
                   if (!messages || !Array.isArray(messages)) return 'Anonymous Student';
                   const firstUserMsg = messages.find(m => m.role === 'user');
                   if (firstUserMsg) {
@@ -456,7 +481,7 @@ export default function Admin({ siteVariant = 'indus' }) {
                     <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-6">
                       <div className="min-w-0 flex-1">
                         <div className="text-[11px] font-black uppercase tracking-widest text-slate-400">Student Name / ID</div>
-                        <div className="mt-2 font-black text-slate-800 text-xl truncate">{extractName(log.messages)}</div>
+                        <div className="mt-2 font-black text-slate-800 text-xl truncate">{extractName(log)}</div>
                         <div className="mt-2 font-black text-slate-400 text-[11px] truncate">Device: {log.deviceId} | Session: {log.id}</div>
                       </div>
                       <div className="text-left md:text-right shrink-0">
@@ -478,15 +503,16 @@ export default function Admin({ siteVariant = 'indus' }) {
                         onClick={() => {
                           setModalConfig({
                             isOpen: true,
-                            title: `Transcript: ${extractName(log.messages)}`,
+                            title: `Chat History: ${extractName(log)}`,
+                            maxWidth: 'max-w-4xl',
                             content: (
-                              <div className="space-y-4 py-2">
+                              <div className="space-y-4 py-2 text-left">
                                 {log.messages?.map((msg, i) => (
-                                  <div key={i} className={`p-4 rounded-xl ${msg.role === 'user' ? 'bg-blue-50 border border-blue-100 ml-4' : 'bg-slate-50 border border-slate-100 mr-4'}`}>
-                                    <div className="text-[10px] font-black uppercase tracking-widest mb-2 opacity-50">
-                                      {msg.role === 'user' ? 'Student' : 'AI Assistant'}
+                                  <div key={i} className={`p-4 rounded-2xl ${msg.role === 'user' ? 'bg-blue-50 ml-8' : 'bg-slate-50 mr-8 border border-slate-100'}`}>
+                                    <div className="text-[10px] font-black uppercase tracking-wider text-slate-400 mb-1">{msg.role === 'user' ? 'Student' : 'Niaa'}</div>
+                                    <div className="text-sm font-medium text-slate-700 leading-relaxed transcript-content">
+                                      <ReactMarkdown>{msg.content}</ReactMarkdown>
                                     </div>
-                                    <div className="text-sm font-semibold text-slate-800 break-words whitespace-pre-wrap">{msg.content}</div>
                                   </div>
                                 ))}
                               </div>
@@ -804,6 +830,27 @@ export default function Admin({ siteVariant = 'indus' }) {
                       This password is shared across both the main site and WIIA.
                     </p>
                   </form>
+                </div>
+
+                <div className="mt-10 pt-10 border-t border-slate-100 text-left cursor-default">
+                  <h3 className="text-xl font-black mb-8 text-slate-800 uppercase tracking-widest leading-none">Administrative Preferences</h3>
+                  
+                  <div 
+                    className="flex items-center justify-between p-6 bg-slate-50 rounded-2xl border border-transparent hover:border-slate-200 transition-all cursor-pointer group"
+                    onClick={() => {
+                      const next = !skipDeleteConfirm;
+                      setSkipDeleteConfirm(next);
+                      localStorage.setItem('indus_kiosk_skip_delete_confirm', next ? 'true' : 'false');
+                    }}
+                  >
+                    <div className="select-none">
+                      <div className="text-[13px] font-black text-slate-800 uppercase tracking-widest">Confirm deletions</div>
+                      <p className="text-[11px] text-slate-400 font-bold mt-1.5 opacity-70">Show a popup before removing items</p>
+                    </div>
+                    <div className={`w-14 h-8 rounded-full transition-all duration-300 flex items-center p-1 ${!skipDeleteConfirm ? 'bg-emerald-500 shadow-[0_0_15px_-3px_rgba(16,185,129,0.5)]' : 'bg-slate-300'}`}>
+                      <div className={`w-6 h-6 bg-white rounded-full shadow-md transition-all duration-300 transform ${!skipDeleteConfirm ? 'translate-x-6' : 'translate-x-0'}`} />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="mt-auto pt-8 border-t border-slate-100">

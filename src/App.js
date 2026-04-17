@@ -213,8 +213,9 @@ function App() {
     localStorage.setItem(activePageStorageKey, activePage);
   }, [activePage, activePageStorageKey]);
 
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [admissionData, setAdmissionData] = useState(null);
+   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+   const [isAiOpen, setIsAiOpen] = useState(false);
+   const [admissionData, setAdmissionData] = useState(null);
 
   React.useEffect(() => {
     const handleScroll = (e) => {
@@ -440,11 +441,11 @@ function App() {
             <ScrollingTicker />
           </div>
         </div>
-        <AIAssistant />
-      </div>
-
-      {/* Unified Intelligent Scroll Controls */}
-      <div className="fixed bottom-20 right-4 md:bottom-24 md:right-10 flex flex-col gap-3 md:gap-4 z-[1000000]">
+         <AIAssistant isOpen={isAiOpen} setIsOpen={setIsAiOpen} />
+       </div>
+ 
+       {/* Unified Intelligent Scroll Controls */}
+       <div className={`fixed bottom-20 flex flex-col gap-3 md:gap-4 z-[1000000] transition-all duration-300 ${isAiOpen ? 'right-[520px]' : 'right-4 md:right-10 md:bottom-24'}`}>
         <button 
           onPointerDown={(e) => {
             e.preventDefault();
