@@ -255,7 +255,7 @@ const AIAssistant = () => {
                         ? 'bg-blue-600 text-white shadow-blue-200'
                         : 'bg-slate-100 border border-slate-200 text-slate-800 shadow-sm'
                       } shadow-md`}>
-                      <div className="prose prose-sm max-w-none">
+                      <div className={`prose prose-base md:prose-lg max-w-none prose-p:leading-relaxed prose-li:marker:text-inherit [&>*]:text-inherit ${msg.role === 'user' ? 'text-white' : 'text-slate-800'}`}>
                         <ReactMarkdown>{msg.content}</ReactMarkdown>
                       </div>
                     </div>
@@ -284,7 +284,7 @@ const AIAssistant = () => {
                     onChange={(e) => { setInput(e.target.value); resetTimer(); }}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Ask me about courses, fees, or anything..."
-                    className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 transition-all pr-12"
+                    className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-6 py-5 text-base md:text-lg font-medium focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 transition-all pr-12"
                   />
                   <button
                     onClick={handleSend}

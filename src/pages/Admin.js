@@ -480,7 +480,7 @@ export default function Admin({ siteVariant = 'indus' }) {
                                     <div className="text-[8px] font-black uppercase tracking-widest mb-1 opacity-50">
                                       {msg.role === 'user' ? 'Student' : 'AI Assistant'}
                                     </div>
-                                    <div className="text-xs font-medium text-slate-800 break-words whitespace-pre-wrap">{msg.content}</div>
+                                    <div className="text-sm font-semibold text-slate-800 break-words whitespace-pre-wrap">{msg.content}</div>
                                   </div>
                                 ))}
                               </div>
