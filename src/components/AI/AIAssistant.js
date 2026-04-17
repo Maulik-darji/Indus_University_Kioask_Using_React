@@ -34,39 +34,33 @@ const AIAssistant = () => {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [sessionId, setSessionId] = useState(null);
-  const [showResetWarning, setShowResetWarning] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(10); // Countdown for warning
+  const [timeLeft, setTimeLeft] = useState(60);
   const messagesEndRef = useRef(null);
-  const inactivityTimerRef = useRef(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const startInactivityTimer = () => {
-    clearTimeout(inactivityTimerRef.current);
-    inactivityTimerRef.current = setTimeout(() => {
-      setShowResetWarning(true);
-      setTimeLeft(10);
-    }, 50000); // 50 seconds
-  };
+  const resetTimer = () => setTimeLeft(60);
 
   useEffect(() => {
-    if (showResetWarning && timeLeft > 0) {
-      const timer = setInterval(() => {
-        setTimeLeft(prev => prev - 1);
-      }, 1000);
-      return () => clearInterval(timer);
-    } else if (showResetWarning && timeLeft === 0) {
-      handleReset();
+    let timer;
+    if (isOpen) {
+      if (timeLeft <= 0) {
+        handleReset();
+        return;
+      }
+      timer = setTimeout(() => setTimeLeft(prev => prev - 1), 1000);
+    } else {
+      setTimeLeft(60);
     }
-  }, [showResetWarning, timeLeft]);
+    return () => clearTimeout(timer);
+  }, [isOpen, timeLeft]);
 
   const handleReset = () => {
     setMessages([INITIAL_GREETING]);
     setSessionId(null);
-    setShowResetWarning(false);
-    clearTimeout(inactivityTimerRef.current);
+    setTimeLeft(60);
   };
 
   const syncToCloud = async (currentMessages, sId = sessionId) => {
@@ -97,11 +91,7 @@ const AIAssistant = () => {
   useEffect(() => {
     localStorage.setItem('indus_ai_messages', JSON.stringify(messages));
     scrollToBottom();
-    if (isOpen) {
-      startInactivityTimer();
-    }
-    return () => clearTimeout(inactivityTimerRef.current);
-  }, [messages, isOpen]);
+  }, [messages]);
 
   const handleSend = async () => {
     if (!input.trim() || isLoading) return;
@@ -111,8 +101,7 @@ const AIAssistant = () => {
     setMessages(newMessages);
     setInput('');
     setIsLoading(true);
-    setShowResetWarning(false);
-    startInactivityTimer();
+    resetTimer();
 
     // Models explicitly available on this specific API key
     const modelsToTry = [
@@ -213,17 +202,23 @@ const AIAssistant = () => {
             animate={{ x: 0 }}
             exit={{ x: '1000' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className={`absolute ${isFullScreen ? 'inset-0' : 'top-0 right-0 md:right-6 lg:right-8 h-full w-full md:w-[450px] lg:w-[500px] shadow-2xl'} z-[2000] bg-white/90 backdrop-blur-xl border-l border-gray-100 flex flex-col`}
+            onClick={resetTimer}
+            className={`absolute ${isFullScreen ? 'inset-0' : 'top-0 right-0 h-full w-full md:w-[450px] lg:w-[500px] shadow-[0_0_50px_rgba(0,0,0,0.15)]'} z-[9999999] bg-white/95 backdrop-blur-xl border-l border-gray-100 flex flex-col`}
           >
             {/* Header */}
-            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-blue-50 to-transparent">
+            <div className="pt-8 pb-6 px-6 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-blue-50 to-transparent">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-full overflow-hidden border border-gray-200 shadow-sm bg-white flex-shrink-0 relative">
                   <img src={NiaaImage} alt="Niaa AI" className="w-full h-full object-cover object-[center_15%] scale-[1.35]" />
                 </div>
                 <div>
                   <h3 className="font-bold text-gray-900 leading-none">Indus AI Assistant</h3>
-                  <p className="text-xs text-blue-600 font-medium mt-1">Online</p>
+                  <div className="text-[11px] text-blue-600 font-bold mt-1.5 flex items-center gap-2">
+                    <span>ONLINE</span>
+                    <span className="text-[9px] font-black tracking-widest uppercase text-slate-400 bg-white px-2 py-0.5 rounded-full border border-slate-200">
+                      Resets in {timeLeft}s
+                    </span>
+                  </div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -286,7 +281,7 @@ const AIAssistant = () => {
                   <input
                     type="text"
                     value={input}
-                    onChange={(e) => setInput(e.target.value)}
+                    onChange={(e) => { setInput(e.target.value); resetTimer(); }}
                     onKeyDown={(e) => e.key === 'Enter' && handleSend()}
                     placeholder="Ask me about courses, fees, or anything..."
                     className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-5 py-4 text-sm focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 transition-all pr-12"
@@ -294,7 +289,7 @@ const AIAssistant = () => {
                   <button
                     onClick={handleSend}
                     disabled={!input.trim() || isLoading}
-                    className="absolute right-2 w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200 hover:bg-blue-700 disabled:bg-gray-300 disabled:shadow-none transition-all active:scale-95"
+                    className="absolute right-2 w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200 hover:bg-blue-700 disabled:opacity-30 disabled:bg-blue-600 disabled:cursor-not-allowed disabled:shadow-none transition-all active:scale-95"
                   >
                     <span className="material-symbols-outlined">send</span>
                   </button>
@@ -308,49 +303,6 @@ const AIAssistant = () => {
         )}
       </AnimatePresence>
 
-      <AnimatePresence>
-        {showResetWarning && (
-          <div className="fixed inset-0 z-[3000] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm"
-            />
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="relative bg-white rounded-3xl shadow-2xl p-8 max-w-sm w-full text-center"
-            >
-              <div className="w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mx-auto mb-6 text-blue-600">
-                <span className="material-symbols-outlined !text-4xl">timer</span>
-              </div>
-              <h3 className="text-xl font-black text-slate-800 mb-2 uppercase tracking-tight">Still there?</h3>
-              <p className="text-slate-500 font-bold mb-8">
-                The chat will reset in <span className="text-blue-600">{timeLeft}</span> seconds to protect your privacy.
-              </p>
-              <div className="flex flex-col gap-3">
-                <button
-                  onClick={() => {
-                    setShowResetWarning(false);
-                    startInactivityTimer();
-                  }}
-                  className="w-full py-4 bg-blue-600 text-white rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-blue-700 transition-all shadow-lg shadow-blue-200 active:scale-95"
-                >
-                  Yes, Continue
-                </button>
-                <button
-                  onClick={handleReset}
-                  className="w-full py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-slate-200 transition-all border border-slate-200 active:scale-95"
-                >
-                  Reset Now
-                </button>
-              </div>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
     </>
   );
 };
