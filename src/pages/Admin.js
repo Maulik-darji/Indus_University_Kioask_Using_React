@@ -162,7 +162,13 @@ export default function Admin({ siteVariant = 'indus' }) {
       if (!ts) return '—';
       const d = typeof ts.toDate === 'function' ? ts.toDate() : new Date(ts);
       if (Number.isNaN(d.getTime())) return '—';
-      return d.toLocaleString();
+      
+      const day = String(d.getDate()).padStart(2, '0');
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const year = d.getFullYear();
+      const time = d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      return `${day}/${month}/${year}, ${time}`;
     } catch {
       return '—';
     }
