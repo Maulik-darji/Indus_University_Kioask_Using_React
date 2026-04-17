@@ -445,29 +445,29 @@ export default function Admin({ siteVariant = 'indus' }) {
                 return (
                   <div
                     key={log.id}
-                    className="rounded-[1.25rem] border border-slate-100 p-6 bg-white hover:border-blue-200 transition-all group"
+                    className="rounded-[1.25rem] border border-slate-100 p-8 bg-white hover:border-blue-200 transition-all group"
                   >
-                    <div className="flex justify-between items-start mb-4 gap-4">
+                    <div className="flex flex-col md:flex-row justify-between items-start mb-6 gap-6">
                       <div className="min-w-0 flex-1">
-                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Student Name / ID</div>
-                        <div className="mt-1 font-black text-slate-800 text-sm truncate">{extractName(log.messages)}</div>
-                        <div className="mt-1 font-black text-slate-400 text-[9px] truncate">Device: {log.deviceId} | Session: {log.id}</div>
+                        <div className="text-[11px] font-black uppercase tracking-widest text-slate-400">Student Name / ID</div>
+                        <div className="mt-2 font-black text-slate-800 text-xl truncate">{extractName(log.messages)}</div>
+                        <div className="mt-2 font-black text-slate-400 text-[11px] truncate">Device: {log.deviceId} | Session: {log.id}</div>
                       </div>
-                      <div className="text-right shrink-0">
-                        <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Last Activity</div>
-                        <div className="mt-1 font-bold text-slate-600 text-[10px]">{formatTs(log.updatedAt)}</div>
+                      <div className="text-left md:text-right shrink-0">
+                        <div className="text-[11px] font-black uppercase tracking-widest text-slate-400">Last Activity</div>
+                        <div className="mt-2 font-bold text-slate-600 text-[12px]">{formatTs(log.updatedAt)}</div>
                       </div>
                     </div>
                     
-                    <div className="flex items-center gap-4 mb-6">
-                      <div className="bg-blue-50 px-3 py-1 rounded-lg">
-                        <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">
+                    <div className="flex items-center gap-4 mb-8">
+                      <div className="bg-blue-50 px-4 py-2 rounded-lg">
+                        <span className="text-[12px] font-black text-blue-600 uppercase tracking-widest">
                           {log.messages?.length || 0} Messages
                         </span>
                       </div>
                     </div>
 
-                    <div className="flex gap-3">
+                    <div className="flex gap-4">
                       <button
                         onClick={() => {
                           setModalConfig({
@@ -477,7 +477,7 @@ export default function Admin({ siteVariant = 'indus' }) {
                               <div className="space-y-4 py-2">
                                 {log.messages?.map((msg, i) => (
                                   <div key={i} className={`p-4 rounded-xl ${msg.role === 'user' ? 'bg-blue-50 border border-blue-100 ml-4' : 'bg-slate-50 border border-slate-100 mr-4'}`}>
-                                    <div className="text-[8px] font-black uppercase tracking-widest mb-1 opacity-50">
+                                    <div className="text-[10px] font-black uppercase tracking-widest mb-2 opacity-50">
                                       {msg.role === 'user' ? 'Student' : 'AI Assistant'}
                                     </div>
                                     <div className="text-sm font-semibold text-slate-800 break-words whitespace-pre-wrap">{msg.content}</div>
@@ -487,13 +487,13 @@ export default function Admin({ siteVariant = 'indus' }) {
                             )
                           });
                         }}
-                        className="flex-1 py-3 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-black active:scale-95 transition-all shadow-lg shadow-slate-900/10"
+                        className="flex-1 py-4 rounded-xl bg-slate-900 text-white font-black text-xs uppercase tracking-[0.2em] hover:bg-black active:scale-95 transition-all shadow-lg shadow-slate-900/10"
                       >
                         View Transcript
                       </button>
                       <button
                         onClick={() => confirmDelete('ai_log', log.id, `Session ${log.id}`)}
-                        className="px-6 py-3 rounded-xl bg-red-50 text-red-600 font-black text-[10px] uppercase tracking-[0.2em] border border-red-100 hover:bg-red-100 active:scale-95 transition-all"
+                        className="px-8 py-4 rounded-xl bg-red-50 text-red-600 font-black text-xs uppercase tracking-[0.2em] border border-red-100 hover:bg-red-100 active:scale-95 transition-all"
                       >
                         Delete
                       </button>
