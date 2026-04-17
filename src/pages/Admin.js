@@ -50,6 +50,7 @@ export default function Admin({ siteVariant = 'indus' }) {
   const [newAdminForm, setNewAdminForm] = useState({ username: '', pass: '' });
   const [tickerForm, setTickerForm] = useState('');
   const [tickerFormIdx, setTickerFormIdx] = useState(null);
+  const [aiLogs, setAiLogs] = useState([]);
 
   // Initial Load
   useEffect(() => {
@@ -84,6 +85,13 @@ export default function Admin({ siteVariant = 'indus' }) {
       });
     }
 
+    // AI Logs - Realtime Cloud Sync
+    const qAi = query(collection(db, "ai_chat_logs"), orderBy("updatedAt", "desc"));
+    const unsubscribeAi = onSnapshot(qAi, (snapshot) => {
+      const items = snapshot.docs.map(doc => ({ ...doc.data(), id: doc.id }));
+      setAiLogs(items);
+    });
+
     setInquiryNumber(localStorage.getItem('indus_inquiry_number') || '+91 74054 13342');
 
     return () => {
@@ -91,6 +99,7 @@ export default function Admin({ siteVariant = 'indus' }) {
       unsubscribeEvents();
       unsubscribeInst();
       unsubscribeDevices();
+      unsubscribeAi();
     };
   }, [kioskAllowlistEnabled]);
 
@@ -384,6 +393,7 @@ export default function Admin({ siteVariant = 'indus' }) {
             { id: 'events', label: 'News & Events' },
             { id: 'institutes', label: 'Our Institutes' },
             { id: 'categories', label: 'Categories & Courses' },
+            { id: 'ai_logs', label: 'AI Chat Logs' },
             ...(kioskAllowlistEnabled ? [{ id: 'devices', label: 'Kiosk Devices' }] : []),
             { id: 'settings', label: 'Global Settings' },
             { id: 'admin', label: 'Personnel Admin' },
@@ -401,6 +411,83 @@ export default function Admin({ siteVariant = 'indus' }) {
         {/* Tab Contents */}
         {activeTab === 'categories' && (
           <AdminCategories confirmDelete={confirmDelete} setModalConfig={setModalConfig} siteVariant={siteVariant} />
+        )}
+
+        {activeTab === 'ai_logs' && (
+          <div className="bg-white p-10 rounded-[1.5rem] shadow-2xl border border-slate-100 fade-in mt-6">
+            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10 border-b border-slate-100 pb-8">
+              <div>
+                <h3 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">AI Assistant Chat Logs</h3>
+                <p className="text-slate-500 font-bold text-sm italic">
+                  Review student interactions and AI performance logs.
+                </p>
+              </div>
+              <div className="text-[10px] font-black uppercase tracking-[0.25em] text-slate-400">
+                Total Sessions: {aiLogs.length}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              {aiLogs.map((log) => (
+                <div
+                  key={log.id}
+                  className="rounded-[1.25rem] border border-slate-100 p-6 bg-white hover:border-blue-200 transition-all group"
+                >
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="min-w-0">
+                      <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Session ID</div>
+                      <div className="mt-1 font-black text-slate-800 text-[10px] truncate">{log.id}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[9px] font-black uppercase tracking-widest text-slate-400">Last Activity</div>
+                      <div className="mt-1 font-bold text-slate-600 text-[10px]">{formatTs(log.updatedAt)}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="bg-blue-50 px-3 py-1 rounded-lg">
+                      <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest">
+                        {log.messages?.length || 0} Messages
+                      </span>
+                    </div>
+                    <div className="text-[10px] font-bold text-slate-400 truncate flex-1">
+                      Device: {log.deviceId?.substring(0, 15)}...
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() => {
+                      setModalConfig({
+                        isOpen: true,
+                        title: 'Conversation Transcript',
+                        content: (
+                          <div className="space-y-4 py-2">
+                            {log.messages?.map((msg, i) => (
+                              <div key={i} className={`p-4 rounded-xl ${msg.role === 'user' ? 'bg-blue-50 border border-blue-100 ml-4' : 'bg-slate-50 border border-slate-100 mr-4'}`}>
+                                <div className="text-[8px] font-black uppercase tracking-widest mb-1 opacity-50">
+                                  {msg.role === 'user' ? 'Student' : 'AI Assistant'}
+                                </div>
+                                <div className="text-xs font-medium text-slate-800 break-words whitespace-pre-wrap">{msg.content}</div>
+                              </div>
+                            ))}
+                          </div>
+                        )
+                      });
+                    }}
+                    className="w-full py-3 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-black active:scale-95 transition-all shadow-lg shadow-slate-900/10"
+                  >
+                    View Full Transcript
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            {aiLogs.length === 0 && (
+              <div className="text-center py-20 opacity-30 font-black text-[10px] uppercase tracking-[0.3em]">
+                No chat records found yet
+              </div>
+            )}
+          </div>
         )}
 
         {activeTab === 'devices' && (

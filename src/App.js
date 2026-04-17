@@ -16,7 +16,7 @@ import AccessGate from './pages/AccessGate';
 import AdminSitePicker from './pages/AdminSitePicker';
 import { getOrCreateDeviceId } from './auth/deviceId';
 import { clearKioskSession, getKioskSession, isKioskSessionValid } from './auth/kioskSession';
-
+import AIAssistant from './components/AI/AIAssistant';
 function ScrollingTicker() {
   const [tickerItems, setTickerItems] = React.useState(() => {
     const cached = localStorage.getItem('indus_ticker_items_cache');
@@ -362,10 +362,11 @@ function App() {
         <main className="flex-1 min-w-0 h-full w-full overflow-hidden flex flex-col relative">
           <div
             id="main-scroll-container"
-            className={`w-full max-w-[1920px] mx-auto h-full overflow-y-auto px-4 md:px-10 lg:px-12 pb-28 md:pb-40 scroll-smooth ${
-              activePage === 'programs' ? 'pt-3 md:pt-4 pb-20 md:pb-24' : 'pt-5 md:pt-8 pb-28 md:pb-40'
-            }`}
+            className="w-full h-full overflow-y-auto scroll-smooth"
           >
+            <div className={`w-full max-w-[1920px] mx-auto px-4 md:px-10 lg:px-12 ${
+              activePage === 'programs' ? 'pt-3 md:pt-4 pb-20 md:pb-24' : 'pt-5 md:pt-8 pb-28 md:pb-40'
+            }`}>
             {/* Responsive Header Row */}
             <div className={`flex flex-col xl:flex-row xl:items-center justify-between ${activePage === 'programs' ? 'mb-2 md:mb-3 gap-3 md:gap-4' : 'mb-6 md:mb-8 gap-4 md:gap-6'}`}>
               <div className="flex items-center gap-4 flex-wrap">
@@ -429,6 +430,7 @@ function App() {
             <div className="fade-in max-w-full">
               {renderPage()}
             </div>
+            </div>
           </div>
         </main>
 
@@ -438,6 +440,7 @@ function App() {
             <ScrollingTicker />
           </div>
         </div>
+        <AIAssistant />
       </div>
 
       {/* Unified Intelligent Scroll Controls */}
@@ -467,7 +470,7 @@ function App() {
               setTimeout(() => { if (target.scrollTop === start) target.scrollTop -= 400; }, 40);
             }
           }}
-          className="w-12 h-12 md:w-16 md:h-16 bg-white border-2 border-slate-200 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex items-center justify-center text-slate-800 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer pointer-events-auto"
+          className="w-12 h-12 md:w-16 md:h-16 bg-white border-2 border-slate-200 rounded-full shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex items-center justify-center text-slate-800 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer pointer-events-auto"
         >
           <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M5 15l7-7 7 7" />
@@ -498,7 +501,7 @@ function App() {
               setTimeout(() => { if (target.scrollTop === start) target.scrollTop += 400; }, 40);
             }
           }}
-          className="w-12 h-12 md:w-16 md:h-16 bg-white border-2 border-slate-200 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex items-center justify-center text-slate-800 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer pointer-events-auto"
+          className="w-12 h-12 md:w-16 md:h-16 bg-white border-2 border-slate-200 rounded-full shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex items-center justify-center text-slate-800 hover:bg-slate-50 active:scale-95 transition-all cursor-pointer pointer-events-auto"
         >
           <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="4" d="M19 9l-7 7-7-7" />

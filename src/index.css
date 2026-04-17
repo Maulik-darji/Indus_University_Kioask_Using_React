@@ -126,6 +126,34 @@
     animation: ticker-scroll var(--ticker-duration, 40s) linear infinite;
   }
 
+/* AI Assistant Custom Styles */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.prose-sm p {
+  margin-bottom: 0.75rem;
+}
+.prose-sm p:last-child {
+  margin-bottom: 0;
+}
+.prose-sm ul, .prose-sm ol {
+  margin-left: 1rem;
+  margin-bottom: 0.75rem;
+  list-style-type: disc;
+}
+.prose-sm li {
+  margin-bottom: 0.25rem;
+}
+.prose-sm strong {
+  font-weight: 700;
+  color: #0f172a;
+}
+
   .ticker-group {
     display: inline-flex;
     align-items: center;

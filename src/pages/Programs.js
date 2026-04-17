@@ -431,7 +431,7 @@ const commonBtechEligibility = {
       title: 'Eligibility Criteria',
       items: [
         'Candidate must have passed 10+2 (Higher Secondary) examination in the Science stream from a recognized board.',
-        'Physics, Chemistry, and Mathematics (PCM) must be compulsory subjects.',
+        'Physics, Chemistry, and Mathematics (PCM) must be compulsory subjects with minimum 45% aggregate marks.',
       ],
     },
     { title: 'Program Duration', items: ['4 Years (8 Semesters)'] }
@@ -560,26 +560,26 @@ const getProgramEligibility = (categoryId, programName) => {
   } else if (categoryId === 'mtech') {
     e = { text: 'B.E/BTECH WITH MIN 50% IN RELEVANT FIELD OR EQUIVALENT FROM A RECOGNIZED UNIVERSITY', duration: '2 Years (4 Semesters)' };
   } else if (categoryId === 'bdes') {
-    e = { text: '10+2 OR EQUIVALENT FROM A RECOGNIZED BOARD', duration: '4 Years (8 Semesters)' };
+    e = { text: '10+2 OR EQUIVALENT FROM A RECOGNIZED BOARD WITH MIN 45%', duration: '4 Years (8 Semesters)' };
   } else if (categoryId === 'mdes') {
-    e = { text: 'GRADUATION IN DESIGN / ALLIED DISCIPLINES OR EQUIVALENT FROM A RECOGNIZED UNIVERSITY', duration: '2 Years (4 Semesters)' };
+    e = { text: 'GRADUATION IN DESIGN / ALLIED DISCIPLINES OR EQUIVALENT FROM A RECOGNIZED UNIVERSITY WITH MIN 45%', duration: '2 Years (4 Semesters)' };
   } else if (categoryId === 'bca') {
-    e = { text: '10+2 OR EQUIVALENT FROM A RECOGNIZED BOARD (SCIENCE/COMMERCE/ARTS)', duration: '3 Years (6 Semesters)' };
+    e = { text: '10+2 OR EQUIVALENT FROM A RECOGNIZED BOARD (SCIENCE/COMMERCE/ARTS) WITH MIN 45%', duration: '3 Years (6 Semesters)' };
   } else if (categoryId === 'mca') {
     e = { text: 'ANY GRADUATE FROM ANY RECOGNIZED UNIVERSITY WITH MIN 50% FOR GENEREAL 45% FOR SC/ST/SEBC/EWS', duration: '2 Years (4 Semesters)' };
   } else if (categoryId === 'mba-avia') {
     if (programName === 'BBA' || programName === 'BBA (General)' || programName === 'Aviation') {
-      e = { text: '10+2 WITH MATHS OR STATICS AS A SUBJECT OR EQUIVALENT', duration: '3 Years (6 Semesters)' };
+      e = { text: '10+2 WITH MATHS OR STATICS AS A SUBJECT OR EQUIVALENT WITH MIN 45%', duration: '3 Years (6 Semesters)' };
     } else {
       e = { text: 'ANY GRADUATE OR EQUIVALENT WITH MIN 50% FROM A RECOGNIZED UNIVERSITY', duration: '2 Years (4 Semesters)' };
     }
   } else if (categoryId === 'bsc') {
     if (programName.includes('Clinical Research') || programName.includes('Microbiology') || programName.includes('Micro Biology')) {
-      e = { text: '10+2 OR EQUIVALENT WITH PCB ONLY FROM A RECOGNIZED BOARD', duration: '3 Years (6 Semesters)' };
+      e = { text: '10+2 OR EQUIVALENT WITH PCB ONLY FROM A RECOGNIZED BOARD WITH MIN 45%', duration: '3 Years (6 Semesters)' };
     } else if (programName.includes('Mathematics') || programName.includes('Physics') || programName.includes('Chemistry')) {
-      e = { text: '10+2 OR EQUIVALENT WITH PCM ONLY FROM A RECOGNIZED BOARD', duration: '3 Years (6 Semesters)' };
+      e = { text: '10+2 OR EQUIVALENT WITH PCM ONLY FROM A RECOGNIZED BOARD WITH MIN 45%', duration: '3 Years (6 Semesters)' };
     } else {
-      e = { text: '10+2 WITH MATHS OR STATICS AS A SUBJECT OR EQUIVALENT FROM A RECOGNIZED BOARD', duration: '3 Years (6 Semesters)' };
+      e = { text: '10+2 WITH MATHS OR STATICS AS A SUBJECT OR EQUIVALENT FROM A RECOGNIZED BOARD WITH MIN 45%', duration: '3 Years (6 Semesters)' };
     }
   } else if (categoryId === 'msc') {
     if (programName.includes('Cyber Security')) {
@@ -592,13 +592,13 @@ const getProgramEligibility = (categoryId, programName) => {
       e = { text: 'BSC IN RELEVANT FIELD OR EQUIVALENT FROM A RECOGNIZED UNIVERSITY WITH MIN 50%', duration: '2 Years (4 Semesters)' };
     }
   } else if (categoryId === 'barch') {
-    e = { text: '10+2 (PCM) OR EQUIVALENT FROM A RECOGNIZED BOARD', duration: '5 Years (10 Semesters)' };
+    e = { text: '10+2 (PCM) OR EQUIVALENT FROM A RECOGNIZED BOARD WITH MIN 45%', duration: '5 Years (10 Semesters)' };
   } else if (categoryId === 'bcom') {
-    e = { text: '10+2 OR EQUIVALENT FROM A RECOGNIZED BOARD (COMMERCE PREFERRED)', duration: '3 Years (6 Semesters)' };
+    e = { text: '10+2 OR EQUIVALENT FROM A RECOGNIZED BOARD (COMMERCE PREFERRED) WITH MIN 45%', duration: '3 Years (6 Semesters)' };
   } else if (categoryId === 'ba') {
-    e = { text: '10+2 OR EQUIVALENT FROM A RECOGNIZED BOARD', duration: '3 Years (6 Semesters)' };
+    e = { text: '10+2 OR EQUIVALENT FROM A RECOGNIZED BOARD WITH MIN 45%', duration: '3 Years (6 Semesters)' };
   } else if (categoryId === 'bpharm') {
-    e = { text: '10+2 (PCB/PCM) OR EQUIVALENT FROM A RECOGNIZED BOARD', duration: '4 Years (8 Semesters)' };
+    e = { text: '10+2 (PCB/PCM) OR EQUIVALENT FROM A RECOGNIZED BOARD WITH MIN 45%', duration: '4 Years (8 Semesters)' };
   }
   return e;
 };
