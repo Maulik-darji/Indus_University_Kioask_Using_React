@@ -255,7 +255,7 @@ const AIAssistant = ({ isOpen, setIsOpen }) => {
             exit={{ x: '1000' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             onClick={resetTimer}
-            className={`absolute ${isFullScreen ? 'inset-0' : 'top-0 right-0 h-full w-full md:w-[450px] lg:w-[500px] shadow-[0_0_50px_rgba(0,0,0,0.15)]'} z-[9999999] bg-white/95 backdrop-blur-xl border-l border-gray-100 flex flex-col overflow-hidden`}
+            className={`absolute ${isFullScreen ? 'inset-0' : 'top-0 right-0 h-full w-full md:w-[450px] lg:w-[500px] xl:top-2 xl:right-2 xl:h-[calc(100%-16px)] xl:rounded-2xl shadow-[0_15px_40px_rgba(0,0,0,0.15)]'} z-[9999999] bg-white/95 backdrop-blur-xl border-l border-gray-100 flex flex-col overflow-hidden transition-all duration-300 ease-in-out`}
           >
             {/* Reset Warning Overlay */}
             <AnimatePresence>
