@@ -45,6 +45,7 @@ const AIAssistant = ({ isOpen, setIsOpen }) => {
   const [showResetWarning, setShowResetWarning] = useState(false);
   const [messageQueue, setMessageQueue] = useState([]);
   const messagesEndRef = useRef(null);
+  const scrollContainerRef = useRef(null);
   const messagesRef = useRef(messages);
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -361,74 +362,107 @@ User Question: ${currentQuestion}` }]
             </div>
 
             {/* Messages Area */}
-            <div className="flex-1 overflow-y-auto scrollbar-hide">
-              <div className={`mx-auto p-6 space-y-6 ${isFullScreen ? 'max-w-4xl' : 'w-full'}`}>
-                {messages.map((msg, idx) => (
-                  <motion.div
-                    key={idx}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
-                  >
-                    {/* Message Header (Name & Time) */}
-                    <div className={`flex items-center gap-2 mb-1.5 px-1 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-                      {msg.role === 'assistant' && (
-                        <div className="w-6 h-6 rounded-full overflow-hidden border border-gray-200 shadow-sm bg-white flex-shrink-0">
-                          <img src={NiaaImage} alt="Niaa" className="w-full h-full object-cover object-[center_15%] scale-[1.35]" />
-                        </div>
-                      )}
-                      <span className={`text-[11px] font-bold ${msg.role === 'user' ? 'text-blue-600' : 'text-gray-900'}`}>
-                        {msg.role === 'user' ? 'You' : 'Niaa'}
-                      </span>
-                      <span className="text-[10px] text-gray-400 font-medium">
-                        {msg.timestamp || 'Just now'}
-                      </span>
-                    </div>
+            <div className="flex-1 relative overflow-hidden flex flex-col">
+              <div ref={scrollContainerRef} className="flex-1 overflow-y-auto scrollbar-hide">
+                <div className={`mx-auto p-6 space-y-6 ${isFullScreen ? 'max-w-4xl' : 'w-full'}`}>
+                  {messages.map((msg, idx) => (
+                    <motion.div
+                      key={idx}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}
+                    >
+                      {/* Message Header (Name & Time) */}
+                      <div className={`flex items-center gap-2 mb-1.5 px-1 ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
+                        {msg.role === 'assistant' && (
+                          <div className="w-6 h-6 rounded-full overflow-hidden border border-gray-200 shadow-sm bg-white flex-shrink-0">
+                            <img src={NiaaImage} alt="Niaa" className="w-full h-full object-cover object-[center_15%] scale-[1.35]" />
+                          </div>
+                        )}
+                        <span className={`text-[11px] font-bold ${msg.role === 'user' ? 'text-blue-600' : 'text-gray-900'}`}>
+                          {msg.role === 'user' ? 'You' : 'Niaa'}
+                        </span>
+                        <span className="text-[10px] text-gray-400 font-medium">
+                          {msg.timestamp || 'Just now'}
+                        </span>
+                      </div>
 
-                    {/* Message Bubble */}
-                    <div className={`max-w-[85%] p-4 rounded-2xl ${msg.role === 'user'
-                        ? 'bg-blue-600 text-white shadow-blue-200'
-                        : 'bg-slate-100 border border-slate-200 text-slate-800 shadow-sm'
-                      } shadow-md`}>
-                      <div className={`prose prose-base md:prose-lg max-w-none prose-p:leading-relaxed prose-li:marker:text-inherit [&>*]:text-inherit ${msg.role === 'user' ? 'text-white' : 'text-slate-800'}`}>
-                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      {/* Message Bubble */}
+                      <div className={`max-w-[85%] p-4 rounded-2xl ${msg.role === 'user'
+                          ? 'bg-blue-600 text-white shadow-blue-200'
+                          : 'bg-slate-100 border border-slate-200 text-slate-800 shadow-sm'
+                        } shadow-md`}>
+                        <div className={`prose prose-base md:prose-lg max-w-none prose-p:leading-relaxed prose-li:marker:text-inherit [&>*]:text-inherit ${msg.role === 'user' ? 'text-white' : 'text-slate-800'}`}>
+                          <ReactMarkdown>{msg.content}</ReactMarkdown>
+                        </div>
+                      </div>
+                    </motion.div>
+                  ))}
+
+                  {/* Suggestion Chips */}
+                  {messages.length === 1 && !isLoading && (
+                    <div className="flex flex-col items-end gap-3 pt-2">
+                      <p className="text-[12px] text-gray-500 font-medium mr-2">Not sure what to ask? Choose something:</p>
+                      <div className="flex flex-wrap justify-end gap-2 max-w-[90%]">
+                        {SUGGESTED_QUESTIONS.map((q, i) => (
+                          <motion.button
+                            key={i}
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ delay: i * 0.1 }}
+                            onClick={() => handleSend(q)}
+                            className="px-4 py-2.5 bg-white border border-gray-200 rounded-full text-sm text-gray-700 font-medium shadow-sm hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all active:scale-95 text-right"
+                          >
+                            {q}
+                          </motion.button>
+                        ))}
                       </div>
                     </div>
-                  </motion.div>
-                ))}
+                  )}
+                  {isLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm flex gap-1">
+                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1 }} className="w-2 h-2 bg-blue-400 rounded-full"></motion.div>
+                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-2 h-2 bg-blue-500 rounded-full"></motion.div>
+                        <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-2 h-2 bg-blue-600 rounded-full"></motion.div>
+                      </div>
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+              </div>
 
-                {/* Suggestion Chips */}
-                {messages.length === 1 && !isLoading && (
-                  <div className="flex flex-col items-end gap-3 pt-2">
-                    <p className="text-[12px] text-gray-500 font-medium mr-2">Not sure what to ask? Choose something:</p>
-                    <div className="flex flex-wrap justify-end gap-2 max-w-[90%]">
-                      {SUGGESTED_QUESTIONS.map((q, i) => (
-                        <motion.button
-                          key={i}
-                          initial={{ opacity: 0, x: 20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          onClick={() => handleSend(q)}
-                          className="px-4 py-2.5 bg-white border border-gray-200 rounded-full text-sm text-gray-700 font-medium shadow-sm hover:border-blue-500 hover:bg-blue-50 hover:text-blue-700 transition-all active:scale-95 text-right"
-                        >
-                          {q}
-                        </motion.button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-                {isLoading && (
-                  <div className="flex justify-start">
-                    <div className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm flex gap-1">
-                      <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1 }} className="w-2 h-2 bg-blue-400 rounded-full"></motion.div>
-                      <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1, delay: 0.2 }} className="w-2 h-2 bg-blue-500 rounded-full"></motion.div>
-                      <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ repeat: Infinity, duration: 1, delay: 0.4 }} className="w-2 h-2 bg-blue-600 rounded-full"></motion.div>
-                    </div>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
+              {/* Floating Scroll Buttons for Chat Area */}
+              <div className="absolute bottom-6 right-6 flex flex-col gap-3 z-[50]">
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    if (scrollContainerRef.current) {
+                      scrollContainerRef.current.scrollBy({ top: -300, behavior: 'smooth' });
+                    }
+                  }}
+                  className="w-12 h-12 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-gray-700 hover:text-blue-600 transition-all"
+                >
+                  <span className="material-symbols-outlined !text-4xl">keyboard_arrow_up</span>
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    if (scrollContainerRef.current) {
+                      scrollContainerRef.current.scrollBy({ top: 300, behavior: 'smooth' });
+                    }
+                  }}
+                  className="w-12 h-12 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-gray-700 hover:text-blue-600 transition-all"
+                >
+                  <span className="material-symbols-outlined !text-4xl">keyboard_arrow_down</span>
+                </motion.button>
               </div>
             </div>
+
 
             {/* Input Area */}
             <div className="p-6 bg-white border-t border-gray-100 pb-10">
