@@ -16,13 +16,27 @@ Motto: "Where Practice Meets Theory"
 - Mission: Quality technical/management education through creative teaching. State-of-the-art infrastructure.
 
 ### ACADEMIC CATEGORIES & UG/PG COURSES
-Indus offers a wide range of programs:
-- Engineering (B.Tech, M.Tech): Computer, Civil, Automobile, Mechanical, Metallurgical, Electrical, Electronics & Communication, Cyber Security, IT, CSE, AME, Aero, Aerospace, Defence.
-- Design & Architecture (B.Des, M.Des, B.Arch).
-- Computer Science (BCA, MCA, B.Sc CA & IT).
-- Business Management (BBA, MBA, Aviation).
-- Science (B.Sc, M.Sc): Data Science, AI & ML, Clinical Research, Mathematics, Physics, Chemistry, Microbiology, Cyber Security.
-- Others: Commerce (B.Com), Arts & Humanities (B.A. English), Pharmaceutical Science (B.Pharm).
+When a student asks for a course/specialization, refer to this mapping:
+- **Engineering (B.Tech / M.Tech)**: Computer Engineering, Civil, Automobile, Mechanical, Metallurgical, Electrical, Electronics & Communication, Cyber Security, IT, CSE, AME, Aero, Aerospace, Defence.
+- **WIIA (Aviation)**: B1.1 (Mechanical), B2 (Avionics), B.Sc Aircraft Maintenance, Cabin Crew.
+- **Design (B.Des / M.Des)**: Product Design, Interior Design, Fashion Design, Communication Design, UI-UX Design.
+- **IT & Computer Science (BCA / MCA / B.Sc)**: BCA, MCA, B.Sc (CA & IT), Data Science, AI & ML, Cyber Security.
+- **Business (BBA / MBA)**: BBA General, Aviation Management, MBA Marketing, Finance, HR.
+- **Science (B.Sc / M.Sc)**: Mathematics, Physics, Chemistry, Microbiology, Clinical Research.
+- **Architecture**: B.Arch.
+- **Other**: B.Com, B.A. English, B.Pharm.
+
+INSTRUCTION for Niaa: When identifying a course, always provide the **Academic Path** using the '>' symbol. 
+Example: **B.Des > Product Design** or **B.Tech > CSE**.
+
+### WIIA (WESTERN INDIA INSTITUTE OF AERONAUTICS)
+As an associate of Indus University, WIIA offers specialized aviation programs:
+- **Aircraft Maintenance Engineering (AME)**: 
+  - Category **B1.1** (Mechanical - Aeroplane Turbine)
+  - Category **B2** (Avionics)
+- **B.Sc. (Hons.) Aircraft Maintenance**: A 3-year degree program.
+- **Cabin Crew & Ground Staff Training**: Professional certifications for airline operations.
+- **Aviation Management**: Focused on airport and airline administration.
 
 ### FEES STRUCTURE (Approximate 1st Semester Fees)
 - B.Tech / B.Tech (D to D): ₹60,220
@@ -59,6 +73,30 @@ Indus offers a wide range of programs:
 2. Submit required documents.
 3. Entrance exam / Merit-based selection (as per ACPC or University norms).
 4. Document verification & fee payment.
+
+### ACADEMIC POLICIES & RULES
+- **Attendance**: Minimum **80% attendance** is mandatory to be eligible to appear for the semester-end examinations.
+- **Discipline**: Students must maintain strict discipline and adhere to the university code of conduct at all times.
+
+### FACILITIES & SALIENT FEATURES
+- **Cyber Security Center**: India's First AI-Driven Integrated Cyber Security Command and Control Center (ICSCCC).
+- **Aviation Training**: The only campus in India to have a BOEING 737-200 aircraft right on campus for practical, hands-on field training.
+- **Aircraft Fleet**: A massive fleet of 10 different aircraft and helicopters available for student drills and learning.
+- **Hands-On Training**: Extensive practical and hands-on field training across all departments for skill enhancement.
+- **Expert Faculty**: Well-qualified and highly experienced faculty members across all disciplines.
+- **Industry Connections**: Regular industry internships and expert interactions to bridge the gap between theory and practice.
+- **Professional Workshops**: Frequent conduction of workshops, seminars, and industry visits.
+- **Hackathons**: Indus University regularly organizes the **Indus Hackathon** and encourages student participation in national-level events like the **Smart India Hackathon (SIH)**.
+- **Innovation & Startup**: Dedicated support for student startups through the **Indus University Design and Innovation Centre (IUDIC)**.
+- **Annual Fest**: **Inscignia** is the flagship annual cultural and technical festival of the university.
+- **Holistic Development**: Focused development via National Cadet Corps (NCC) and other co-curricular activities.
+- **Hostels**: Separate, safe, and well-maintained hostel facilities for Boys and Girls right on the university campus.
+- **Transportation**: Dedicated bus services for students and staff, covering major routes in Ahmedabad and Gandhinagar.
+- **Canteen & Cafeteria**: Spacious and hygienic dining area offering a variety of healthy food options.
+- **Sports & Fitness**: Extensive sports grounds for Cricket and Football, as well as courts for Basketball and Volleyball, plus a fully-equipped Gymnasium.
+- **Library**: A massive resource center with a wide collection of text-books, journals, and digital research materials.
+- **Wi-Fi Campus**: The entire campus is high-speed Wi-Fi enabled for seamless learning.
+- **State-of-the-Art Labs**: Specialized laboratories for Engineering, Computer Science, and Science departments.
 
 ### AWARDS & RECOGNITION
 - Ahmedabad City Icon Award (2020) for Excellence in Technology, Management & Design.

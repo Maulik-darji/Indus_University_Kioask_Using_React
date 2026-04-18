@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 
 const PROGRAM_KEY_ALIASES = {
@@ -2486,12 +2487,93 @@ function Programs({ setActivePage, setAdmissionData, siteVariant = 'indus' }) {
     }, 100);
   };
 
+  const [globalSearchQuery, setGlobalSearchQuery] = useState('');
+  
+  // Create a flat list of all programs across all categories for global search
+  const allPrograms = React.useMemo(() => {
+    const list = [];
+    categories.forEach(cat => {
+      cat.programs.forEach(prog => {
+        list.push({
+          name: prog,
+          category: cat
+        });
+      });
+    });
+    return list;
+  }, [categories]);
+
+  const filteredGlobalPrograms = globalSearchQuery.trim() === '' 
+    ? [] 
+    : allPrograms.filter(p => p.name.toLowerCase().includes(globalSearchQuery.toLowerCase())).slice(0, 8);
+
   if (!selectedCategory) {
     return (
       <div className="w-full flex-1 h-full overflow-hidden px-4 md:px-6 lg:px-8 pb-4 md:pb-6 fade-in">
+        {/* Global Search Header */}
+        <div className="max-w-4xl mx-auto mb-10 md:mb-16">
+          <div className="relative group">
+            <div className="absolute inset-y-0 left-6 flex items-center pointer-events-none">
+              <span className="material-symbols-outlined text-slate-400 group-focus-within:text-blue-600 transition-colors !text-3xl">search</span>
+            </div>
+            <input 
+              type="text" 
+              placeholder="Search for any course (e.g. AI, Cyber Security, Avionics...)" 
+              value={globalSearchQuery}
+              onChange={(e) => setGlobalSearchQuery(e.target.value)}
+              className="w-full pl-20 pr-8 py-3 bg-white border-2 border-slate-100 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.06)] focus:ring-12 focus:ring-blue-500/10 focus:border-blue-500 outline-none font-bold text-slate-800 transition-all placeholder:text-slate-300 text-lg md:text-xl"
+            />
+            
+            {/* Search Results Overlay */}
+            <AnimatePresence>
+              {filteredGlobalPrograms.length > 0 && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="absolute top-full left-0 right-0 mt-4 bg-white rounded-[2rem] shadow-[0_30px_100px_rgba(0,0,0,0.2)] border border-slate-100 overflow-hidden z-[1000]"
+                >
+                  <div className="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                    <span className="text-[10px] font-black text-slate-400 tracking-widest uppercase ml-4">Matching Programs</span>
+                    <button onClick={() => setGlobalSearchQuery('')} className="p-2 hover:bg-slate-200 rounded-full transition-colors">
+                      <span className="material-symbols-outlined !text-xl text-slate-500">close</span>
+                    </button>
+                  </div>
+                  <div className="max-h-[500px] overflow-y-auto custom-scrollbar">
+                    {filteredGlobalPrograms.map((res, i) => (
+                      <div 
+                        key={i}
+                        onClick={() => {
+                          setGlobalSearchQuery('');
+                          setSelectedCategory(res.category);
+                          setSelectedProgram(res.name);
+                        }}
+                        className="flex items-center justify-between p-5 hover:bg-blue-50 cursor-pointer transition-colors border-b border-slate-50 last:border-0 group"
+                      >
+                        <div className="flex items-center gap-5">
+                          <div className={`w-12 h-12 rounded-xl border-2 flex items-center justify-center bg-white ${res.category.color}`}>
+                            <span className={`material-symbols-outlined ${res.category.color.replace('border-', 'text-')}`}>
+                              {CATEGORY_CARD_ICONS[res.category.id] || 'school'}
+                            </span>
+                          </div>
+                          <div>
+                            <h4 className="font-black text-slate-900 leading-tight group-hover:text-blue-700 transition-colors uppercase">{res.name}</h4>
+                            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-1">{res.category.label}</p>
+                          </div>
+                        </div>
+                        <span className="material-symbols-outlined text-slate-300 group-hover:text-blue-600 group-hover:translate-x-1 transition-all">chevron_right</span>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+
         {/* Categories Cards Grid */}
         <div
-          className={`grid gap-6 md:gap-10 overflow-y-visible px-4 md:px-8 pt-5 md:pt-8 pb-8 md:pb-12 -mx-4 md:-mx-8 content-start items-start ${
+          className={`grid gap-6 md:gap-10 overflow-y-visible px-4 md:px-8 pt-0 pb-8 md:pb-12 -mx-4 md:-mx-8 content-start items-start ${
             isWiia
               ? 'max-w-5xl mx-auto grid-cols-1 md:grid-cols-2 lg:grid-cols-2'
               : 'grid-cols-[repeat(auto-fit,minmax(240px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(280px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]'
