@@ -2583,10 +2583,10 @@ function Programs({ setActivePage, setAdmissionData, siteVariant = 'indus' }) {
 
         {/* Categories Cards Grid */}
         <div
-          className={`grid gap-6 md:gap-10 overflow-y-visible px-4 md:px-8 pt-0 pb-8 md:pb-12 -mx-4 md:-mx-8 content-start items-start ${
+          className={`grid gap-4 md:gap-7 lg:gap-10 overflow-y-visible px-4 md:px-8 pt-0 pb-8 md:pb-12 -mx-4 md:-mx-8 content-start items-start ${
             isWiia
               ? 'max-w-5xl mx-auto grid-cols-1 md:grid-cols-2 lg:grid-cols-2'
-              : 'grid-cols-[repeat(auto-fit,minmax(240px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(280px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]'
+              : 'grid-cols-[repeat(auto-fit,minmax(200px,1fr))] sm:grid-cols-[repeat(auto-fit,minmax(230px,1fr))] md:grid-cols-[repeat(auto-fit,minmax(250px,1fr))] lg:grid-cols-[repeat(auto-fit,minmax(280px,1fr))] xl:grid-cols-[repeat(auto-fit,minmax(300px,1fr))]'
           }`}
         >
            {categories.map((cat) => (
@@ -2596,8 +2596,8 @@ function Programs({ setActivePage, setAdmissionData, siteVariant = 'indus' }) {
                    saveMainScroll('categories');
                    setSelectedCategory(cat);
                  }}
-                 className={`rounded-[2.5rem] p-6 md:p-7 lg:p-8 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] border-t-[22px] md:border-t-[28px] ${cat.color} ${cat.lightBg || 'bg-slate-100'} relative overflow-hidden group hover:shadow-2xl transition-all duration-700 cursor-pointer hover:-translate-y-2 flex flex-col justify-between ${
-                   isWiia ? 'h-[260px] md:h-[300px] lg:h-[320px]' : 'aspect-[4/3] md:aspect-square'
+                 className={`rounded-[2rem] md:rounded-[2.5rem] p-5 md:p-6 shadow-[0_20px_60px_-15px_rgba(0,0,0,0.12)] border-t-[18px] md:border-t-[24px] ${cat.color} ${cat.lightBg || 'bg-slate-100'} relative overflow-hidden group hover:shadow-2xl transition-all duration-700 cursor-pointer hover:-translate-y-2 flex flex-col justify-between ${
+                   isWiia ? 'h-[260px] md:h-[300px] lg:h-[320px]' : 'aspect-[4/3.2] xl:aspect-square md:aspect-square'
                  }`}
              >
               <div className={`absolute inset-0 ${cat.bgColor} opacity-10 group-hover:opacity-20 transition-opacity duration-700`}></div>
@@ -2615,17 +2615,17 @@ function Programs({ setActivePage, setAdmissionData, siteVariant = 'indus' }) {
                
               <div className="relative z-10 flex-1 flex flex-col">
                 {/* Icon chip */}
-                <div className="mb-4">
-                  <div className="w-14 h-14 md:w-16 md:h-16 rounded-2xl bg-white/60 border border-white/70 flex items-center justify-center">
-                    <span className={`material-symbols-outlined !text-[30px] md:!text-[34px] ${cat.color.replace('border-', 'text-')}`}>
+                <div className="mb-3 md:mb-4">
+                  <div className="w-11 h-11 md:w-14 md:h-14 lg:w-16 lg:h-16 rounded-xl md:rounded-2xl bg-white/60 border border-white/70 flex items-center justify-center">
+                    <span className={`material-symbols-outlined !text-[24px] md:!text-[28px] lg:!text-[34px] ${cat.color.replace('border-', 'text-')}`}>
                       {CATEGORY_CARD_ICONS[cat.id] || 'school'}
                     </span>
                   </div>
                 </div>
-                <div className={`text-[10px] font-black tracking-[0.15em] mb-3 uppercase mt-1 ${cat.color.replace('border-', 'text-')}`}>
+                <div className={`text-[9px] md:text-[10px] font-black tracking-[0.15em] mb-2 md:mb-3 uppercase mt-0.5 ${cat.color.replace('border-', 'text-')}`}>
                   {cat.badge}
                 </div>
-                <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 leading-[1.1] mb-2 tracking-tight">
+                <h3 className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-black text-slate-900 leading-[1.1] mb-2 tracking-tight">
                   {cat.label}
                 </h3>
               </div>

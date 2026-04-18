@@ -25,7 +25,7 @@ function Sidebar({ activePage, setActivePage, siteVariant = 'indus', isOpen, set
   return (
     <>
       <aside 
-        className={`fixed inset-y-0 left-0 z-50 bg-white flex flex-col justify-between border-r border-gray-200 transition-all duration-300 ease-in-out md:sticky md:top-0 md:h-screen ${
+        className={`fixed inset-y-0 left-0 z-50 bg-white flex flex-col justify-between border-r border-gray-200 transition-all duration-300 ease-in-out md:sticky md:top-0 md:h-full ${
           isOpen 
             ? 'w-72 p-6 translate-x-0 opacity-100' 
             : 'w-24 p-4 -translate-x-full opacity-100 md:translate-x-0'

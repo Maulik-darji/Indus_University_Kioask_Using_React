@@ -228,6 +228,21 @@ function App() {
    const [isAiOpen, setIsAiOpen] = useState(false);
    const [admissionData, setAdmissionData] = useState(null);
 
+  useEffect(() => {
+    const handleSync = () => {
+      // Threshold 1370px to cover 7-12 inch tablets including high-res ones (like iPad Pro 12.9" at 1024 or 1366 scales)
+      if (window.innerWidth < 1370) {
+        setIsSidebarOpen(!isAiOpen);
+      }
+    };
+
+    handleSync();
+    
+    // Add resize listener to ensure it stays synced during orientation changes
+    window.addEventListener('resize', handleSync);
+    return () => window.removeEventListener('resize', handleSync);
+  }, [isAiOpen]);
+
   React.useEffect(() => {
     const handleScroll = (e) => {
       // Only handle if no modal is open (modals handle their own kiosk-scroll)
@@ -333,7 +348,7 @@ function App() {
   }
 
   return (
-    <div className="flex flex-col md:flex-row h-screen w-full overflow-hidden bg-[#f2f0ee]">
+    <div className="flex flex-col md:flex-row h-[100dvh] w-full overflow-hidden bg-[#f2f0ee] selection:bg-blue-100">
       <header className="flex items-center justify-between p-4 bg-white border-b border-gray-200 md:hidden sticky top-0 z-50">
         <div className="flex items-center gap-4">
           <button className="p-2 text-2xl hover:bg-gray-100 rounded-lg transition-colors" onClick={() => setIsSidebarOpen(true)}>&#9776;</button>
@@ -370,30 +385,30 @@ function App() {
         }}
       />
 
-      <div className="flex-1 min-w-0 flex flex-col h-full overflow-hidden relative">
+      <div className="flex-1 min-w-0 flex flex-col overflow-hidden relative">
         {/* Main Content Workspace - Shrinks on XL screens when AI is open */}
         <motion.div 
           layout
-          className={`flex-1 min-w-0 flex flex-col h-full overflow-hidden relative transition-all duration-300 ease-in-out origin-right 
-            ${isAiOpen ? 'xl:mr-[510px] xl:scale-[0.99] xl:rounded-2xl xl:shadow-[0_10px_40px_rgba(0,0,0,0.08)] xl:my-2 xl:ml-2 xl:border xl:border-white/30 bg-[#f2f0ee]' : 'bg-[#f2f0ee]'}`}
+          className={`flex-1 min-w-0 flex flex-col overflow-hidden relative transition-all duration-300 ease-in-out origin-right 
+            ${isAiOpen ? 'md:mr-[450px] lg:mr-[500px] xl:mr-[510px] xl:scale-[0.99] xl:rounded-2xl xl:shadow-[0_10px_40px_rgba(0,0,0,0.08)] xl:my-2 xl:ml-2 xl:border xl:border-white/30 bg-[#f2f0ee]' : 'bg-[#f2f0ee]'}`}
         >
-          <main className="flex-1 min-w-0 h-full w-full overflow-hidden flex flex-col relative">
+          <main className="flex-1 min-w-0 w-full overflow-hidden flex flex-col relative">
             <div
               id="main-scroll-container"
-              className="w-full h-full overflow-y-auto scroll-smooth"
+              className="w-full flex-1 overflow-y-auto scroll-smooth"
             >
               <div className={`w-full max-w-[1920px] mx-auto px-4 md:px-10 lg:px-12 ${
-                activePage === 'programs' ? 'pt-3 md:pt-4 pb-20 md:pb-24' : 'pt-5 md:pt-8 pb-28 md:pb-40'
+                activePage === 'programs' ? 'pt-2 md:pt-4 pb-32 md:pb-48' : 'pt-4 md:pt-8 pb-40 md:pb-56'
               }`}>
               {/* Responsive Header Row */}
               <div className={`flex flex-col xl:flex-row xl:items-center justify-between ${activePage === 'programs' ? 'mb-2 md:mb-3 gap-3 md:gap-4' : 'mb-6 md:mb-8 gap-4 md:gap-6'}`}>
                 <div className="flex items-center gap-4 flex-wrap">
                   <button 
                     onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-                    className="hidden md:flex items-center justify-center p-3.5 bg-white border border-gray-100 shadow-sm rounded-2xl text-gray-700 hover:text-blue-600 hover:shadow-md hover:-translate-y-0.5 transition-all outline-none active:scale-95"
+                    className="hidden md:flex items-center justify-center p-3 bg-white border border-gray-100 shadow-sm rounded-2xl text-gray-700 hover:text-blue-600 hover:shadow-md hover:-translate-y-0.5 transition-all outline-none active:scale-95 transition-all"
                     title={isSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-6 w-6 transition-transform duration-300 ${isSidebarOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 md:h-6 md:w-6 transition-transform duration-300 ${isSidebarOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
                     </svg>
                   </button>
@@ -404,12 +419,12 @@ function App() {
                         if (activePage === 'committees') setActivePage('about');
                         else setActivePage('home');
                       }}
-                      className="flex items-center gap-3 bg-white border border-gray-100 shadow-sm px-6 py-3.5 rounded-2xl text-gray-700 hover:text-blue-600 font-bold text-sm tracking-wider uppercase hover:shadow-md hover:-translate-y-0.5 transition-all outline-none group active:scale-95"
+                      className="flex items-center gap-2 md:gap-3 bg-white border border-gray-100 shadow-sm px-4 md:px-6 py-2.5 md:py-3.5 rounded-2xl text-gray-700 hover:text-blue-600 font-bold text-xs md:text-sm tracking-wider uppercase hover:shadow-md hover:-translate-y-0.5 transition-all outline-none group active:scale-95"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 md:h-5 md:w-5 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                       </svg>
-                      <span>{activePage === 'committees' ? 'About Indus' : 'Home'}</span>
+                      <span>{activePage === 'committees' ? 'About' : 'Home'}</span>
                     </button>
                   )}
                 </div>
