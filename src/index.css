@@ -149,9 +149,14 @@
 .prose-sm li {
   margin-bottom: 0.25rem;
 }
-.prose-sm strong {
-  font-weight: 700;
-  color: #0f172a;
+.prose-sm strong, .prose strong {
+  font-weight: 750;
+  color: #1a1a1a;
+  letter-spacing: -0.01em;
+}
+.prose-base strong, .prose-lg strong {
+  font-weight: 800;
+  color: #111111;
 }
 
   .ticker-group {
