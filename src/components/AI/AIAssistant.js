@@ -115,6 +115,17 @@ const AIAssistant = ({ isOpen, setIsOpen }) => {
     scrollToBottom();
   }, [messages]);
 
+  // Scroll to bottom when sidebar is opened
+  useEffect(() => {
+    if (isOpen) {
+      // Small timeout to ensure the DOM is rendered and animation has started
+      const timer = setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   const handleSend = async (forcedInput = null) => {
     const messageText = forcedInput || input;
     if (!messageText.trim()) return;
