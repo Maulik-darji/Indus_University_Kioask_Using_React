@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { db } from './firebase';
 import { collection, onSnapshot, query, orderBy } from "firebase/firestore";
@@ -18,6 +18,8 @@ import AdminSitePicker from './pages/AdminSitePicker';
 import { getOrCreateDeviceId } from './auth/deviceId';
 import { clearKioskSession, getKioskSession, isKioskSessionValid } from './auth/kioskSession';
 import AIAssistant from './components/AI/AIAssistant';
+import normalFavicon from './images/University Logo/smallicon_sidebar.png';
+import wiiaFavicon from './images/University Logo/WIIA.png';
 function ScrollingTicker() {
   const [tickerItems, setTickerItems] = React.useState(() => {
     const cached = localStorage.getItem('indus_ticker_items_cache');
@@ -147,6 +149,14 @@ function App() {
     if (adminTarget === 'wiia') return 'wiia';
     return 'indus';
   }, [adminTarget]);
+
+  // Dynamically set favicon based on site variant (normal or WIIA)
+  useEffect(() => {
+    const link = document.querySelector("link[rel~='icon']") || document.createElement('link');
+    link.rel = 'icon';
+    link.href = siteVariant === 'wiia' ? wiiaFavicon : normalFavicon;
+    document.head.appendChild(link);
+  }, [siteVariant]);
 
   const activePageStorageKey = siteVariant === 'wiia' ? 'wiia_active_page' : 'indus_active_page';
 
