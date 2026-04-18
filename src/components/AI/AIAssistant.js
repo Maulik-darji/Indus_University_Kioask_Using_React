@@ -8,20 +8,14 @@ import { getOrCreateDeviceId } from '../../auth/deviceId';
 import { UNIVERSITY_KNOWLEDGE } from '../../data/universityInfo';
 import NiaaImage from './Niaa_image.png';
 
-const kSegments = [
-  'AIzaSyDpHv2k',
-  'tNahy0P9t53O',
-  'ccdd1d1VP0',
-  'YyMUk'
-];
-const geminiApiKey = (process.env.REACT_APP_GEMINI_API_KEY || process.env.GEMINI_API_KEY || kSegments.join('')).trim();
+const geminiApiKey = (process.env.REACT_APP_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '').trim();
 const genAI = geminiApiKey ? new GoogleGenerativeAI(geminiApiKey) : null;
 
 const getCurrentTime = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
 const INITIAL_GREETING = { 
   role: 'assistant', 
-  content: 'Hello! I am Niaa, your Indus AI Assistant. What is your name and how can I help you today?',
+  content: 'Hello! I am Niaa, your AI Assistant. What is your name and how can I help you today?',
   timestamp: getCurrentTime()
 };
 
