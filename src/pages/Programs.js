@@ -2521,8 +2521,18 @@ function Programs({ setActivePage, setAdmissionData, siteVariant = 'indus' }) {
               placeholder="Search for any course (e.g. AI, Cyber Security, Avionics...)" 
               value={globalSearchQuery}
               onChange={(e) => setGlobalSearchQuery(e.target.value)}
-              className="w-full pl-20 pr-8 py-3 bg-white border-2 border-slate-100 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.06)] focus:ring-12 focus:ring-blue-500/10 focus:border-blue-500 outline-none font-bold text-slate-800 transition-all placeholder:text-slate-300 text-lg md:text-xl"
+              className="w-full pl-20 pr-16 py-3 bg-white border-2 border-slate-100 rounded-[2.5rem] shadow-[0_20px_50px_rgba(0,0,0,0.06)] focus:ring-12 focus:ring-blue-500/10 focus:border-blue-500 outline-none font-bold text-slate-800 transition-all placeholder:text-slate-300 text-lg md:text-xl"
             />
+            {globalSearchQuery && (
+              <button 
+                onClick={() => setGlobalSearchQuery('')}
+                className="absolute inset-y-0 right-5 flex items-center justify-center"
+              >
+                <div className="w-9 h-9 rounded-full bg-red-500/15 flex items-center justify-center text-red-500 shadow-sm hover:bg-red-500/25 hover:scale-110 active:scale-95 transition-all">
+                  <span className="material-symbols-outlined !text-2xl !font-bold">close</span>
+                </div>
+              </button>
+            )}
             
             {/* Search Results Overlay */}
             <AnimatePresence>
@@ -2676,8 +2686,18 @@ function Programs({ setActivePage, setAdmissionData, siteVariant = 'indus' }) {
               placeholder="Search programs..." 
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-12 pr-4 py-3 md:py-4 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-8 focus:ring-blue-500/10 focus:border-blue-500 outline-none font-bold text-slate-700 transition-all placeholder:text-slate-300 text-sm"
+              className="w-full pl-12 pr-12 py-3 md:py-4 bg-white border border-slate-200 rounded-2xl shadow-sm focus:ring-8 focus:ring-blue-500/10 focus:border-blue-500 outline-none font-bold text-slate-700 transition-all placeholder:text-slate-300 text-sm"
             />
+            {searchQuery && (
+              <button 
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-3 flex items-center justify-center"
+              >
+                <div className="w-7 h-7 rounded-full bg-red-500/15 flex items-center justify-center text-red-500 shadow-sm hover:bg-red-500/25 hover:scale-110 active:scale-95 transition-all">
+                  <span className="material-symbols-outlined !text-[18px] !font-bold">close</span>
+                </div>
+              </button>
+            )}
           </div>
         </div>
       </div>
