@@ -146,10 +146,11 @@ const AIAssistant = ({ isOpen, setIsOpen }) => {
       setIsLoading(true);
 
       const modelsToTry = [
-        'gemini-2.5-flash-lite',
+        'gemini-3.1-flash',
+        'gemini-3.1-flash-lite',
+        'gemini-3-flash',
         'gemini-2.5-flash',
-        'gemini-2.0-flash-lite',
-        'gemini-2.0-flash'
+        'gemini-1.5-flash'
       ];
       let success = false;
       let sId = sessionId;
@@ -161,8 +162,10 @@ const AIAssistant = ({ isOpen, setIsOpen }) => {
         if (!fullHistory) throw new Error('History synchronization failed');
 
         const historyMessages = [];
+        // Skip the initial greeting for history
         for (let i = 1; i < fullHistory.length; i++) {
           const msg = fullHistory[i];
+          // Stop if we reach the current question (which was already pushed to messages state)
           if (msg.role === 'user' && msg.content === currentQuestion) break;
           historyMessages.push({
             role: msg.role === 'assistant' ? 'model' : 'user',
@@ -175,9 +178,10 @@ const AIAssistant = ({ isOpen, setIsOpen }) => {
         for (const modelId of modelsToTry) {
           if (success) break;
           try {
-            console.log(`AI Queue: Direct Fetch (v1) using model "${modelId}"...`);
+            console.log(`AI Queue: Official SDK using model "${modelId}"...`);
             
-            // Format history for the API call
+            const model = genAI.getGenerativeModel({ model: modelId });
+            
             const apiContents = [...historyMessages, {
               role: 'user',
               parts: [{ text: `You are the official Niaa AI Assistant for Indus University.
@@ -204,22 +208,11 @@ ${UNIVERSITY_KNOWLEDGE}
 User Question: ${currentQuestion}` }]
             }];
 
-            const response = await fetch(
-              `https://generativelanguage.googleapis.com/v1/models/${modelId}:generateContent?key=${geminiApiKey}`,
-              {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ contents: apiContents })
-              }
-            );
+            const result = await model.generateContent({ contents: apiContents });
+            const response = await result.response;
+            const text = response.text();
 
-            if (!response.ok) {
-              const errorData = await response.json();
-              throw new Error(errorData.error?.message || `HTTP ${response.status}`);
-            }
-
-            const data = await response.json();
-            const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "No response received.";
+            if (!text) throw new Error("Empty response received.");
 
             setMessages(prev => {
               const finalMessages = [...prev, { role: 'assistant', content: text, timestamp: getCurrentTime() }];
@@ -229,6 +222,10 @@ User Question: ${currentQuestion}` }]
             success = true;
           } catch (err) {
             console.warn(`Model "${modelId}" failed:`, err.message);
+            // If the error indicates invalid key, don't bothering trying other models
+            if (err.message.includes("API key not valid")) {
+              throw new Error('INVALID_API_KEY');
+            }
           }
         }
 
@@ -236,12 +233,19 @@ User Question: ${currentQuestion}` }]
 
       } catch (error) {
         console.error('AI Queue Error:', error);
+        
         const isKeyMissing = error.message === 'GEMINI_KEY_MISSING';
+        const isInvalidKey = error.message === 'INVALID_API_KEY' || error.message.includes('API key not valid');
+        
+        let errorMessage = `I'm having trouble connecting right now. Please try again in a few seconds!`;
+        
+        if (isKeyMissing || isInvalidKey) {
+          errorMessage = `⚠️ **Gemini API key ${isKeyMissing ? 'is not configured' : 'is invalid or expired'}.**\n\nTo activate me, please:\n1. Go to [aistudio.google.com](https://aistudio.google.com) and create a free API key\n2. Open \`.env.local\` in your project root\n3. Update: \`REACT_APP_GEMINI_API_KEY=your_working_key\`\n4. Restart the dev server (Ctrl+C → npm start)`;
+        }
+
         setMessages(prev => [...prev, {
           role: 'assistant',
-          content: isKeyMissing
-            ? `⚠️ **Gemini API key is not configured.**\n\nTo activate me, please:\n1. Go to [aistudio.google.com](https://aistudio.google.com) and create a free API key\n2. Open \`.env.local\` in your project root\n3. Add: \`REACT_APP_GEMINI_API_KEY=your_key_here\`\n4. Restart the dev server (Ctrl+C → npm start)`
-            : `I'm having trouble connecting right now. Please try again in a few seconds!`,
+          content: errorMessage,
           timestamp: getCurrentTime()
         }]);
       } finally {
