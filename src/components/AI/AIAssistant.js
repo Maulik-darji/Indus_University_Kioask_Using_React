@@ -9,6 +9,9 @@ import { UNIVERSITY_KNOWLEDGE } from '../../data/universityInfo';
 import NiaaImage from './Niaa_image.png';
 
 const geminiApiKey = (process.env.REACT_APP_GEMINI_API_KEY || process.env.GEMINI_API_KEY || '').trim();
+if (geminiApiKey) {
+  console.log('AI System: Using Key from', process.env.REACT_APP_GEMINI_API_KEY ? 'REACT_APP_GEMINI_API_KEY' : 'GEMINI_API_KEY', `(${geminiApiKey.substring(0, 6)}...${geminiApiKey.slice(-4)})`);
+}
 const genAI = geminiApiKey ? new GoogleGenerativeAI(geminiApiKey) : null;
 
 const getCurrentTime = () => new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -146,11 +149,7 @@ const AIAssistant = ({ isOpen, setIsOpen }) => {
       setIsLoading(true);
 
       const modelsToTry = [
-        'gemini-3.1-flash',
-        'gemini-3.1-flash-lite',
-        'gemini-3-flash',
-        'gemini-2.5-flash',
-        'gemini-1.5-flash'
+        'gemini-2.5-flash'
       ];
       let success = false;
       let sId = sessionId;
@@ -200,7 +199,12 @@ STRICT RULES:
    2. **Design (B.Des)**
    - Product Design
    - Communication Design
-6. For eligibility or "Can I..." questions, ALWAYS start the response with a clear **Yes** or **No** before providing the explanation.
+6. **ADMISSION INQUIRIES**:
+   - If a user asks "Can I get admission?" or similar without specifying a field: Do NOT list all criteria. Instead, ask them which **field or course** they are interested in.
+   - If they have specified a field but HAVEN'T mentioned their 12th grade percentage: Ask them: "What was your **percentage in 12th grade**?" so you can give a definitive answer.
+   - Once you have both the field and the percentage, use the context below to give a clear **Yes** or **No** for eligibility.
+
+7. For general eligibility or "Can I..." questions where all info is present, ALWAYS start the response with a clear **Yes** or **No** before providing the explanation.
 
 Context:
 ${UNIVERSITY_KNOWLEDGE}

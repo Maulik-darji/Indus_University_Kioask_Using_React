@@ -390,7 +390,7 @@ function App() {
         <motion.div 
           layout
           className={`flex-1 min-w-0 flex flex-col overflow-hidden relative transition-all duration-300 ease-in-out origin-right 
-            ${isAiOpen ? 'md:mr-[450px] lg:mr-[500px] xl:mr-[510px] xl:scale-[0.99] xl:rounded-2xl xl:shadow-[0_10px_40px_rgba(0,0,0,0.08)] xl:my-2 xl:ml-2 xl:border xl:border-white/30 bg-[#f2f0ee]' : 'bg-[#f2f0ee]'}`}
+            ${isAiOpen ? 'md:mr-[400px] lg:mr-[450px] xl:mr-[500px] bg-[#f2f0ee]' : 'bg-[#f2f0ee]'}`}
         >
           <main className="flex-1 min-w-0 w-full overflow-hidden flex flex-col relative">
             <div
@@ -479,7 +479,7 @@ function App() {
       </div>
  
        {/* Unified Intelligent Scroll Controls */}
-       <div className={`fixed bottom-20 flex flex-col gap-3 md:gap-4 z-[1000000] transition-all duration-300 ${isAiOpen ? 'right-[525px]' : 'right-4 md:right-10 md:bottom-24'}`}>
+       <div className={`fixed bottom-20 flex flex-col gap-3 md:gap-4 z-[1000000] transition-all duration-300 ${isAiOpen ? 'md:right-[420px] lg:right-[470px] xl:right-[520px]' : 'right-4 md:right-10 md:bottom-24'}`}>
         <button 
           onPointerDown={(e) => {
             e.preventDefault();
