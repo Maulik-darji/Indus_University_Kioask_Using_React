@@ -209,166 +209,83 @@ export default function AccessGate({ onAuthenticated, siteVariant = 'indus' }) {
   const showConfigHint = !remotePasswordHash && !expectedHash && !expectedPlain;
 
   return (
-    <div className="min-h-screen w-full bg-[#f8f7f5] flex items-center justify-center p-4 md:p-8 lg:p-12">
-      {/* Decorative Background Elements */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] bg-blue-50 rounded-full blur-[120px] opacity-60"></div>
-        <div className="absolute -bottom-[10%] -right-[10%] w-[40%] h-[40%] bg-amber-50 rounded-full blur-[120px] opacity-60"></div>
-      </div>
-
-      <div className="relative w-full max-w-xl bg-white/80 backdrop-blur-xl rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-white overflow-hidden flex flex-col md:flex-row min-h-[500px]">
-        {/* Left Side: Branding (Visible on larger screens) */}
-        <div className="hidden md:flex w-1/2 bg-slate-900 items-center justify-center p-12 relative overflow-hidden">
-          <div className="absolute inset-0 opacity-20">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.1)_1px,transparent_1px)] bg-[length:24px_24px]"></div>
-          </div>
-          <div className="relative z-10 text-center">
-            <div className="w-32 h-32 bg-white rounded-3xl shadow-2xl flex items-center justify-center mx-auto mb-6 transform hover:rotate-3 transition-transform duration-500">
-              <img src={logo} alt="Indus University" className="w-full h-full object-contain p-4" />
+    <div className="min-h-screen w-full bg-[#f2f0ee] flex items-center justify-center p-6">
+      <div className="w-full max-w-[440px] bg-white rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col items-center">
+        {/* Top Branding Section */}
+        <div className="w-full p-4 pb-0 flex flex-col items-center">
+          <div className="w-full aspect-[16/8] bg-white rounded-[24px] border border-slate-100 shadow-[inset_0_2px_8px_rgba(0,0,0,0.02)] flex items-center justify-center p-2 mb-1">
+            <div className="flex items-center justify-center w-full h-full p-2">
+              <img src={indusLogo} alt="Indus University & WIIA" className="w-full h-full object-contain" />
             </div>
-            <h2 className="text-white text-2xl font-black tracking-tight leading-tight">Indus<br/>University</h2>
-            <div className="mt-4 w-12 h-1 bg-blue-500 mx-auto rounded-full"></div>
-            <p className="mt-6 text-slate-400 text-sm font-bold uppercase tracking-widest">Kiosk Portal</p>
           </div>
+          
+          <h1 className="text-[22px] font-bold text-slate-900 tracking-tight">Enter Access Password</h1>
+          <p className="text-slate-500 font-medium text-center text-[13px]">Unlock the kiosk to view content.</p>
         </div>
 
-        {/* Right Side: Login Form */}
-        <div className="flex-1 p-8 md:p-12 flex flex-col justify-center">
-          <div className="mb-10 text-center md:text-left">
-            <div className="md:hidden w-20 h-20 bg-slate-50 rounded-2xl flex items-center justify-center mx-auto mb-6 border border-slate-100">
-              <img src={logo} alt="Logo" className="w-full h-full object-contain p-3" />
-            </div>
-            <h1 className="text-3xl font-black text-slate-900 tracking-tight mb-3">Welcome Back</h1>
-            <p className="text-slate-500 font-bold text-sm">Please enter the access password to unlock the kiosk interface.</p>
-          </div>
+        {/* Divider */}
+        <div className="w-full h-[1px] bg-slate-50"></div>
 
+        {/* Form Section */}
+        <div className="w-full p-4 pt-2">
           {allowlistEnabled && (
-            <div className="mb-8 rounded-2xl border border-slate-100 bg-slate-50/50 p-5 group transition-all hover:bg-white hover:shadow-sm">
-              <div className="flex items-start justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="text-[10px] font-black uppercase tracking-widest text-slate-400">Device Identity</div>
-                  <div className="mt-1 font-black text-slate-900 text-xs break-all">{deviceId}</div>
-                  <div className="mt-3 flex items-center gap-2">
-                    <div className={`w-2 h-2 rounded-full ${deviceAllowed ? 'bg-emerald-500' : 'bg-slate-300'}`}></div>
-                    <div className="text-[11px] font-bold text-slate-500">
-                      Status:{' '}
-                      <span className="text-slate-800">
-                        {deviceStatus === 'checking' && 'Verifying…'}
-                        {deviceStatus === 'ok' && (deviceAllowed ? 'Authorized' : 'Pending Approval')}
-                        {deviceStatus === 'offline' && (deviceAllowed ? 'Authorized (Cached)' : 'Offline')}
-                        {deviceStatus === 'skipped' && 'Public Mode'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    try {
-                      navigator.clipboard.writeText(deviceId);
-                    } catch {
-                      // ignore
-                    }
-                  }}
-                  className="p-3 rounded-xl bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 active:scale-90 transition-all shadow-sm"
-                  title="Copy Device ID"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
-                  </svg>
-                </button>
+            <div className="mb-6 p-4 rounded-2xl bg-slate-50 border border-slate-100 text-[11px] font-medium text-slate-500">
+              <div className="flex justify-between items-center mb-2">
+                <span className="uppercase tracking-widest opacity-60">Device ID</span>
+                <span className="font-mono text-slate-900">{deviceId.slice(0, 8)}...</span>
               </div>
-
+              <div className="flex items-center gap-2">
+                <div className={`w-1.5 h-1.5 rounded-full ${deviceAllowed ? 'bg-emerald-500' : 'bg-amber-500'}`}></div>
+                <span className="text-slate-700">
+                  {deviceStatus === 'checking' ? 'Verifying...' : (deviceAllowed ? 'Authorized' : 'Pending Approval')}
+                </span>
+              </div>
               {!deviceAllowed && deviceStatus !== 'checking' && (
-                <div className="mt-5 flex gap-3">
-                  <button
-                    type="button"
-                    onClick={requestAccess}
-                    className="flex-1 py-3 rounded-xl bg-slate-900 text-white font-black text-[10px] uppercase tracking-[0.2em] hover:bg-black active:scale-95 transition-all shadow-lg shadow-slate-900/10"
-                  >
-                    Request Access
-                  </button>
-                  <button
-                    type="button"
-                    onClick={refreshDeviceAllowed}
-                    className="px-4 py-3 rounded-xl bg-white border border-slate-200 text-slate-700 font-black text-[10px] uppercase tracking-wider hover:bg-slate-50 active:scale-95 transition-all"
-                  >
-                    Refresh
-                  </button>
-                </div>
-              )}
-
-              {requestSent && (
-                <div className="mt-4 text-[11px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 flex items-center gap-3">
-                  <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                  Request sent. Waiting for administrator approval.
-                </div>
+                <button 
+                  onClick={requestAccess}
+                  className="mt-3 w-full py-2 bg-white border border-slate-200 rounded-lg text-slate-900 font-bold hover:bg-slate-50 transition-colors"
+                >
+                  Request Access
+                </button>
               )}
             </div>
           )}
 
-          {showConfigHint && (
-            <div className="mb-8 text-[11px] font-bold text-amber-800 bg-amber-50/50 border border-amber-200 rounded-2xl px-5 py-4">
-              <span className="opacity-60">Configuration Note:</span><br/>
-              No password found in env. Use default: <span className="font-black text-amber-900">0000</span>
-            </div>
-          )}
-
-          <form onSubmit={onSubmit} className="space-y-6">
-            <div className="relative group">
+          <form onSubmit={onSubmit} className="space-y-2">
+            <div className="relative">
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••"
-                className="w-full bg-slate-50 px-6 py-5 rounded-[1.25rem] border-2 border-transparent outline-none focus:border-blue-500/20 focus:bg-white focus:ring-4 focus:ring-blue-500/5 text-center text-4xl tracking-[0.6em] font-black text-slate-900 transition-all placeholder:text-slate-200"
+                className="w-full bg-[#f8f9fb] px-6 py-6 rounded-[20px] border-none outline-none focus:ring-2 focus:ring-blue-500/10 text-center text-3xl tracking-[0.8em] font-bold text-slate-900 transition-all placeholder:text-slate-300"
                 autoFocus
                 required
               />
             </div>
+            
             <button
               type="submit"
               disabled={busy}
-              className="group relative w-full bg-blue-600 text-white font-black py-5 rounded-[1.25rem] hover:bg-blue-700 active:scale-[0.98] transition-all shadow-xl shadow-blue-600/20 uppercase tracking-[0.25em] text-xs disabled:opacity-60 overflow-hidden"
+              className="w-full bg-[#2563eb] text-white font-bold py-4 rounded-[16px] hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-600/20 uppercase tracking-[0.2em] text-[12px] disabled:opacity-60"
             >
-              <span className="relative z-10 flex items-center justify-center gap-3">
-                {busy ? (
-                  <>
-                    <svg className="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Authorizing…
-                  </>
-                ) : (
-                  <>
-                    Unlock Kiosk
-                    <svg className="w-4 h-4 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                    </svg>
-                  </>
-                )}
-              </span>
+              {busy ? 'Authorizing...' : 'Unlock'}
             </button>
           </form>
 
           {error && (
-            <div className="mt-6 text-[12px] font-bold text-red-700 bg-red-50 border border-red-100 rounded-2xl px-5 py-4 flex items-center gap-3 animate-head-shake">
-              <svg className="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-              </svg>
+            <div className="mt-4 text-[13px] font-semibold text-red-500 text-center">
               {error}
             </div>
           )}
 
-          <div className="mt-10 text-center">
-            <div className="inline-block px-4 py-2 bg-slate-50 rounded-full border border-slate-100">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em]">Indus University Kiosk</span>
-            </div>
+          <div className="mt-2 text-center">
+            <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.3em]">Indus University Kiosk</span>
           </div>
         </div>
       </div>
     </div>
   );
+
 
 }
