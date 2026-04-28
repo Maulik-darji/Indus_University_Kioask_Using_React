@@ -341,37 +341,64 @@ export default function Admin({ siteVariant = 'indus' }) {
 
   if (!isAuth) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-[#faf9f8] min-h-screen p-6">
-        <div className="bg-white p-12 rounded-[1.5rem] shadow-2xl max-w-md w-full border border-gray-100 text-center relative">
+      <div className="flex-1 flex items-center justify-center bg-[#f8f7f5] min-h-screen p-4 md:p-8 relative overflow-hidden">
+        {/* Decorative Background Elements */}
+        <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-slate-100 rounded-full blur-[100px] opacity-50"></div>
+        <div className="absolute bottom-[20%] left-[10%] w-[30%] h-[30%] bg-slate-50 rounded-full blur-[100px] opacity-50"></div>
+
+        <div className="relative bg-white p-10 md:p-14 rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.12)] max-w-md w-full border border-white text-center">
           <button
             type="button"
             onClick={() => {
               localStorage.setItem(activePageStorageKey, 'home');
               window.location.href = basePath;
             }}
-            className="absolute top-5 right-5 w-10 h-10 rounded-full bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 active:scale-95 transition-all flex items-center justify-center"
+            className="absolute top-6 right-6 w-11 h-11 rounded-full bg-slate-50 border border-slate-200 text-slate-500 hover:bg-slate-100 hover:text-slate-900 active:scale-90 transition-all flex items-center justify-center shadow-sm"
             aria-label="Exit admin"
             title="Exit admin"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+
+          <div className="w-24 h-24 bg-slate-950 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl transform rotate-3">
+            <svg className="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path>
+            </svg>
           </div>
-          <h2 className="text-3xl font-black text-slate-800 mb-2">Admin Access</h2>
-          <p className="text-slate-500 mb-8 font-medium">Use pin (0000)</p>
+
+          <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Admin Gate</h2>
+          <p className="text-slate-500 mb-10 font-bold text-sm">Authentication required to manage kiosk records.</p>
+
           <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-slate-50 px-6 py-4 rounded-2xl border-none outline-none focus:ring-2 focus:ring-slate-200 text-center text-3xl tracking-[0.5em] font-black text-slate-900" placeholder="••••" />
+            <div className="relative">
+              <input 
+                type="password" 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                className="w-full bg-slate-50 px-6 py-5 rounded-2xl border-2 border-transparent outline-none focus:border-slate-900/5 focus:bg-white focus:ring-4 focus:ring-slate-500/5 text-center text-4xl tracking-[0.5em] font-black text-slate-900 transition-all" 
+                placeholder="••••" 
+                autoFocus
+              />
+              <div className="text-[10px] font-black uppercase tracking-widest text-slate-300 mt-3">Hint: Use System PIN (0000)</div>
             </div>
-            <button type="submit" className="w-full bg-slate-800 text-white font-bold py-4 rounded-2xl hover:bg-slate-900 active:scale-[0.98] transition-all shadow-[0_10px_30px_-10px_rgba(30,41,59,0.5)]">Authenticate</button>
+            <button 
+              type="submit" 
+              className="w-full bg-slate-900 text-white font-black py-5 rounded-2xl hover:bg-black active:scale-[0.98] transition-all shadow-xl shadow-slate-900/20 uppercase tracking-[0.2em] text-xs"
+            >
+              Unlock Terminal
+            </button>
           </form>
+          
+          <div className="mt-12 opacity-30">
+            <span className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-900">Secure Access Management</span>
+          </div>
         </div>
       </div>
     );
   }
+
 
   return (
     <div className="flex-1 bg-[#faf9f8] min-h-screen overflow-y-auto p-6 md:p-12 relative pb-32 font-medium">

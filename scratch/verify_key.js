@@ -3,8 +3,8 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 // Keys found in your .env files
 const keys = {
-  ".env": "AIzaSyBD7ciyZMIfiNh_I4nWQQqgOphcEQ3RHZfk",
-  ".env.local": "AIzaSyBD7ciyZMlfiNh_I4nWQqgOphcEQ3RHZfk"
+  ".env": "AIzaSyAgt_85LbP0zSBVKyCa2-pp65ajb5fptoA",
+  ".env.local": "AIzaSyAgt_85LbP0zSBVKyCa2-pp65ajb5fptoA"
 };
 
 async function verify() {
