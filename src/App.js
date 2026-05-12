@@ -353,6 +353,15 @@ function App() {
             </div>
           </div>
         );
+      case 'fetch-details':
+        return (
+          <div className="fade-in">
+            <h2 className="text-3xl font-bold mb-6 text-black">Fetch Details</h2>
+            <div className="bg-gray-200 h-96 rounded-2xl flex items-center justify-center text-gray-500 italic">
+              Coming Soon...
+            </div>
+          </div>
+        );
       case 'admin':
         if (adminTarget === 'picker') return <AdminSitePicker />;
         return <Admin siteVariant={adminTarget || siteVariant} />;

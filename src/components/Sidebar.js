@@ -15,6 +15,7 @@ function Sidebar({ activePage, setActivePage, siteVariant = 'indus', isOpen, set
     { id: 'institutes', label: 'Institutes', icon: 'apartment', color: 'text-orange-600 bg-slate-100' },
     { id: 'map', label: 'Campus Map', icon: 'map', color: 'text-rose-600 bg-slate-100' },
     { id: 'events', label: 'Events', icon: 'event', color: 'text-violet-600 bg-slate-100' },
+    { id: 'fetch-details', label: 'Fetch Details', icon: 'manage_search', color: 'text-amber-600 bg-slate-100' },
   ];
 
   const handleNavigate = (id) => {
