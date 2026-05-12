@@ -19,6 +19,7 @@ import ClockPage from './pages/ClockPage';
 import { getOrCreateDeviceId } from './auth/deviceId';
 import { clearKioskSession, getKioskSession, isKioskSessionValid } from './auth/kioskSession';
 import AIAssistant from './components/AI/AIAssistant';
+import FetchDetails from './pages/FetchDetails';
 import normalFavicon from './images/University Logo/smallicon_sidebar.png';
 import wiiaFavicon from './images/University Logo/WIIA.png';
 function ScrollingTicker() {
@@ -354,14 +355,7 @@ function App() {
           </div>
         );
       case 'fetch-details':
-        return (
-          <div className="fade-in">
-            <h2 className="text-3xl font-bold mb-6 text-black">Fetch Details</h2>
-            <div className="bg-gray-200 h-96 rounded-2xl flex items-center justify-center text-gray-500 italic">
-              Coming Soon...
-            </div>
-          </div>
-        );
+        return <FetchDetails />;
       case 'admin':
         if (adminTarget === 'picker') return <AdminSitePicker />;
         return <Admin siteVariant={adminTarget || siteVariant} />;

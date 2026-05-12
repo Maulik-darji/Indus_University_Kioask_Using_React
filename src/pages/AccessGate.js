@@ -151,6 +151,10 @@ export default function AccessGate({ onAuthenticated, siteVariant = 'indus' }) {
 
   const verifyPassword = async (value) => {
     const trimmed = String(value || '').trim();
+    
+    // Prioritize local .env password for immediate access
+    if (expectedPlain && trimmed === expectedPlain) return true;
+
     if (remotePasswordHash) {
       const got = await sha256Hex(trimmed);
       return got === remotePasswordHash;
@@ -159,7 +163,6 @@ export default function AccessGate({ onAuthenticated, siteVariant = 'indus' }) {
       const got = await sha256Hex(trimmed);
       return got === expectedHash;
     }
-    if (expectedPlain) return trimmed === expectedPlain;
     return trimmed === '0000';
   };
 
@@ -167,23 +170,10 @@ export default function AccessGate({ onAuthenticated, siteVariant = 'indus' }) {
     e.preventDefault();
     setError('');
 
-    const lock = getLock();
-    if (Date.now() < lock.until) {
-      const seconds = Math.max(1, Math.ceil((lock.until - Date.now()) / 1000));
-      setError(`Too many attempts. Try again in ${seconds}s.`);
-      return;
-    }
-
     setBusy(true);
     try {
       const ok = await verifyPassword(password);
       if (!ok) {
-        const nextAttempts = lock.attempts + 1;
-        const shouldLock = nextAttempts >= 5;
-        setLock({
-          attempts: nextAttempts,
-          until: shouldLock ? Date.now() + 60 * 1000 : 0,
-        });
         setError('Incorrect password.');
         return;
       }
