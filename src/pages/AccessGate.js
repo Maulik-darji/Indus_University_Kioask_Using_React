@@ -209,25 +209,22 @@ export default function AccessGate({ onAuthenticated, siteVariant = 'indus' }) {
   const showConfigHint = !remotePasswordHash && !expectedHash && !expectedPlain;
 
   return (
-    <div className="min-h-screen w-full bg-[#f2f0ee] flex items-center justify-center p-6">
-      <div className="w-full max-w-[440px] bg-white rounded-[40px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col items-center">
+    <div className="min-h-screen w-full bg-[#f2f0ee] flex items-center justify-center p-2">
+      <div className="w-full max-w-[360px] bg-white rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] overflow-hidden flex flex-col items-center">
         {/* Top Branding Section */}
-        <div className="w-full p-4 pb-0 flex flex-col items-center">
-          <div className="w-full aspect-[16/8] bg-white rounded-[24px] border border-slate-100 shadow-[inset_0_2px_8px_rgba(0,0,0,0.02)] flex items-center justify-center p-2 mb-1">
-            <div className="flex items-center justify-center w-full h-full p-2">
+        <div className="w-full p-4 pb-0.5 flex flex-col items-center">
+          <div className="w-full aspect-[16/5] bg-white rounded-[12px] border border-slate-100 shadow-[inset_0_2px_8px_rgba(0,0,0,0.02)] flex items-center justify-center p-1 mb-0">
+            <div className="flex items-center justify-center w-full h-full p-1">
               <img src={indusLogo} alt="Indus University & WIIA" className="w-full h-full object-contain" />
             </div>
           </div>
           
-          <h1 className="text-[22px] font-bold text-slate-900 tracking-tight">Enter Access Password</h1>
-          <p className="text-slate-500 font-medium text-center text-[13px]">Unlock the kiosk to view content.</p>
+          <h1 className="text-[18px] font-bold text-slate-900 tracking-tight mt-1.5">Enter Access Password</h1>
+          <p className="text-slate-500 font-medium text-center text-[11px] leading-tight">Unlock the kiosk to view content.</p>
         </div>
 
-        {/* Divider */}
-        <div className="w-full h-[1px] bg-slate-50"></div>
-
         {/* Form Section */}
-        <div className="w-full p-4 pt-2">
+        <div className="w-full p-4 pt-0">
           {allowlistEnabled && (
             <div className="mb-6 p-4 rounded-2xl bg-slate-50 border border-slate-100 text-[11px] font-medium text-slate-500">
               <div className="flex justify-between items-center mb-2">
@@ -251,14 +248,14 @@ export default function AccessGate({ onAuthenticated, siteVariant = 'indus' }) {
             </div>
           )}
 
-          <form onSubmit={onSubmit} className="space-y-2">
+          <form onSubmit={onSubmit} className="space-y-1.5">
             <div className="relative">
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••"
-                className="w-full bg-[#f8f9fb] px-6 py-6 rounded-[20px] border-none outline-none focus:ring-2 focus:ring-blue-500/10 text-center text-3xl tracking-[0.8em] font-bold text-slate-900 transition-all placeholder:text-slate-300"
+                className="w-full bg-[#f8f9fb] px-6 py-2.5 rounded-[10px] border-none outline-none focus:ring-2 focus:ring-blue-500/10 text-center text-xl tracking-[0.8em] font-bold text-slate-900 transition-all placeholder:text-slate-300"
                 autoFocus
                 required
               />
@@ -267,7 +264,7 @@ export default function AccessGate({ onAuthenticated, siteVariant = 'indus' }) {
             <button
               type="submit"
               disabled={busy}
-              className="w-full bg-[#2563eb] text-white font-bold py-4 rounded-[16px] hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-600/20 uppercase tracking-[0.2em] text-[12px] disabled:opacity-60"
+              className="w-full bg-[#2563eb] text-white font-bold py-2.5 rounded-[10px] hover:bg-blue-700 active:scale-[0.98] transition-all shadow-lg shadow-blue-600/20 uppercase tracking-[0.2em] text-[11px] disabled:opacity-60"
             >
               {busy ? 'Authorizing...' : 'Unlock'}
             </button>
@@ -279,8 +276,8 @@ export default function AccessGate({ onAuthenticated, siteVariant = 'indus' }) {
             </div>
           )}
 
-          <div className="mt-2 text-center">
-            <span className="text-[11px] font-bold text-slate-300 uppercase tracking-[0.3em]">Indus University Kiosk</span>
+          <div className="mt-0.5 text-center">
+            <span className="text-[9px] font-bold text-slate-300 uppercase tracking-[0.3em]">Indus University Kiosk</span>
           </div>
         </div>
       </div>

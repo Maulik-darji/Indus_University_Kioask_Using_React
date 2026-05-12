@@ -15,6 +15,7 @@ import Committees from './pages/Committees';
 import Admin from './pages/Admin';
 import AccessGate from './pages/AccessGate';
 import AdminSitePicker from './pages/AdminSitePicker';
+import ClockPage from './pages/ClockPage';
 import { getOrCreateDeviceId } from './auth/deviceId';
 import { clearKioskSession, getKioskSession, isKioskSessionValid } from './auth/kioskSession';
 import AIAssistant from './components/AI/AIAssistant';
@@ -225,8 +226,19 @@ function App() {
   }, [activePage, activePageStorageKey]);
 
    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-   const [isAiOpen, setIsAiOpen] = useState(false);
-   const [admissionData, setAdmissionData] = useState(null);
+    const [isAiOpen, setIsAiOpen] = useState(false);
+    const [admissionData, setAdmissionData] = useState(null);
+    const [aiContext, setAiContext] = useState({ page: 'home', category: null, program: null });
+
+    useEffect(() => {
+      setAiContext(prev => ({ 
+        ...prev, 
+        page: activePage,
+        // Reset category/program when leaving programs page
+        category: activePage === 'programs' ? prev.category : null,
+        program: activePage === 'programs' ? prev.program : null
+      }));
+    }, [activePage]);
 
   useEffect(() => {
     const handleSync = () => {
@@ -320,12 +332,18 @@ function App() {
       case 'home': return <Home setActivePage={setActivePage} />;
       case 'admission': return <Admission admissionData={admissionData} setAdmissionData={setAdmissionData} siteVariant={siteVariant} />;
       case 'about': return <About setActivePage={setActivePage} />;
-      case 'programs': return <Programs setActivePage={setActivePage} setAdmissionData={setAdmissionData} siteVariant={siteVariant} />;
+      case 'programs': return <Programs 
+        setActivePage={setActivePage} 
+        setAdmissionData={setAdmissionData} 
+        siteVariant={siteVariant} 
+        onContextChange={(ctx) => setAiContext(prev => ({ ...prev, ...ctx }))}
+      />;
       case 'institutes': return <Institutes />;
       case 'events': return <Events />;
       case 'committees': return <Committees />;
       case 'facilities': return <SalientFeatures />;
       case 'placements': return <Placements />;
+      case 'clock': return <ClockPage onBack={() => setActivePage('home')} />;
       case 'map':
         return (
           <div className="fade-in">
@@ -338,6 +356,7 @@ function App() {
       case 'admin':
         if (adminTarget === 'picker') return <AdminSitePicker />;
         return <Admin siteVariant={adminTarget || siteVariant} />;
+      case 'clock': return <ClockPage onBack={() => setActivePage('home')} />;
       default: return <Home setActivePage={setActivePage} />;
     }
   };
@@ -345,6 +364,10 @@ function App() {
   if (activePage === 'admin') {
     if (adminTarget === 'picker') return <AdminSitePicker />;
     return <Admin siteVariant={adminTarget || siteVariant} />;
+  }
+
+  if (activePage === 'clock') {
+    return <ClockPage onBack={() => setActivePage('home')} />;
   }
 
   return (
@@ -436,6 +459,7 @@ function App() {
                     {activePage === 'institutes' && "Our Institutes"}
                     {activePage === 'committees' && "University Committees"}
                     {activePage === 'events' && "University Events"}
+                    {activePage === 'clock' && "Digital Clock"}
                   </h1>
                 </div>
 
@@ -475,11 +499,11 @@ function App() {
           </div>
         </motion.div>
         
-        <AIAssistant isOpen={isAiOpen} setIsOpen={setIsAiOpen} />
+        <AIAssistant isOpen={isAiOpen} setIsOpen={setIsAiOpen} context={aiContext} />
       </div>
  
        {/* Unified Intelligent Scroll Controls */}
-       <div className={`fixed bottom-20 flex flex-col gap-3 md:gap-4 z-[1000000] transition-all duration-300 ${isAiOpen ? 'md:right-[420px] lg:right-[470px] xl:right-[520px]' : 'right-4 md:right-10 md:bottom-24'}`}>
+       <div className={`fixed bottom-20 flex flex-col gap-3 md:gap-4 z-[1000000] transition-all duration-300 ${isAiOpen ? 'md:right-[470px] lg:right-[520px] xl:right-[570px]' : 'right-4 md:right-10 md:bottom-24'}`}>
         <button 
           onPointerDown={(e) => {
             e.preventDefault();

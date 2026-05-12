@@ -24,7 +24,8 @@ When a student asks for a course/specialization, refer to this mapping:
 - **Business (BBA / MBA)**: BBA General, Aviation Management, MBA Marketing, Finance, HR.
 - **Science (B.Sc / M.Sc)**: Mathematics, Physics, Chemistry, Microbiology, Clinical Research.
 - **Architecture**: B.Arch.
-- **Other**: B.Com, B.A. English, B.Pharm.
+- **Pharmacy**: B.Pharm, M.Pharm.
+- **Other**: B.Com, B.A. English.
 
 INSTRUCTION for Niaa: When identifying a course, always provide the **Academic Path** using the '>' symbol. 
 Example: **B.Des > Product Design** or **B.Tech > CSE**.
@@ -58,6 +59,7 @@ As an associate of Indus University, WIIA offers specialized aviation programs:
 - M.Sc Cyber Security: ₹67,150
 - M.Sc Clinical Research: ₹78,150
 - MBA / MBA Aviation: ₹58,453
+- M.Pharm: ₹52,000
 
 ### ELIGIBILITY CRITERIA
 - B.Tech: 10+2 Science with PCM (Min 45%).
@@ -67,6 +69,7 @@ As an associate of Indus University, WIIA offers specialized aviation programs:
 - MCA: Graduation (Min 50% Gen, 45% SC/ST/SEBC).
 - B.Des: 10+2 any stream (Min 45%).
 - B.Arch: 10+2 with PCM + Aptitude test (Min 45%).
+- M.Pharm: B.Pharm degree (Min 55%).
 
 ### ADMISSION PROCESS
 1. Fill application form.

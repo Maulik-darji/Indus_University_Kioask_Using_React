@@ -25,7 +25,7 @@ export default function Admin({ siteVariant = 'indus' }) {
   const adminSessionKey = siteVariant === 'wiia' ? 'wiia_admin_session' : 'indus_admin_session';
   const kioskAllowlistEnabled = String(process.env.REACT_APP_KIOSK_DEVICE_ALLOWLIST || '').toLowerCase() === 'true';
   const passwordSettingsRef = doc(db, 'kiosk_settings', 'global');
-  const passwordHashCacheKey = 'indus_kiosk_password_sha256_cache_v1';
+  const passwordHashCacheKey = siteVariant === 'wiia' ? 'wiia_kiosk_password_sha256_cache_v1' : 'indus_kiosk_password_sha256_cache_v1';
   const [isAuth, setIsAuth] = useState(() => {
     return localStorage.getItem(adminSessionKey) === 'active';
   });
@@ -208,6 +208,21 @@ export default function Admin({ siteVariant = 'indus' }) {
     } catch (err) { console.error(err); }
   };
 
+  const saveInstitute = async (e) => {
+    e.preventDefault();
+    const payload = { ...instituteForm, timestamp: serverTimestamp() };
+    delete payload.id;
+
+    try {
+      if (instituteForm.id) {
+        await updateDoc(doc(db, "institutes_v3", instituteForm.id), payload);
+      } else {
+        await addDoc(collection(db, "institutes_v3"), payload);
+      }
+      setInstituteForm({ id: null, name: '', desc: '' });
+    } catch (err) { console.error(err); }
+  };
+
   const performDelete = async (type, id) => {
     try {
       if (type === 'event') await deleteDoc(doc(db, "events_v3", id));
@@ -317,6 +332,7 @@ export default function Admin({ siteVariant = 'indus' }) {
     if (password === '0000' || localStorage.getItem(`admin_${password}`)) {
       setIsAuth(true);
       localStorage.setItem(adminSessionKey, 'active');
+      setModalConfig({ isOpen: false, title: '', content: null });
     } else {
       setModalConfig({
         isOpen: true,
@@ -342,6 +358,14 @@ export default function Admin({ siteVariant = 'indus' }) {
   if (!isAuth) {
     return (
       <div className="flex-1 flex items-center justify-center bg-[#f8f7f5] min-h-screen p-4 md:p-8 relative overflow-hidden">
+        <CenterModal 
+          isOpen={modalConfig.isOpen} 
+          onClose={() => setModalConfig({ ...modalConfig, isOpen: false })} 
+          title={modalConfig.title}
+          maxWidth={modalConfig.maxWidth || 'max-w-sm'}
+        >
+          {modalConfig.content}
+        </CenterModal>
         {/* Decorative Background Elements */}
         <div className="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-slate-100 rounded-full blur-[100px] opacity-50"></div>
         <div className="absolute bottom-[20%] left-[10%] w-[30%] h-[30%] bg-slate-50 rounded-full blur-[100px] opacity-50"></div>

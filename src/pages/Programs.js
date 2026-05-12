@@ -364,6 +364,7 @@ const PROGRAM_VISUALS = {
   [normalizeProgramVisualKey('English (Hons)')]: { icon: 'menu_book', boxClass: 'bg-sky-50 border-sky-200', iconClass: 'text-sky-800' },
   [normalizeProgramVisualKey('B.A. English (Hons.)')]: { icon: 'menu_book', boxClass: 'bg-sky-50 border-sky-200', iconClass: 'text-sky-800' },
   [normalizeProgramVisualKey('B.Pharm')]: { icon: 'vaccines', boxClass: 'bg-green-50 border-green-200', iconClass: 'text-green-800' },
+  [normalizeProgramVisualKey('M.Pharm')]: { icon: 'vaccines', boxClass: 'bg-green-50 border-green-200', iconClass: 'text-green-800' },
 };
 
 const getProgramVisual = (programData, categoryId, programName) => {
@@ -423,6 +424,7 @@ const CATEGORY_CARD_ICONS = {
   bcom: 'account_balance',
   ba: 'menu_book',
   bpharm: 'medication',
+  mpharm: 'vaccines',
 };
 
 // Common B.Tech Eligibility
@@ -489,6 +491,7 @@ const FIRST_SEMESTER_FEES = {
   bcom: { default: 33600 },
   ba: { default: 15250 },
   bpharm: { default: 48393 },
+  mpharm: { default: 52000 },
   bsc: {
     'B.Sc Data Science': 43200,
     'B.Sc Computer Science (AI and ML)': 43200,
@@ -600,6 +603,8 @@ const getProgramEligibility = (categoryId, programName) => {
     e = { text: '10+2 OR EQUIVALENT FROM A RECOGNIZED BOARD WITH MIN 45%', duration: '3 Years (6 Semesters)' };
   } else if (categoryId === 'bpharm') {
     e = { text: '10+2 (PCB/PCM) OR EQUIVALENT FROM A RECOGNIZED BOARD WITH MIN 45%', duration: '4 Years (8 Semesters)' };
+  } else if (categoryId === 'mpharm') {
+    e = { text: 'B.PHARM WITH MIN 55% OR EQUIVALENT FROM A RECOGNIZED UNIVERSITY', duration: '2 Years (4 Semesters)' };
   }
   return e;
 };
@@ -2266,6 +2271,26 @@ const defaultProgramData = {
       sections: [{ title: 'Why Choose This Program at Indus University', items: ['Strong practical and lab exposure', 'Industry-relevant curriculum', 'Mentored projects', 'Career and higher studies support'] }],
     },
   },
+  'M.Pharm': {
+    'CURRICULUM & LEARNING': {
+      sections: [
+        { title: 'Core Areas', items: ['Advanced Pharmaceutics', 'Novel Drug Delivery Systems', 'Regulatory Affairs & Quality Assurance', 'Research Methodology & Biostatistics'] },
+        { title: 'Applied Learning', items: ['Advanced Laboratory Techniques', 'Dissertation / Research Project', 'Instrumental Analysis', 'Clinical Research methodology'] },
+      ],
+    },
+    'INDUSTRY EXPOSURE': {
+      sections: [{ title: 'Industry Exposure & Practical Learning', items: ['Research labs and advanced practicals', 'Industry / Pharma collaboration projects', 'Advanced workshops and seminars', 'Hospital and clinical rotations'] }],
+    },
+    'CAREER PROSPECTS': {
+      sections: [
+        { title: 'Job Roles', items: ['Research Scientist (R&D)', 'Formulation Scientist', 'Quality Assurance Manager', 'Regulatory Affairs Manager', 'Clinical Research Associate'] },
+        { title: 'Career Sectors', items: ['Pharmaceutical R&D Centers', 'CROs (Contract Research Organizations)', 'Government Regulatory Bodies', 'Academic and Research Institutions'] },
+      ],
+    },
+    'WHY CHOOSE US': {
+      sections: [{ title: 'Why Choose This Program at Indus University', items: ['Focus on cutting-edge research', 'Advanced instrumental and lab infrastructure', 'Industry-led research projects', 'Strong pathways for Ph.D. and global careers'] }],
+    },
+  },
 };
 
 const defaultCategories = [
@@ -2283,7 +2308,8 @@ const defaultCategories = [
   { id: 'barch', label: 'B.Arch', badge: 'Undergraduate', color: 'border-fuchsia-600', bgColor: 'bg-fuchsia-600', lightBg: 'bg-fuchsia-50', programs: ['B.Arch (Bachelor of Architecture)'] },
   { id: 'bcom', label: 'B.Com (Hons.)', badge: 'Undergraduate', color: 'border-emerald-600', bgColor: 'bg-emerald-600', lightBg: 'bg-emerald-50', programs: ['B.Com (Hons.)'] },
   { id: 'ba', label: 'B.A', badge: 'Undergraduate', color: 'border-sky-600', bgColor: 'bg-sky-600', lightBg: 'bg-sky-50', programs: ['English (Hons)'] },
-  { id: 'bpharm', label: 'B.Pharm', badge: 'Undergraduate', color: 'border-green-700', bgColor: 'bg-green-700', lightBg: 'bg-green-50', programs: ['B.Pharm'] }
+  { id: 'bpharm', label: 'B.Pharm', badge: 'Undergraduate', color: 'border-green-700', bgColor: 'bg-green-700', lightBg: 'bg-green-50', programs: ['B.Pharm'] },
+  { id: 'mpharm', label: 'M.Pharm', badge: 'Post Graduate', color: 'border-rose-600', bgColor: 'bg-rose-600', lightBg: 'bg-rose-50', programs: ['M.Pharm'] }
 ];
 
 const defaultWiiaCategories = [
@@ -2361,13 +2387,23 @@ const filterCategoriesBySiteVariant = (cats, siteVariant) => {
   return out;
 };
 
-function Programs({ setActivePage, setAdmissionData, siteVariant = 'indus' }) {
+function Programs({ setActivePage, setAdmissionData, siteVariant = 'indus', onContextChange }) {
   const isWiia = siteVariant === 'wiia';
   const categoriesStorageKey = isWiia ? 'wiia_categories' : 'indus_categories';
   const programDataStorageKey = isWiia ? 'wiia_programData' : 'indus_programData';
   const categoryDefaults = isWiia ? defaultWiiaCategories : defaultCategories;
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [selectedProgram, setSelectedProgram] = useState(null);
+
+  React.useEffect(() => {
+    if (onContextChange) {
+      onContextChange({ 
+        category: selectedCategory ? selectedCategory.label : null,
+        program: selectedProgram || null
+      });
+    }
+  }, [selectedCategory, selectedProgram, onContextChange]);
+
   const [selectedDetailSection, setSelectedDetailSection] = useState('CURRICULUM & LEARNING');
   const [searchQuery, setSearchQuery] = useState('');
   const detailContentRef = React.useRef(null);
@@ -2648,7 +2684,7 @@ function Programs({ setActivePage, setAdmissionData, siteVariant = 'indus' }) {
 
   return (
     <>
-      <div className="w-full">
+      <div className={`w-full ${selectedProgram ? 'hidden' : ''}`}>
         <div className="w-full flex-1 h-full overflow-hidden px-4 md:px-10 lg:px-12 pt-0 md:pt-2 lg:pt-3 pb-16 md:pb-20 fade-in">
       {/* Detail Header with Back Button */}
       <div className="mb-2 grid grid-cols-1 md:grid-cols-3 items-center gap-3 md:gap-0">
@@ -2794,7 +2830,7 @@ function Programs({ setActivePage, setAdmissionData, siteVariant = 'indus' }) {
            </div>
 
           {/* Main Content Area - Grid of Detail Squares */}
-          <div id="modal-details-container" className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-10 pb-6 md:pb-8 relative h-full">
+          <div id="modal-details-container" className="flex-1 overflow-y-auto custom-scrollbar px-4 md:px-10 pb-12 relative">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 pt-6 md:pt-10 pb-4">
               {[
                 { title: 'CURRICULUM & LEARNING', color: 'bg-[#ffae4f]', id: 'CURRICULUM & LEARNING' },
@@ -2876,7 +2912,7 @@ function Programs({ setActivePage, setAdmissionData, siteVariant = 'indus' }) {
                             </h4>
                             <ul className="space-y-4 ml-1">
                               {section.items.map((item, i) => (
-                                <li key={i} className="flex items-start text-lg text-slate-600 font-bold mb-4">
+                                <li key={i} className="flex items-start text-lg text-slate-600 font-bold">
                                   <span className="w-2 h-2 rounded-full bg-brand-brown mt-2.5 mr-4 opacity-80 shrink-0"></span>
                                   <span className="leading-[1.6]">
                                     {/* Make Criteria/Duration boldly highlighted if they match standard patterns */}

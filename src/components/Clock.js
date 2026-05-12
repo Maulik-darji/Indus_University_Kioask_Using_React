@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-function Clock() {
+function Clock({ onClick }) {
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -12,14 +12,18 @@ function Clock() {
   const dateString = time.toLocaleDateString(undefined, {
     weekday: 'long',
     month: 'short',
-    day: 'numeric'
+    day: 'numeric',
+    year: 'numeric'
   });
 
   return (
-    <div className="bg-gray-200 p-5 rounded-xl text-center shadow-sm">
-      <div className="text-2xl font-semibold text-gray-800">{timeString}</div>
-      <div className="text-gray-600 text-sm">{dateString}</div>
-      <div className="text-gray-500 text-xs mt-1">Ahmedabad, Gujarat</div>
+    <div 
+      onClick={onClick}
+      className="bg-gray-200 p-5 rounded-xl text-center shadow-sm cursor-pointer hover:bg-gray-300 active:scale-95 transition-all"
+    >
+      <div className="text-2xl font-bold text-gray-800">{timeString}</div>
+      <div className="text-gray-600 text-sm font-semibold">{dateString}</div>
+      <div className="text-gray-500 text-xs mt-1 font-medium">Ahmedabad, Gujarat</div>
     </div>
   );
 }

@@ -9,12 +9,12 @@ function Sidebar({ activePage, setActivePage, siteVariant = 'indus', isOpen, set
   const primaryLogo = isWiia ? wiiaLogo : logo;
   const compactLogo = isWiia ? wiiaLogo : smallLogo;
   const menuItems = [
-    { id: 'home', label: 'Home', icon: 'home', color: 'text-blue-600 bg-blue-50' },
-    { id: 'about', label: 'About Indus', icon: 'info', color: 'text-indigo-600 bg-indigo-50' },
-    { id: 'programs', label: 'Programs', icon: 'school', color: 'text-emerald-600 bg-emerald-50' },
-    { id: 'institutes', label: 'Institutes', icon: 'apartment', color: 'text-orange-600 bg-orange-50' },
-    { id: 'map', label: 'Campus Map', icon: 'map', color: 'text-rose-600 bg-rose-50' },
-    { id: 'events', label: 'Events', icon: 'event', color: 'text-violet-600 bg-violet-50' },
+    { id: 'home', label: 'Home', icon: 'home', color: 'text-blue-600 bg-slate-100' },
+    { id: 'about', label: 'About Indus', icon: 'info', color: 'text-indigo-600 bg-slate-100' },
+    { id: 'programs', label: 'Programs', icon: 'school', color: 'text-emerald-600 bg-slate-100' },
+    { id: 'institutes', label: 'Institutes', icon: 'apartment', color: 'text-orange-600 bg-slate-100' },
+    { id: 'map', label: 'Campus Map', icon: 'map', color: 'text-rose-600 bg-slate-100' },
+    { id: 'events', label: 'Events', icon: 'event', color: 'text-violet-600 bg-slate-100' },
   ];
 
   const handleNavigate = (id) => {
@@ -51,13 +51,13 @@ function Sidebar({ activePage, setActivePage, siteVariant = 'indus', isOpen, set
                     isOpen ? 'p-3 gap-4 mb-2' : 'p-2 justify-center mb-3'
                   } ${
                     activePage === item.id 
-                      ? `${item.color.split(' ')[1]} shadow-md ring-1 ring-slate-100` 
-                      : 'text-slate-600 hover:bg-slate-50'
+                      ? `bg-slate-100 shadow-md ring-1 ring-slate-200` 
+                      : 'bg-slate-50 text-slate-600 hover:bg-slate-100'
                   }`}
                   title={!isOpen ? item.label : ""}
                   onClick={() => handleNavigate(item.id)}
                 >
-                  <div className={`rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 ${item.color} ${isOpen ? 'w-11 h-11' : 'w-12 h-12'}`}>
+                  <div className={`rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 ${textColorClass} bg-slate-100 ${isOpen ? 'w-11 h-11' : 'w-12 h-12'}`}>
                     <span className="material-symbols-outlined !text-[27px]">{item.icon}</span>
                   </div>
                   {isOpen && (
@@ -82,7 +82,7 @@ function Sidebar({ activePage, setActivePage, siteVariant = 'indus', isOpen, set
             >
               Terminate Session
             </button>
-            <Clock />
+            <Clock onClick={() => setActivePage('clock')} />
           </div>
         </div>
       </aside>

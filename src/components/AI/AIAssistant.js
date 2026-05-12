@@ -30,7 +30,65 @@ const SUGGESTED_QUESTIONS = [
   "Eligibility for B.Tech?",
   "Tell me about the campus facilities."
 ];
-const AIAssistant = ({ isOpen, setIsOpen }) => {
+
+const getContextualQuestions = (context) => {
+  if (!context) return SUGGESTED_QUESTIONS;
+
+  if (context.page === 'admission') {
+    return [
+      "How to apply for 2026?",
+      "What documents are required?",
+      "Tell me about the admission process.",
+      "Entrance exam details?"
+    ];
+  }
+
+  if (context.page === 'programs') {
+    if (context.program) {
+      return [
+        `What is the curriculum for ${context.program}?`,
+        `Career prospects in ${context.program}?`,
+        `Eligibility and fees for ${context.program}?`,
+        "Placement stats for this field?"
+      ];
+    }
+    if (context.category) {
+      return [
+        `What are the ${context.category} branches?`,
+        `Placement records for ${context.category}?`,
+        `${context.category} lab facilities?`,
+        "Admission process for this category?"
+      ];
+    }
+    return [
+      "What courses are offered?",
+      "Fees for different programs?",
+      "Undergraduate vs Postgraduate?",
+      "Admission criteria for engineering?"
+    ];
+  }
+
+  if (context.page === 'about') {
+    return [
+      "Who are the leaders of Indus?",
+      "Tell me about the university mission.",
+      "What awards has Indus won?",
+      "Where is the campus located?"
+    ];
+  }
+
+  if (context.page === 'institutes') {
+    return [
+      "Which institutes are part of Indus?",
+      "Tell me about IITE.",
+      "Information about WIIA?",
+      "Management and Design institutes?"
+    ];
+  }
+
+  return SUGGESTED_QUESTIONS;
+};
+const AIAssistant = ({ isOpen, setIsOpen, context }) => {
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [input, setInput] = useState('');
   const [messages, setMessages] = useState(() => {
@@ -131,8 +189,9 @@ const AIAssistant = ({ isOpen, setIsOpen }) => {
   }, [isOpen]);
 
   const handleSend = async (forcedInput = null) => {
-    const messageText = forcedInput || input;
-    if (!messageText.trim()) return;
+    // If called via event handler directly, forcedInput might be an event object.
+    const messageText = (typeof forcedInput === 'string' ? forcedInput : null) || input;
+    if (!messageText || typeof messageText !== 'string' || !messageText.trim()) return;
 
     const userMessage = { role: 'user', content: messageText, timestamp: getCurrentTime() };
     setMessages(prev => [...prev, userMessage]);
@@ -240,11 +299,12 @@ User Question: ${currentQuestion}` }]
         
         const isKeyMissing = error.message === 'GEMINI_KEY_MISSING';
         const isInvalidKey = error.message === 'INVALID_API_KEY' || error.message.includes('API key not valid');
+        const isLeaked = error.message.includes('leaked');
         
         let errorMessage = `I'm having trouble connecting right now. Please try again in a few seconds!`;
         
-        if (isKeyMissing || isInvalidKey) {
-          errorMessage = `⚠️ **Gemini API key ${isKeyMissing ? 'is not configured' : 'is invalid or expired'}.**\n\nTo activate me, please:\n1. Go to [aistudio.google.com](https://aistudio.google.com) and create a free API key\n2. Open \`.env.local\` in your project root\n3. Update: \`REACT_APP_GEMINI_API_KEY=your_working_key\`\n4. Restart the dev server (Ctrl+C → npm start)`;
+        if (isKeyMissing || isInvalidKey || isLeaked) {
+          errorMessage = `⚠️ **Gemini API key ${isLeaked ? 'has been reported as leaked' : isKeyMissing ? 'is not configured' : 'is invalid or expired'}.**\n\nTo activate me, please:\n1. Go to [aistudio.google.com](https://aistudio.google.com) and create a **NEW** API key\n2. Update your \`.env\` file with the new key\n3. Restart the server.`;
         }
 
         setMessages(prev => [...prev, {
@@ -274,7 +334,7 @@ User Question: ${currentQuestion}` }]
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
           onClick={toggleSidebar}
-          className="fixed bottom-24 right-20 md:right-32 z-[1000] w-16 h-16 bg-white border-2 border-white rounded-full shadow-2xl flex items-center justify-center cursor-pointer group"
+          className="fixed bottom-64 right-4 md:right-10 z-[1000] w-16 h-16 bg-white border-2 border-white rounded-full shadow-2xl flex items-center justify-center cursor-pointer group"
         >
           <div className="w-full h-full overflow-hidden rounded-full">
             <img src={NiaaImage} alt="Niaa AI" className="w-full h-full object-cover object-[center_15%] scale-[1.35] group-hover:scale-[1.4] transition-transform duration-300" />
@@ -412,7 +472,7 @@ User Question: ${currentQuestion}` }]
                     <div className="flex flex-col items-end gap-3 pt-2">
                       <p className="text-[12px] text-gray-500 font-medium mr-2">Not sure what to ask? Choose something:</p>
                       <div className="flex flex-wrap justify-end gap-2 max-w-[90%]">
-                        {SUGGESTED_QUESTIONS.map((q, i) => (
+                        {getContextualQuestions(context).map((q, i) => (
                           <motion.button
                             key={i}
                             initial={{ opacity: 0, x: 20 }}
@@ -453,7 +513,7 @@ User Question: ${currentQuestion}` }]
                   }}
                   className="w-12 h-12 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-gray-700 hover:text-blue-600 transition-all"
                 >
-                  <span className="material-symbols-outlined !text-4xl">keyboard_arrow_up</span>
+                  <span className="material-symbols-outlined !text-3xl">keyboard_arrow_up</span>
                 </motion.button>
                 <motion.button
                   whileHover={{ scale: 1.1 }}
@@ -466,7 +526,7 @@ User Question: ${currentQuestion}` }]
                   }}
                   className="w-12 h-12 bg-white border border-gray-200 rounded-full shadow-lg flex items-center justify-center text-gray-700 hover:text-blue-600 transition-all"
                 >
-                  <span className="material-symbols-outlined !text-4xl">keyboard_arrow_down</span>
+                  <span className="material-symbols-outlined !text-3xl">keyboard_arrow_down</span>
                 </motion.button>
               </div>
             </div>
@@ -475,22 +535,31 @@ User Question: ${currentQuestion}` }]
             {/* Input Area */}
             <div className="p-6 bg-white border-t border-gray-100 pb-10">
               <div className={`relative flex flex-col gap-4 ${isFullScreen ? 'max-w-4xl mx-auto' : 'w-full'}`}>
-                <div className="relative flex items-center gap-2">
-                  <input
-                    type="text"
-                    value={input}
-                    onChange={(e) => { setInput(e.target.value); resetTimer(); }}
-                    onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-                    placeholder="Ask me about courses, fees, or anything..."
-                    className="flex-1 bg-gray-50 border border-gray-200 rounded-2xl px-6 py-3 text-base md:text-lg font-medium focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 transition-all pr-12"
-                  />
+                <div className="relative flex items-center gap-3">
                   <button
-                    onClick={handleSend}
-                    disabled={!input.trim()}
-                    className="absolute right-2 w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200 hover:bg-blue-700 disabled:opacity-30 disabled:bg-blue-600 disabled:cursor-not-allowed disabled:shadow-none transition-all active:scale-95"
+                    onClick={handleReset}
+                    className="shrink-0 w-12 h-12 md:w-14 md:h-14 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center hover:bg-blue-100 transition-all border border-blue-100 active:scale-90 shadow-sm"
+                    title="New Chat"
                   >
-                    <span className="material-symbols-outlined">send</span>
+                    <span className="material-symbols-outlined !text-2xl md:!text-3xl">refresh</span>
                   </button>
+                  <div className="relative flex-1 group">
+                    <input
+                      type="text"
+                      value={input}
+                      onChange={(e) => { setInput(e.target.value); resetTimer(); }}
+                      onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                      placeholder="Ask me about courses, fees, or anything..."
+                      className="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-6 pr-14 py-3.5 text-base md:text-lg font-medium focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50/50 transition-all"
+                    />
+                    <button
+                      onClick={() => handleSend()}
+                      disabled={!input.trim()}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200 hover:bg-blue-700 disabled:opacity-30 disabled:bg-blue-600 disabled:cursor-not-allowed disabled:shadow-none transition-all active:scale-95"
+                    >
+                      <span className="material-symbols-outlined !text-xl">send</span>
+                    </button>
+                  </div>
                 </div>
                 <p className="text-[10px] text-gray-400 text-center">
                   Check info before acting. AI may generate incorrect details.
