@@ -22,6 +22,8 @@ import AIAssistant from './components/AI/AIAssistant';
 import FetchDetails from './pages/FetchDetails';
 import normalFavicon from './images/University Logo/smallicon_sidebar.png';
 import wiiaFavicon from './images/University Logo/WIIA.png';
+import CampusMap from './pages/CampusMap';
+
 function ScrollingTicker() {
   const [tickerItems, setTickerItems] = React.useState(() => {
     const cached = localStorage.getItem('indus_ticker_items_cache');
@@ -346,14 +348,7 @@ function App() {
       case 'placements': return <Placements />;
       case 'clock': return <ClockPage onBack={() => setActivePage('home')} />;
       case 'map':
-        return (
-          <div className="fade-in">
-            <h2 className="text-3xl font-bold mb-6 text-black">Campus Map</h2>
-            <div className="bg-gray-200 h-96 rounded-2xl flex items-center justify-center text-gray-500 italic">
-              Comming Soon...
-            </div>
-          </div>
-        );
+        return <CampusMap />;
       case 'fetch-details':
         return <FetchDetails />;
       case 'admin':
