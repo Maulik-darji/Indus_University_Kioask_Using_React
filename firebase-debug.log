@@ -426,3 +426,9 @@
 [debug] [2026-05-18T06:29:50.199Z] Checked if tokens are valid: true, expires at: 1779089153431
 [debug] [2026-05-18T06:29:50.199Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/indus-kioask/versions/9e87c56286e797cb/files/a9e02a198b53e0f92b6b2f04d940a41d81b8006257367c569bdcdf5c36e07dd8 [none]
 [debug] [2026-05-18T06:29:50.199Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/indus-kioask/versions/9e87c56286e797cb/files/a9e02a198b53e0f92b6b2f04d940a41d81b8006257367c569bdcdf5c36e07dd8 [stream]
+[debug] [2026-05-18T06:29:52.129Z] <<< [apiv2][status] POST https://upload-firebasehosting.googleapis.com/upload/sites/indus-kioask/versions/9e87c56286e797cb/files/a9e02a198b53e0f92b6b2f04d940a41d81b8006257367c569bdcdf5c36e07dd8 200
+[debug] [2026-05-18T06:29:52.129Z] <<< [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/indus-kioask/versions/9e87c56286e797cb/files/a9e02a198b53e0f92b6b2f04d940a41d81b8006257367c569bdcdf5c36e07dd8 [stream]
+[debug] [2026-05-18T06:29:52.129Z] Checked if tokens are valid: true, expires at: 1779089153431
+[debug] [2026-05-18T06:29:52.129Z] Checked if tokens are valid: true, expires at: 1779089153431
+[debug] [2026-05-18T06:29:52.130Z] >>> [apiv2][query] POST https://upload-firebasehosting.googleapis.com/upload/sites/indus-kioask/versions/9e87c56286e797cb/files/57d87f723da860b0fb04ea1f778b383436c4a47bf93970577b1aaf49d08675ae [none]
+[debug] [2026-05-18T06:29:52.130Z] >>> [apiv2][body] POST https://upload-firebasehosting.googleapis.com/upload/sites/indus-kioask/versions/9e87c56286e797cb/files/57d87f723da860b0fb04ea1f778b383436c4a47bf93970577b1aaf49d08675ae [stream]
